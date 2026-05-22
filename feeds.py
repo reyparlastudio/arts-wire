@@ -22,6 +22,35 @@ run, so a bad URL can never crash the robot. Add freely.
 """
 
 FEEDS = [
+    # ===================== CUBA, THE CARIBBEAN & LATIN AMERICA ============
+    ("Rialta",                          "https://rialta.org/feed/",                          "ideas",      "news"),
+    ("OnCuba News",                     "https://oncubanews.com/feed/",                      "ideas",      "news"),
+    ("Hypermedia Magazine",             "https://www.hypermediamagazine.com/feed/",          "ideas",      "news"),
+    ("El Estornudo",                    "https://revistaelestornudo.com/feed/",              "ideas",      "news"),
+    ("Repeating Islands",               "https://repeatingislands.com/feed/",                "ideas",      "news"),
+    ("80grados",                        "https://www.80grados.net/feed/",                    "ideas",      "news"),
+    ("Artburst Miami",                  "https://www.artburstmiami.com/feed/",               "art",        "news"),
+    ("Artishock",                       "https://artishockrevista.com/feed/",                "art",        "news"),
+    ("Terremoto",                       "https://terremoto.mx/en/feed/",                     "art",        "news"),
+    ("Puerto Rico Art News",            "https://www.puertoricoartnews.com/feeds/posts/default?alt=rss", "art", "news"),
+    ("Letras Libres",                   "https://letraslibres.com/feed/",                    "literature", "news"),
+    ("Latin American Literature Today", "https://latinamericanliteraturetoday.org/feed/",    "literature", "news"),
+    ("Remezcla",                        "https://remezcla.com/feed/",                        "music",      "news"),
+    # ============================ GASTRONOMY ==============================
+    ("Eater",                           "https://www.eater.com/rss/index.xml",               "gastronomy", "news"),
+    ("Eater New York",                  "https://ny.eater.com/rss/index.xml",                "gastronomy", "news"),
+    ("Eater Miami",                     "https://miami.eater.com/rss/index.xml",             "gastronomy", "news"),
+    ("Eater LA",                        "https://la.eater.com/rss/index.xml",                "gastronomy", "news"),
+    ("Eater Atlanta",                   "https://atlanta.eater.com/rss/index.xml",           "gastronomy", "news"),
+    ("Saveur",                          "https://www.saveur.com/feed/",                      "gastronomy", "news"),
+    ("Bon Appétit",                     "https://www.bonappetit.com/feed/rss",               "gastronomy", "news"),
+    ("Honest Cooking",                  "https://honestcooking.com/feed/",                   "gastronomy", "news"),
+    # ============================ FASHION =================================
+    ("Vogue",                           "https://www.vogue.com/feed/rss",                    "fashion",    "news"),
+    ("WWD",                             "https://wwd.com/feed/",                             "fashion",    "news"),
+    ("Fashionista",                     "https://fashionista.com/.rss/excerpt/",             "fashion",    "news"),
+    ("Hypebeast",                       "https://hypebeast.com/feed",                        "fashion",    "news"),
+    ("The Cut",                         "https://www.thecut.com/rss/index.xml",              "fashion",    "news"),
     # ============================ THE WIRE (news by medium) ===============
     # --- Film & Television ---
     ("IndieWire",            "https://www.indiewire.com/feed/",        "film", "news"),
