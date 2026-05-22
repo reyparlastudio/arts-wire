@@ -40,8 +40,7 @@ CHROME_EN = {
     "wire_label": "The Wire &mdash; today&rsquo;s news, by medium",
     "subscribe": "Subscribe &middot; $1/month",
     "art_label": "The Frame",
-    "foot1": ("Assembled automatically by The Arts Wire. Every title links to its "
-              "original publisher; summaries are written fresh and link out for the full piece."),
+    "foot1": "Curated and assembled by reyparla.com & automatically by Time & Space Art, LLC for The Arts Wire. Every title links to its original publisher; summaries are written fresh and link out to the full piece.",
     "foot2": "built with care, run on autopilot.",
     "empty": "Nothing today.",
     "banner": "",
