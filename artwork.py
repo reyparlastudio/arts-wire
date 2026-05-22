@@ -21,7 +21,7 @@ from urllib.parse import quote
 MET_SEARCH = "https://collectionapi.metmuseum.org/public/collection/v1/search"
 MET_OBJECT = "https://collectionapi.metmuseum.org/public/collection/v1/objects/"
 AIC_ART = "https://api.artic.edu/api/v1/artworks"
-AIC_IIIF = "https://www.artic.edu/iiif/2/{id}/full/1200,/0/default.jpg"
+AIC_IIIF = "https://www.artic.edu/iiif/2/{id}/full/843,/0/default.jpg"
 
 # Rotating query terms so the featured work varies day to day.
 TERMS = ["painting", "portrait", "landscape", "still life", "drawing",

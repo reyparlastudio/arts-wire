@@ -356,6 +356,24 @@ def _art_filters(it):
     return " ".join(k for k, rx in _ART_RX if rx.search(text))
 
 
+def _save_image(url, dest, timeout=20):
+    """Download an image to a local file. Returns True on success, else False —
+    never raises, so a museum hiccup can't break the build (we fall back to the
+    remote URL, and the <img> hides itself if even that fails in the browser)."""
+    try:
+        import urllib.request
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (The Arts Wire)"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            data = r.read()
+        if not data or len(data) < 512:          # too small to be a real image
+            return False
+        with open(dest, "wb") as f:
+            f.write(data)
+        return True
+    except Exception:                            # noqa: BLE001
+        return False
+
+
 def render_html(items, columns, categories, generated, used_ai, *,
                 lang="en", chrome=None, langs=("en",), artwork=None,
                 regional_sources=(), frames=None):
@@ -377,7 +395,8 @@ def render_html(items, columns, categories, generated, used_ai, *,
         return (
             f'<figure class="oneart frame-mid">'
             f'<a href="{esc(fr.get("url","#"))}" target="_blank" rel="noopener">'
-            f'<img src="{esc(fr["image"])}" alt="{esc(fr.get("title",""))}" loading="lazy"></a>'
+            f'<img src="{esc(fr["image"])}" alt="{esc(fr.get("title",""))}" loading="lazy" '
+            f'onerror="this.closest(\'.oneart\').style.display=\'none\'"></a>'
             f'<figcaption><span class="art-title">{esc(fr.get("title",""))}</span> &mdash; {meta}'
             f'<span class="art-src">{esc(fr.get("source",""))}</span></figcaption></figure>'
         )
@@ -391,7 +410,8 @@ def render_html(items, columns, categories, generated, used_ai, *,
         oneart = (
             f'<div class="zone-label frame-label">{chrome.get("art_label","One Beautiful Thing")}</div>'
             f'<figure class="oneart"><a href="{esc(artwork.get("url","#"))}" target="_blank" rel="noopener">'
-            f'<img src="{esc(artwork["image"])}" alt="{esc(artwork.get("title",""))}" loading="lazy"></a>'
+            f'<img src="{esc(artwork["image"])}" alt="{esc(artwork.get("title",""))}" loading="lazy" '
+            f'onerror="this.closest(\'.oneart\').style.display=\'none\'"></a>'
             f'<figcaption><span class="art-title">{esc(artwork.get("title",""))}</span> &mdash; {meta}'
             f'<span class="art-src">{esc(artwork.get("source",""))}</span></figcaption></figure>'
         )
@@ -798,6 +818,10 @@ function awDoSearch(){{
     var anyShown=Array.prototype.some.call(its, function(el){{ return !el.classList.contains("hidden-by-search"); }});
     sec.style.display = anyShown ? "" : "none";
   }});
+  // While searching, set aside the decorative chrome so results read cleanly.
+  document.querySelectorAll(".zone-label,.oneart,.banner").forEach(function(el){{
+    el.style.display = q ? "none" : "";
+  }});
   var note=document.getElementById("awSearchNote");
   note.textContent = q ? (shown + " " + (shown===1?"piece":"pieces") + " match \u201c" + q + "\u201d") : "";
 }}
@@ -983,6 +1007,21 @@ def main():
                     used.add(fr["image"])
             print(f"Frames: {len(frames)} section-matched works"
                   f"{(' — ' + ', '.join(frames)) if frames else ' (none reachable)'}.")
+
+            # Self-host the artwork so the browser never depends on a museum CDN
+            # (which has 404'd before). Any failure falls back to the remote URL.
+            adir = os.path.join(args.out, "assets")
+            os.makedirs(adir, exist_ok=True)
+            if art and str(art.get("image", "")).startswith("http"):
+                if _save_image(art["image"], os.path.join(adir, "frame-hero.jpg")):
+                    art["image"] = "assets/frame-hero.jpg"
+            saved = 0
+            for key, fr in frames.items():
+                if str(fr.get("image", "")).startswith("http"):
+                    if _save_image(fr["image"], os.path.join(adir, f"frame-{key}.jpg")):
+                        fr["image"] = f"assets/frame-{key}.jpg"
+                        saved += 1
+            print(f"Self-hosted artwork: hero + {saved} frames saved locally.")
 
     def write(page, lang):
         name = "index.html" if lang == "en" else f"index.{lang}.html"
