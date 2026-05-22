@@ -133,23 +133,64 @@ def _clean(text):
 
 
 def dedupe(items):
-    seen, kept = set(), []
+    """Drop duplicates and near-duplicates. A story is a dup of one we've kept if
+    ANY of: same link; titles are >80% character-identical; their significant
+    words overlap strongly (same event under a different headline); or they share
+    the SAME photo and at least two key words (the cross-outlet case). Guarded so
+    unrelated stories that merely share a stock/logo image are NOT merged."""
+    kept, meta, seen_links = [], [], set()
     for it in sorted(items, key=lambda x: x["published"], reverse=True):
         link = it["link"].rstrip("/").lower()
-        if link and link in seen:
+        if link and link in seen_links:
             continue
         norm = _norm_title(it["title"])
-        if not norm or any(
-                SequenceMatcher(None, norm, _norm_title(k["title"])).ratio() > 0.85
-                for k in kept):
+        if not norm:
             continue
-        seen.add(link)
+        toks = _sig_tokens(it["title"])
+        img = (it.get("image") or "").strip().lower()
+        dup = False
+        for m in meta:
+            if SequenceMatcher(None, norm, m["norm"]).ratio() > 0.80:
+                dup = True
+                break
+            inter = len(toks & m["toks"])
+            if inter:
+                union = len(toks | m["toks"]) or 1
+                jaccard = inter / union
+                contain = inter / min(len(toks), len(m["toks"]))
+                if (jaccard >= 0.5
+                        or (contain >= 0.55 and inter >= 4)
+                        or (img and img == m["img"] and inter >= 2)):
+                    dup = True
+                    break
+        if dup:
+            continue
+        seen_links.add(link)
+        meta.append({"norm": norm, "toks": toks, "img": img})
         kept.append(it)
     return kept
 
 
 def _norm_title(t):
     return re.sub(r"[^a-z0-9 ]", "", (t or "").lower()).strip()
+
+
+# Common function/filler words ignored when comparing headlines, so the match
+# keys on distinctive words (names, places, subjects) rather than glue.
+_STOP = {
+    "the", "a", "an", "and", "or", "but", "of", "to", "in", "on", "for", "with",
+    "at", "by", "from", "as", "is", "are", "was", "were", "be", "been", "being",
+    "have", "has", "had", "will", "would", "this", "that", "these", "those",
+    "its", "it", "his", "her", "their", "our", "your", "now", "new", "more",
+    "most", "than", "into", "over", "after", "before", "amid", "says", "said",
+    "how", "why", "what", "who", "when", "where", "review", "reviews",
+    "exclusive", "watch", "trailer", "recap", "interview", "first", "best",
+    "video", "photos", "may", "about",
+}
+
+
+def _sig_tokens(t):
+    return {w for w in _norm_title(t).split() if len(w) >= 4 and w not in _STOP}
 
 
 def ai_enrich(items, media, batch_size=10):
