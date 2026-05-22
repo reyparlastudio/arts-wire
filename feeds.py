@@ -125,13 +125,16 @@ CATEGORIES = [
 
 # THE REVIEW: the three Arts & Letters Daily-style columns, in display order.
 COLUMNS = [
-  REGIONAL_SOURCES = {
+    ("note",  "Articles of Note"),
+    ("book",  "New Books"),
+    ("essay", "Essays &amp; Opinions"),
+]
+
+# Sources pinned to the regional section (Cuba, the Caribbean & Latin America).
+# Matched by Display Name, so these always appear in the pinned zone at the top.
+REGIONAL_SOURCES = {
     "Rialta", "OnCuba News", "Hypermedia Magazine", "El Estornudo",
     "Repeating Islands", "80grados", "Artburst Miami", "Artishock",
     "Terremoto", "Puerto Rico Art News", "Letras Libres",
     "Latin American Literature Today", "Remezcla",
 }
-    ("note",  "Articles of Note"),
-    ("book",  "New Books"),
-    ("essay", "Essays &amp; Opinions"),
-]
