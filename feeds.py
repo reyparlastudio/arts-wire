@@ -47,6 +47,8 @@ FEEDS = [
     ("The Great Women Artists", "https://feeds.soundcloud.com/users/soundcloud:users:698800785/sounds.rss", "podcast", "news"),
     ("99% Invisible",           "https://feeds.simplecast.com/BqbsxVfO", "podcast", "news"),
     ("The Slowdown",            "https://feeds.publicradio.org/public_feeds/the-slowdown", "podcast", "news"),
+    ("The Big Picture", "https://feeds.megaphone.fm/the-big-picture", "podcast", "news"),
+    ("Talk Easy with Sam Fragoso", "https://rss.art19.com/talk-easy-with-sam-fragoso", "podcast", "news"),
     # --- Photography ---
     ("PetaPixel",            "https://petapixel.com/feed/",            "photography", "news"),
     # --- Visual Art (painting, sculpture) ---
