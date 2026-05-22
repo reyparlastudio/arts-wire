@@ -40,7 +40,7 @@ FEEDS = [
     # --- Music ---
     ("Pitchfork",            "https://pitchfork.com/rss/news/",        "music", "news"),
     ("NPR Music",            "https://feeds.npr.org/1039/rss.xml",     "music", "news"),
-  # --- Podcasts ---
+    # --- Podcasts ---
     ("Pop Culture Happy Hour", "https://feeds.npr.org/510282/podcast.xml", "podcast", "news"),
     ("Fresh Air",              "https://feeds.npr.org/381444908/podcast.xml", "podcast", "news"),
     # --- Photography ---
