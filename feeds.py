@@ -23,6 +23,8 @@ run, so a bad URL can never crash the robot. Add freely.
 
 FEEDS = [
     # ===================== CUBA, THE CARIBBEAN & LATIN AMERICA ============
+    # Grouped into a pinned section at the very top of the page. Their names
+    # must match REGIONAL_SOURCES (below) exactly.
     ("Rialta",                          "https://rialta.org/feed/",                          "ideas",      "news"),
     ("OnCuba News",                     "https://oncubanews.com/feed/",                      "ideas",      "news"),
     ("Hypermedia Magazine",             "https://www.hypermediamagazine.com/feed/",          "ideas",      "news"),
@@ -36,7 +38,8 @@ FEEDS = [
     ("Letras Libres",                   "https://letraslibres.com/feed/",                    "literature", "news"),
     ("Latin American Literature Today", "https://latinamericanliteraturetoday.org/feed/",    "literature", "news"),
     ("Remezcla",                        "https://remezcla.com/feed/",                        "music",      "news"),
-    # ============================ GASTRONOMY ==============================
+
+    # ============================ GASTRONOMY (global + key US cities) =====
     ("Eater",                           "https://www.eater.com/rss/index.xml",               "gastronomy", "news"),
     ("Eater New York",                  "https://ny.eater.com/rss/index.xml",                "gastronomy", "news"),
     ("Eater Miami",                     "https://miami.eater.com/rss/index.xml",             "gastronomy", "news"),
@@ -45,12 +48,24 @@ FEEDS = [
     ("Saveur",                          "https://www.saveur.com/feed/",                      "gastronomy", "news"),
     ("Bon Appétit",                     "https://www.bonappetit.com/feed/rss",               "gastronomy", "news"),
     ("Honest Cooking",                  "https://honestcooking.com/feed/",                   "gastronomy", "news"),
-    # ============================ FASHION =================================
+
+    # ============================ FASHION (global) ========================
     ("Vogue",                           "https://www.vogue.com/feed/rss",                    "fashion",    "news"),
     ("WWD",                             "https://wwd.com/feed/",                             "fashion",    "news"),
     ("Fashionista",                     "https://fashionista.com/.rss/excerpt/",             "fashion",    "news"),
     ("Hypebeast",                       "https://hypebeast.com/feed",                        "fashion",    "news"),
     ("The Cut",                         "https://www.thecut.com/rss/index.xml",              "fashion",    "news"),
+
+    # ============================ PODCASTS ================================
+    ("Pop Culture Happy Hour",          "https://feeds.npr.org/510282/podcast.xml",          "podcast",    "news"),
+    ("Fresh Air",                       "https://feeds.npr.org/381444908/podcast.xml",       "podcast",    "news"),
+    ("Talk Art",                        "https://feeds.acast.com/public/shows/f6a980f6-3f5c-482b-9da0-1b92892998da", "podcast", "news"),
+    ("The Great Women Artists",         "https://feeds.soundcloud.com/users/soundcloud:users:698800785/sounds.rss", "podcast", "news"),
+    ("99% Invisible",                   "https://feeds.simplecast.com/BqbsxVfO",             "podcast",    "news"),
+    ("The Slowdown",                    "https://feeds.publicradio.org/public_feeds/the-slowdown", "podcast", "news"),
+    ("The Big Picture",                 "https://feeds.megaphone.fm/the-big-picture",        "podcast",    "news"),
+    ("Talk Easy with Sam Fragoso",      "https://rss.art19.com/talk-easy-with-sam-fragoso",  "podcast",    "news"),
+
     # ============================ THE WIRE (news by medium) ===============
     # --- Film & Television ---
     ("IndieWire",            "https://www.indiewire.com/feed/",        "film", "news"),
@@ -69,15 +84,6 @@ FEEDS = [
     # --- Music ---
     ("Pitchfork",            "https://pitchfork.com/rss/news/",        "music", "news"),
     ("NPR Music",            "https://feeds.npr.org/1039/rss.xml",     "music", "news"),
-    # --- Podcasts ---
-    ("Pop Culture Happy Hour", "https://feeds.npr.org/510282/podcast.xml", "podcast", "news"),
-    ("Fresh Air",              "https://feeds.npr.org/381444908/podcast.xml", "podcast", "news"),
-    ("Talk Art",                "https://feeds.acast.com/public/shows/f6a980f6-3f5c-482b-9da0-1b92892998da", "podcast", "news"),
-    ("The Great Women Artists", "https://feeds.soundcloud.com/users/soundcloud:users:698800785/sounds.rss", "podcast", "news"),
-    ("99% Invisible",           "https://feeds.simplecast.com/BqbsxVfO", "podcast", "news"),
-    ("The Slowdown",            "https://feeds.publicradio.org/public_feeds/the-slowdown", "podcast", "news"),
-    ("The Big Picture", "https://feeds.megaphone.fm/the-big-picture", "podcast", "news"),
-    ("Talk Easy with Sam Fragoso", "https://rss.art19.com/talk-easy-with-sam-fragoso", "podcast", "news"),
     # --- Photography ---
     ("PetaPixel",            "https://petapixel.com/feed/",            "photography", "news"),
     # --- Visual Art (painting, sculpture) ---
@@ -110,16 +116,22 @@ FEEDS = [
 
 # THE WIRE: medium sections, in display order.
 CATEGORIES = [
+    # FILM
     ("film",        "Film &amp; Television"),
+    # THEATER — the stage & sound arts
     ("theater",     "Theater &amp; Stage"),
     ("dance",       "Dance"),
-    ("music",       "Music"), ("podcast",     "Podcasts"),
+    ("music",       "Music"),
+    ("podcast",     "Podcasts"),
+    # ART — the visual & made arts
     ("art",         "Visual Art"),
     ("photography", "Photography"),
     ("design",      "Design &amp; Architecture"),
-    ("gastronomy",  "Gastronomy &amp; Culinary Arts"),
     ("fashion",     "Fashion &amp; Style"),
+    ("gastronomy",  "Gastronomy &amp; Culinary Arts"),
+    # LETTERS
     ("literature",  "Literature &amp; Poetry"),
+    # IDEAS
     ("ideas",       "Ideas &amp; Humanities"),
 ]
 
@@ -130,8 +142,9 @@ COLUMNS = [
     ("essay", "Essays &amp; Opinions"),
 ]
 
-# Sources pinned to the regional section (Cuba, the Caribbean & Latin America).
-# Matched by Display Name, so these always appear in the pinned zone at the top.
+# Sources whose items are gathered into the pinned section at the very top of
+# the page ("Cuba, the Caribbean & Latin America"), regardless of art form.
+# Names MUST match the Display Name used in FEEDS above, exactly.
 REGIONAL_SOURCES = {
     "Rialta", "OnCuba News", "Hypermedia Magazine", "El Estornudo",
     "Repeating Islands", "80grados", "Artburst Miami", "Artishock",

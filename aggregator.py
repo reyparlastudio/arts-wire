@@ -561,8 +561,8 @@ TEMPLATE = """<!DOCTYPE html>
   {banner}
   {oneart}
   {regional}
-  {review}
   {wire}
+  {review}
   <footer><p>{foot1}</p></footer>
 </div>
 <div class="aw-overlay" id="awOverlay" role="dialog" aria-modal="true" aria-label="Subscribe to The Arts Wire">
