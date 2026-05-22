@@ -74,6 +74,13 @@ FEEDS = [
     ("Deadline",             "https://deadline.com/feed/",             "film", "news"),
     ("Cineuropa",            "https://cineuropa.org/en/rss/",          "film", "news"),
     ("Screen Daily",         "https://www.screendaily.com/rss",        "film", "news"),
+    # --- Animation ---
+    ("Cartoon Brew",         "https://www.cartoonbrew.com/feed",       "animation", "news"),
+    ("Animation Magazine",   "https://www.animationmagazine.net/feed", "animation", "news"),
+    # --- Games & Interactive ---
+    ("Polygon",              "https://www.polygon.com/rss/index.xml",  "games", "news"),
+    ("Rock Paper Shotgun",   "https://www.rockpapershotgun.com/feed",  "games", "news"),
+    ("Eurogamer",            "https://www.eurogamer.net/feed",         "games", "news"),
     # --- Theater & Stage ---
     ("American Theatre",     "https://www.americantheatre.org/feed/",  "theater", "news"),
     ("Playbill",             "https://playbill.com/rss/news",          "theater", "news"),
@@ -92,6 +99,10 @@ FEEDS = [
     ("Artnet News",          "https://news.artnet.com/feed",           "art", "news"),
     ("The Art Newspaper",    "https://www.theartnewspaper.com/rss",    "art", "news"),
     ("Colossal",             "https://www.thisiscolossal.com/feed/",   "art", "news"),
+    # --- Comics & Graphic Novels ---
+    ("The Comics Journal",   "https://www.tcj.com/feed/",              "comics", "news"),
+    ("The Beat",             "https://www.comicsbeat.com/feed/",       "comics", "news"),
+    ("Women Write About Comics", "https://womenwriteaboutcomics.com/feed/", "comics", "news"),
     # --- Design & Architecture ---
     ("Dezeen",               "https://www.dezeen.com/feed/",           "design", "news"),
     ("ArchDaily",            "https://www.archdaily.com/rss/",         "design", "news"),
@@ -110,14 +121,19 @@ FEEDS = [
     # --- New Books (reviews & criticism) ---
     ("New York Review of Books","https://feeds.feedburner.com/nybooks","literature", "book"),
     ("Los Angeles Review of Books","https://lareviewofbooks.org/feed/","literature", "book"),
+    ("The Guardian — Books", "https://www.theguardian.com/books/rss",  "literature", "book"),
+    ("The New York Times — Books","https://rss.nytimes.com/services/xml/rss/nyt/Books.xml","literature","book"),
+    ("Chicago Review of Books","https://chireviewofbooks.com/feed/",    "literature", "book"),
     ("Public Books",         "https://www.publicbooks.org/feed/",      "ideas", "book"),
     ("The Millions",         "https://themillions.com/feed",           "literature", "book"),
 ]
 
 # THE WIRE: medium sections, in display order.
 CATEGORIES = [
-    # FILM
+    # FILM & SCREEN
     ("film",        "Film &amp; Television"),
+    ("animation",   "Animation"),
+    ("games",       "Games &amp; Interactive"),
     # THEATER — the stage & sound arts
     ("theater",     "Theater &amp; Stage"),
     ("dance",       "Dance"),
@@ -126,6 +142,7 @@ CATEGORIES = [
     # ART — the visual & made arts
     ("art",         "Visual Art"),
     ("photography", "Photography"),
+    ("comics",      "Comics &amp; Graphic Novels"),
     ("design",      "Design &amp; Architecture"),
     ("fashion",     "Fashion &amp; Style"),
     ("gastronomy",  "Gastronomy &amp; Culinary Arts"),

@@ -209,7 +209,9 @@ def ai_enrich(items, media, batch_size=10):
         prompt = (
             "You are an arts-and-letters desk editor. For each item return:\n"
             "- summary: a neutral 1-2 sentence summary IN YOUR OWN WORDS\n"
-            "- kind: one of note, book, essay, news\n"
+            "- kind: news (a timely report), note (a long feature or profile), "
+            "book (a review of or essay about a specific book or author), "
+            "essay (an opinion or argument)\n"
             f"- medium: one of [{media_list}]\n- tags: 2-4 short lowercase tags\n"
             'Reply ONLY a JSON array of {"i":int,"summary":str,"kind":str,'
             '"medium":str,"tags":[str]}.\n\n' + json.dumps(payload, ensure_ascii=False))
@@ -221,7 +223,11 @@ def ai_enrich(items, media, batch_size=10):
                 d = by_i.get(i, {})
                 b["summary"] = d.get("summary") or b["raw_summary"] or "(Open the piece.)"
                 b["tags"] = d.get("tags") or [b["medium"]]
-                if d.get("kind") in ALL_KINDS:
+                # Trust dedicated review outlets — their column is their specialty.
+                # Only let the AI set 'kind' for sources that default to news
+                # (so a book review on a news site can still reach New Books),
+                # while a dedicated book/essay/note source keeps its column.
+                if b["kind"] not in REVIEW_KINDS and d.get("kind") in ALL_KINDS:
                     b["kind"] = d["kind"]
                 if d.get("medium") in media:
                     b["medium"] = d["medium"]
@@ -266,11 +272,14 @@ def switcher_html(langs, current):
 # Caribbean block (curated by source, not a medium in CATEGORIES).
 FRAME_SECTIONS = {
     "film":        ["nocturne", "moonlight", "shadow", "lantern", "night"],
+    "animation":   ["caricature", "silhouette", "magic lantern", "shadow play", "puppet"],
+    "games":       ["chess players", "card players", "playing cards", "dice", "game board"],
     "theater":     ["theater", "stage", "harlequin", "masquerade", "opera"],
     "dance":       ["dancer", "ballet", "dance", "Degas dancer"],
     "music":       ["musician", "lute", "violin", "concert", "song"],
     "art":         ["painting", "palette", "studio", "still life", "easel"],
     "photography": ["photograph", "daguerreotype", "portrait photograph"],
+    "comics":      ["caricature", "satirical print", "Daumier", "broadsheet", "engraving"],
     "design":      ["architecture", "ornament", "interior", "facade", "pattern"],
     "gastronomy":  ["still life fruit", "banquet", "kitchen", "feast", "table"],
     "fashion":     ["costume", "dress", "gown", "textile", "embroidery"],
