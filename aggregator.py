@@ -39,7 +39,7 @@ CHROME_EN = {
     "review_label": "The Review &mdash; long reads, books &amp; ideas",
     "wire_label": "The Wire &mdash; today&rsquo;s news, by medium",
     "subscribe": "Subscribe &middot; $1/month",
-    "art_label": "One Beautiful Thing",
+    "art_label": "The Frame",
     "foot1": ("Assembled automatically by The Arts Wire. Every title links to its "
               "original publisher; summaries are written fresh and link out for the full piece."),
     "foot2": "built with care, run on autopilot.",
