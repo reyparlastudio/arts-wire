@@ -40,7 +40,7 @@ CHROME_EN = {
     "wire_label": "The Wire &mdash; today&rsquo;s news, by medium",
     "subscribe": "Subscribe &middot; $1/month",
     "art_label": "The Frame",
-    "regional_label": "Cuba, the Caribbean &amp; Latin America",
+    "regional_label": "Latin America &amp; the Caribbean",
     "foot1": "Curated and assembled by reyparla.com & automatically by Time & Space Art, LLC for The Arts Wire. Every title links to its original publisher; summaries are written fresh and link out to the full piece.",
     "foot2": "built with care, run on autopilot.",
     "empty": "Nothing today.",
@@ -221,7 +221,16 @@ def render_html(items, columns, categories, generated, used_ai, *,
     review = (f'<div class="zone-label">{chrome["review_label"]}</div>'
               f'<section class="review">{cols_html}</section>')
 
+    # Build the pinned regional block first, so it can be slotted inside The Wire.
+    regional_block = ""
+    if reg_items:
+        rcards = "".join(card(it) for it in reg_items)
+        regional_block = (f'<div class="zone-label zone-region">'
+                          f'{chrome.get("regional_label","Latin America &amp; the Caribbean")}</div>'
+                          f'<section class="section region"><div class="grid">{rcards}</div></section>')
+
     wire_inner = ""
+    regional_done = False
     for medium, label in categories:
         group = [it for it in main_items if it["kind"] == "news" and it["medium"] == medium]
         if not group:
@@ -229,14 +238,14 @@ def render_html(items, columns, categories, generated, used_ai, *,
         wire_inner += (f'<section class="section"><h2>{label}<span class="ct">'
                        f'{len(group)}</span></h2><div class="grid">'
                        + "".join(card(it) for it in group) + "</div></section>")
+        if medium == "design" and regional_block:
+            wire_inner += regional_block
+            regional_done = True
+    if regional_block and not regional_done:
+        wire_inner += regional_block
     wire = (f'<div class="zone-label">{chrome["wire_label"]}</div>' + wire_inner) if wire_inner else ""
 
-    regional = ""
-    if reg_items:
-        rcards = "".join(card(it) for it in reg_items)
-        regional = (f'<div class="zone-label zone-region">'
-                    f'{chrome.get("regional_label","Cuba, the Caribbean &amp; Latin America")}</div>'
-                    f'<section class="section region"><div class="grid">{rcards}</div></section>')
+    regional = ""  # regional now lives inside The Wire (after Design &amp; Architecture)
 
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
     mode = "Curated by Rey Parl&aacute;"
