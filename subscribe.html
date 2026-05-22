@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscribe &middot; The Arts Wire</title>
+<meta name="theme-color" content="#191512">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Newsreader:ital,opsz@0,6..72;1,6..72&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5efe3;--ink:#191512;--muted:#6f6253;--line:#d8cdb8;--accent:#b8412a;--gold:#9a7b32}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"Newsreader",Georgia,serif;
+    font-size:18px;line-height:1.55;
+    background-image:radial-gradient(#00000008 1px,transparent 1px);background-size:4px 4px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px 70px}
+  a{color:inherit}
+  header{text-align:center;padding:46px 0 16px;border-bottom:3px double var(--ink)}
+  .kicker{font-family:"Fraunces";letter-spacing:.34em;text-transform:uppercase;font-size:12px;
+    color:var(--accent);font-weight:600}
+  h1{font-family:"Fraunces";font-weight:900;font-size:clamp(40px,8vw,76px);line-height:.94;
+    letter-spacing:-.02em;margin:6px 0 10px}
+  .lede{max-width:640px;margin:22px auto 0;text-align:center;font-size:20px;color:#3a322a}
+  .lede em{color:var(--accent);font-style:italic}
+
+  .pick{margin:34px auto 0;max-width:520px;background:#fbf7ee;border:1px solid var(--line);padding:18px 20px}
+  .pick label{font-family:"Fraunces";font-weight:600;font-size:13px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--muted);display:block;margin-bottom:8px}
+  select{width:100%;font-family:"Newsreader",serif;font-size:18px;padding:10px 12px;
+    background:var(--paper);border:1px solid var(--line);color:var(--ink)}
+
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+  .tier{border:1px solid var(--line);background:var(--paper);padding:24px 22px;display:flex;
+    flex-direction:column;gap:12px}
+  .tier.feature{border:2px solid var(--accent);background:#fbf7ee;position:relative}
+  .flag{position:absolute;top:-12px;left:22px;background:var(--accent);color:var(--paper);
+    font-family:"Fraunces";font-weight:600;font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;padding:3px 10px}
+  .tier h2{font-family:"Fraunces";font-weight:600;font-size:24px}
+  .price{font-family:"Fraunces";font-weight:900;font-size:40px;line-height:1}
+  .price small{font-family:"Newsreader";font-style:italic;font-weight:400;font-size:15px;color:var(--muted)}
+  .note{font-size:14px;color:var(--muted);font-style:italic}
+  .tier ul{list-style:none;font-size:15.5px;display:flex;flex-direction:column;gap:7px;margin-top:2px}
+  .tier li::before{content:"\2014  ";color:var(--gold)}
+  .btn{margin-top:auto;display:block;text-align:center;font-family:"Fraunces";font-weight:600;
+    font-size:16px;padding:11px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+    cursor:pointer;text-decoration:none}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn:hover{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+
+  .pay{text-align:center;margin-top:40px;color:var(--muted);font-size:15px}
+  .pay b{color:var(--ink);font-style:normal}
+  .methods{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+  .chip{font-family:"Fraunces";font-size:12px;border:1px solid var(--line);border-radius:20px;
+    padding:4px 12px;color:var(--muted)}
+  footer{text-align:center;margin-top:46px;padding-top:22px;border-top:1px solid var(--line);
+    color:var(--muted);font-style:italic;font-size:14px}
+  @media (max-width:720px){.tiers{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide</div>
+    <h1>Read the world&rsquo;s arts,<br>in your language.</h1>
+    <p class="lede">A daily review of film, theater, art, books and ideas from across the globe &mdash;
+    delivered to your inbox and <em>translated into the language you choose</em>, wherever you are.</p>
+  </header>
+
+  <div class="pick">
+    <label for="lang">Deliver my edition in</label>
+    <select id="lang">
+      <option value="en">English</option>
+      <option value="es">Español (Spanish)</option>
+      <option value="fr">Français (French)</option>
+      <option value="pt">Português (Portuguese)</option>
+      <option value="de">Deutsch (German)</option>
+      <option value="it">Italiano (Italian)</option>
+      <option value="ar">العربية (Arabic)</option>
+      <option value="hi">हिन्दी (Hindi)</option>
+      <option value="zh">中文 (Chinese)</option>
+      <option value="ja">日本語 (Japanese)</option>
+      <option value="ko">한국어 (Korean)</option>
+      <option value="ru">Русский (Russian)</option>
+      <option value="other">Another language &mdash; just ask</option>
+    </select>
+  </div>
+
+  <section class="tiers">
+    <div class="tier">
+      <h2>Reader</h2>
+      <div class="price">Free</div>
+      <p class="note">The daily edition, online.</p>
+      <ul><li>Full daily digest on the web</li><li>Any language</li><li>No account needed</li></ul>
+      <a class="btn ghost" href="index.html">Start reading</a>
+    </div>
+
+    <div class="tier feature">
+      <span class="flag">Most popular</span>
+      <h2>Supporter</h2>
+      <div class="price">$1<small> / month</small></div>
+      <p class="note">Billed $12 once a year &mdash; keeps the dollar honest.</p>
+      <ul><li>Edition emailed daily</li><li>Your chosen language</li><li>Keeps it free for everyone</li></ul>
+      <a class="btn" data-plan="supporter" href="#">Subscribe</a>
+    </div>
+
+    <div class="tier">
+      <h2>Patron</h2>
+      <div class="price">$10<small> / month</small></div>
+      <p class="note">For those who can give more.</p>
+      <ul><li>Everything in Supporter</li><li>Weekly long-read roundup</li><li>Your name in the colophon</li></ul>
+      <a class="btn ghost" data-plan="patron" href="#">Become a patron</a>
+    </div>
+  </section>
+
+  <div class="pay">
+    <p>Pay securely from <b>almost anywhere in the world</b>. Taxes handled for you.</p>
+    <div class="methods">
+      <span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span>
+      <span class="chip">PayPal</span><span class="chip">Apple Pay</span><span class="chip">Google Pay</span>
+      <span class="chip">iDEAL</span><span class="chip">SEPA</span><span class="chip">Alipay</span>
+      <span class="chip">+ local methods</span>
+    </div>
+  </div>
+
+  <footer>
+    <p>The daily edition stays free to read. Subscriptions keep it independent and ad-free.</p>
+  </footer>
+</div>
+
+<script>
+/* ----------------------------------------------------------------------------
+   WIRING THE CHECKOUT  (one-time setup, explained in ARCHITECTURE.md)
+   --------------------------------------------------------------------------
+   This page is static (no server needed). To take real payments worldwide:
+
+   1) Create products in a Merchant-of-Record checkout (Paddle or Lemon Squeezy
+      recommended — they collect global VAT/sales tax FOR you).
+        - "Supporter"  -> a $12/year subscription
+        - "Patron"     -> a $120/year (or $10/mo) subscription
+   2) Paste each product's hosted checkout link below.
+   3) The reader's language choice is passed along so your sending tool knows
+      which translated edition to send them.
+---------------------------------------------------------------------------- */
+const CHECKOUT = {
+  supporter: "https://YOUR-STORE.lemonsqueezy.com/checkout/buy/SUPPORTER_ID",
+  patron:    "https://YOUR-STORE.lemonsqueezy.com/checkout/buy/PATRON_ID"
+};
+
+document.querySelectorAll("[data-plan]").forEach(function (btn) {
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+    const plan = btn.getAttribute("data-plan");
+    const lang = document.getElementById("lang").value;
+    const base = CHECKOUT[plan];
+    if (base.includes("YOUR-STORE")) {
+      alert("Checkout not wired yet.\n\nPlan: " + plan + "\nLanguage: " + lang +
+            "\n\nPaste your Paddle/Lemon Squeezy link into CHECKOUT in this file" +
+            " (see ARCHITECTURE.md). The language is carried through as ?lang=" + lang + ".");
+      return;
+    }
+    // Pass language as checkout metadata so the sender picks the right edition.
+    window.location.href = base + "?checkout[custom][lang]=" + encodeURIComponent(lang);
+  });
+});
+</script>
+</body></html>
