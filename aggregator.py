@@ -52,6 +52,43 @@ CHROME_EN = {
 # ----------------------------------------------------------------------------
 # COLLECT / DEDUPE / ENRICH  (unchanged core)
 # ----------------------------------------------------------------------------
+def _entry_image(e):
+    """Best-effort lead image straight from the feed entry — no page fetch, so
+    it stays fast for ~120 stories. Tries media:thumbnail, media:content,
+    image enclosures, then the first <img> in the content/summary HTML. Returns
+    an https URL or "" (cards with no image fall back cleanly)."""
+    def _ok(u):
+        u = (u or "").strip()
+        if not u:
+            return ""
+        if u.startswith("http://"):          # the site is https; upgrade or it's blocked
+            u = "https://" + u[len("http://"):]
+        return u if u.startswith("https://") else ""
+    for th in (e.get("media_thumbnail") or []):
+        u = _ok(th.get("url"))
+        if u:
+            return u
+    for mc in (e.get("media_content") or []):
+        if mc.get("medium") == "image" or str(mc.get("type", "")).startswith("image") \
+                or re.search(r"\.(jpe?g|png|gif|webp)(\?|$)", mc.get("url", ""), re.I):
+            u = _ok(mc.get("url"))
+            if u:
+                return u
+    for ln in (e.get("links") or []):
+        if ln.get("rel") == "enclosure" and str(ln.get("type", "")).startswith("image"):
+            u = _ok(ln.get("href"))
+            if u:
+                return u
+    blobs = [c.get("value", "") for c in (e.get("content") or [])] + [e.get("summary", "")]
+    for blob in blobs:
+        m = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', blob or "", re.I)
+        if m:
+            u = _ok(m.group(1))
+            if u:
+                return u
+    return ""
+
+
 def collect(feeds, hours):
     import socket
     socket.setdefaulttimeout(20)
@@ -71,6 +108,7 @@ def collect(feeds, hours):
                     "title": _clean(e.get("title", "")).strip(),
                     "link": e.get("link", "").strip(), "source": name,
                     "medium": medium, "kind": kind,
+                    "image": _entry_image(e),
                     "published": published.isoformat() if published else "",
                     "raw_summary": _clean(e.get("summary", ""))[:400]})
                 count += 1
@@ -254,7 +292,13 @@ def render_html(items, columns, categories, generated, used_ai, *,
 
     def card(it):
         tags = "".join(f'<span class="tag">{esc(t)}</span>' for t in it.get("tags", []))
-        return (f'<article class="card"><h3><a href="{esc(it["link"])}" target="_blank" '
+        img = ""
+        if it.get("image"):
+            img = (f'<a class="card-img" href="{esc(it["link"])}" target="_blank" rel="noopener">'
+                   f'<img src="{esc(it["image"])}" alt="" loading="lazy" '
+                   f'onerror="this.closest(\'.card\').classList.add(\'noimg\');this.remove()"></a>')
+        return (f'<article class="card{" has-img" if img else ""}">{img}'
+                f'<h3><a href="{esc(it["link"])}" target="_blank" '
                 f'rel="noopener">{esc(it["title"])}</a></h3>'
                 f'<p class="sum">{esc(it.get("summary",""))}</p>'
                 f'<div class="meta"><span class="csrc">{esc(it["source"])}</span>{tags}</div></article>')
@@ -417,6 +461,12 @@ TEMPLATE = """<!DOCTYPE html>
   .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}}
   .card{{background:var(--paper);border:1px solid var(--line);padding:18px 18px 16px;
     display:flex;flex-direction:column;gap:8px}}
+  .card-img{{display:block;margin:-18px -18px 12px;overflow:hidden;background:#e9e0cf;
+    border-bottom:1px solid var(--line)}}
+  .card-img img{{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;display:block;
+    transition:transform .5s cubic-bezier(.2,.7,.2,1)}}
+  .card:hover .card-img img{{transform:scale(1.04)}}
+  .card.noimg .card-img{{display:none}}
   .card h3{{font-family:"Spectral",serif;font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.005em}}
   .card h3 a:hover{{color:var(--accent)}}
   .sum{{color:#3a322a;font-size:16px}}
