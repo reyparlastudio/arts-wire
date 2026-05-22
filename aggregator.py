@@ -288,7 +288,35 @@ FRAME_SECTIONS = {
     "ideas":       ["philosopher", "allegory", "scholar", "study", "manuscript"],
     "podcast":     ["conversation", "salon", "gathering", "two figures"],
     "regional":    ["Mexican", "Spanish colonial", "Latin American", "colonial"],
+    "artsci":      ["botanical", "anatomical", "astronomical chart", "scientific illustration", "natural history"],
+    "artjustice":  ["allegory of justice", "liberty", "crowd", "procession", "laborer"],
 }
+
+
+# The page's section order — edit this single list to reorder the whole site.
+# Keys are the medium keys from feeds.CATEGORIES, plus "artsci" / "artjustice"
+# (the cross-cutting Art & Science / Art & Social Justice lenses) and "regional"
+# (Latin America & the Caribbean). Any medium NOT named here is appended at the
+# end automatically, so a section can never silently vanish. The Review always
+# closes the page, after this sequence.
+SECTION_ORDER = [
+    "theater",       # Theater & Stage
+    "photography",   # Photography
+    "design",        # Design & Architecture
+    "film",          # Film & Television
+    "art",           # Visual Art
+    "fashion",       # Fashion & Style
+    "ideas",         # Ideas & Humanities
+    "artsci",        # Art & Science  (lens)
+    "artjustice",    # Art & Social Justice  (lens)
+    "music",         # Music
+    "podcast",       # Podcasts
+    "literature",    # Literature & Poetry
+    "regional",      # Latin America & the Caribbean
+    "gastronomy",    # Gastronomy & Culinary Arts
+    "animation",     # Animation
+    "games",         # Games & Interactive
+]
 
 # ---------------------------------------------------------------------------
 # THREADS — cross-cutting themes. The robot reads every story's title, summary,
@@ -468,16 +496,19 @@ def render_html(items, columns, categories, generated, used_ai, *,
                           f'<span class="ct">{len(reg_items)}</span></h2>'
                           f'<div class="grid">{rcards}</div></section>')
 
-    # Assemble the wire as an ordered list of blocks, then drop a section-matched
-    # frame BETWEEN each pair (it rhymes with the section that follows). The first
-    # block has no frame above it, so the rhythm reads "section, frame, section,
-    # frame…" — and it extends automatically as new categories are added.
-    blocks = []  # list of (frame_key, section_html)
-    for medium, label in categories:
+    # ------------------------------------------------------------------
+    # ONE ordered sequence of sections (SECTION_ORDER), with a matched frame
+    # between each. Medium sections are card grids; Art & Science and Art & Social
+    # Justice are cross-cutting "lens" lists drawn from the whole edition; Latin
+    # America is its own card section. The Review closes the page (rendered after).
+    # ------------------------------------------------------------------
+    label_of = dict(categories)
+
+    def medium_section(medium):
         group = [it for it in main_items if it["kind"] == "news" and it["medium"] == medium]
         if not group:
-            continue
-        head = f'<h2>{label}<span class="ct">{len(group)}</span></h2>'
+            return ""
+        head = f'<h2>{label_of.get(medium, medium)}<span class="ct">{len(group)}</span></h2>'
         cards_html = "".join(card(it) for it in group)
         if medium == "art":
             present = set()
@@ -490,15 +521,37 @@ def render_html(items, columns, categories, generated, used_ai, *,
                 if fk in present:
                     chips += f'<button class="vchip" data-f="{fk}">{flabel}</button>'
             bar = f'<div class="vfilter">{chips}</div>' if present else ""
-            section_html = (f'<section class="section">{head}{bar}'
-                            f'<div class="grid art-grid">{cards_html}</div></section>')
+            return (f'<section class="section">{head}{bar}'
+                    f'<div class="grid art-grid">{cards_html}</div></section>')
+        return f'<section class="section">{head}<div class="grid">{cards_html}</div></section>'
+
+    def theme_section(key):
+        for k, label, rx in _THEME_RX:
+            if k == key:
+                picks = [it for it in items if rx.search(_theme_text(it))][:10]
+                if not picks:
+                    return ""
+                return (f'<section class="section thread"><h2>{label}'
+                        f'<span class="ct">{len(picks)}</span></h2>'
+                        f'<div class="threadlist">'
+                        f'{"".join(teaser(it) for it in picks)}</div></section>')
+        return ""
+
+    order = list(SECTION_ORDER)
+    for m, _ in categories:                 # append any medium not explicitly ordered
+        if m not in order:
+            order.append(m)
+
+    blocks = []  # list of (frame_key, section_html)
+    for key in order:
+        if key in ("artsci", "artjustice"):
+            sec_html = theme_section(key)
+        elif key == "regional":
+            sec_html = regional_block
         else:
-            section_html = f'<section class="section">{head}<div class="grid">{cards_html}</div></section>'
-        blocks.append((medium, section_html))
-        if medium == "design" and regional_block:
-            blocks.append(("regional", regional_block))
-    if regional_block and not any(k == "regional" for k, _ in blocks):
-        blocks.append(("regional", regional_block))
+            sec_html = medium_section(key)
+        if sec_html:
+            blocks.append((key, sec_html))
 
     wire_inner = ""
     for i, (key, block_html) in enumerate(blocks):
@@ -507,20 +560,8 @@ def render_html(items, columns, categories, generated, used_ai, *,
         wire_inner += block_html
     wire = (f'<div class="zone-label">{chrome["wire_label"]}</div>' + wire_inner) if wire_inner else ""
 
-    regional = ""  # regional now lives inside The Wire (after Design &amp; Architecture)
-
-    # THREADS — cross-cutting themed lists drawn from the entire edition.
-    thread_blocks = []
-    for key, label, rx in _THEME_RX:
-        picks = [it for it in items if rx.search(_theme_text(it))][:10]
-        if not picks:
-            continue
-        thread_blocks.append(
-            f'<section class="section thread"><h2>{label}'
-            f'<span class="ct">{len(picks)}</span></h2>'
-            f'<div class="threadlist">{"".join(teaser(it) for it in picks)}</div></section>')
-    threads = ((f'<div class="zone-label">{chrome.get("threads_label","Threads")}</div>'
-                + "".join(thread_blocks)) if thread_blocks else "")
+    regional = ""   # rendered inline in the sequence above
+    threads = ""    # Art & Science / Art & Social Justice are now inline sections
 
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
     mode = "Curated by Rey Parl&aacute;"
