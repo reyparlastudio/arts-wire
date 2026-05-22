@@ -334,6 +334,28 @@ def _theme_text(it):
                      it.get("raw_summary", ""), " ".join(it.get("tags", []))])
 
 
+# Sub-filters inside Visual Art (Painting / Sculpture / Performance / Video & New
+# Media). Each art card is tagged with whichever apply; on-page chips filter the
+# grid. Cards that match none stay visible only under "All". Tunable, whole-word.
+_ART_FILTERS = [
+    ("painting",    ["painting", "painter", "canvas", "mural", "fresco",
+                     "watercolor", "watercolour", "oil paint", "portraitist"]),
+    ("sculpture",   ["sculpture", "sculptor", "statue", "bronze", "marble",
+                     "carving", "relief", "ceramic", "terracotta"]),
+    ("performance", ["performance art", "performative", "live art", "happening",
+                     "body art", "performance piece"]),
+    ("video",       ["video art", "new media", "digital art", "video installation",
+                     "moving image", "generative art", "virtual reality",
+                     "augmented reality", "net art", "nft"]),
+]
+_ART_RX = [(k, _theme_rx(terms)) for k, terms in _ART_FILTERS]
+
+
+def _art_filters(it):
+    text = _theme_text(it)
+    return " ".join(k for k, rx in _ART_RX if rx.search(text))
+
+
 def render_html(items, columns, categories, generated, used_ai, *,
                 lang="en", chrome=None, langs=("en",), artwork=None,
                 regional_sources=(), frames=None):
@@ -396,7 +418,12 @@ def render_html(items, columns, categories, generated, used_ai, *,
             img = (f'<a class="card-img" href="{esc(it["link"])}" target="_blank" rel="noopener">'
                    f'<img src="{esc(it["image"])}" alt="" loading="lazy" '
                    f'onerror="this.closest(\'.card\').classList.add(\'noimg\');this.remove()"></a>')
-        return (f'<article class="card{" has-img" if img else ""}">{img}'
+        vsub = ""
+        if it.get("medium") == "art":
+            f = _art_filters(it)
+            if f:
+                vsub = f' data-vsub="{f}"'
+        return (f'<article class="card{" has-img" if img else ""}"{vsub}>{img}'
                 f'<h3><a href="{esc(it["link"])}" target="_blank" '
                 f'rel="noopener">{esc(it["title"])}</a></h3>'
                 f'<p class="sum">{esc(it.get("summary",""))}</p>'
@@ -430,10 +457,24 @@ def render_html(items, columns, categories, generated, used_ai, *,
         group = [it for it in main_items if it["kind"] == "news" and it["medium"] == medium]
         if not group:
             continue
-        blocks.append((medium,
-                       f'<section class="section"><h2>{label}<span class="ct">'
-                       f'{len(group)}</span></h2><div class="grid">'
-                       + "".join(card(it) for it in group) + "</div></section>"))
+        head = f'<h2>{label}<span class="ct">{len(group)}</span></h2>'
+        cards_html = "".join(card(it) for it in group)
+        if medium == "art":
+            present = set()
+            for it in group:
+                present |= {s for s in _art_filters(it).split() if s}
+            chips = '<button class="vchip active" data-f="all">All</button>'
+            for fk, flabel in (("painting", "Painting"), ("sculpture", "Sculpture"),
+                               ("performance", "Performance"),
+                               ("video", "Video &amp; New Media")):
+                if fk in present:
+                    chips += f'<button class="vchip" data-f="{fk}">{flabel}</button>'
+            bar = f'<div class="vfilter">{chips}</div>' if present else ""
+            section_html = (f'<section class="section">{head}{bar}'
+                            f'<div class="grid art-grid">{cards_html}</div></section>')
+        else:
+            section_html = f'<section class="section">{head}<div class="grid">{cards_html}</div></section>'
+        blocks.append((medium, section_html))
         if medium == "design" and regional_block:
             blocks.append(("regional", regional_block))
     if regional_block and not any(k == "regional" for k, _ in blocks):
@@ -553,6 +594,12 @@ TEMPLATE = """<!DOCTYPE html>
   .threadlist{{column-count:2;column-gap:36px}}
   .threadlist .teaser{{break-inside:avoid;-webkit-column-break-inside:avoid}}
   @media (max-width:760px){{.threadlist{{column-count:1}}}}
+  .vfilter{{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 18px}}
+  .vchip{{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:12.5px;
+    letter-spacing:.04em;text-transform:uppercase;padding:5px 13px;cursor:pointer;
+    background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:20px}}
+  .vchip:hover{{color:var(--ink);border-color:var(--ink)}}
+  .vchip.active{{background:var(--ink);color:var(--paper);border-color:var(--ink)}}
   .zone-region{{color:var(--accent);font-size:15px;letter-spacing:.2em}}
   .section.region{{background:#b8412a0a;border:1px solid #b8412a44;
     padding:18px 18px 6px;margin-top:0}}
@@ -770,6 +817,22 @@ function awDoSearch(){{
   if(ov){{ ov.addEventListener("click", function(e){{ if(e.target===ov){{ awCloseNews(); }} }}); }}
   document.addEventListener("keydown", function(e){{ if(e.key==="Escape"){{ awCloseNews(); }} }});
 }})();
+
+/* Visual Art sub-filters: chips show/hide cards by their data-vsub. */
+document.querySelectorAll(".vfilter").forEach(function(bar){{
+  var grid=bar.parentElement.querySelector(".art-grid");
+  if(!grid){{ return; }}
+  bar.addEventListener("click", function(e){{
+    var b=e.target.closest(".vchip"); if(!b){{ return; }}
+    bar.querySelectorAll(".vchip").forEach(function(c){{ c.classList.remove("active"); }});
+    b.classList.add("active");
+    var f=b.getAttribute("data-f");
+    grid.querySelectorAll(".card").forEach(function(card){{
+      var subs=(card.getAttribute("data-vsub")||"").split(" ");
+      card.style.display=(f==="all"||subs.indexOf(f)>=0)?"":"none";
+    }});
+  }});
+}});
 </script>
 </body></html>"""
 
