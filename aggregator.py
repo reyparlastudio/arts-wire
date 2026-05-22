@@ -42,7 +42,7 @@ CHROME_EN = {
     "subscribe": "Subscribe &middot; $1/month",
     "art_label": "The Frame",
     "regional_label": "Latin America &amp; the Caribbean",
-    "foot1": "Curated and assembled by reyparla.com & automatically by Time & Space Art, LLC for The Arts Wire. Every title links to its original publisher; summaries are written fresh and link out to the full piece.",
+    "foot1": "Curated by reyparla.com &copy; Time &amp; Space Art, LLC {year} for The Arts Wire&trade;. Every title links to its original publisher; summaries are written fresh and link out to the full piece. Built with care.",
     "foot2": "built with care, run on autopilot.",
     "empty": "Nothing today.",
     "banner": "",
@@ -273,7 +273,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
         if artwork.get("date"):
             meta += f", {esc(artwork['date'])}"
         oneart = (
-            f'<div class="zone-label">{chrome.get("art_label","One Beautiful Thing")}</div>'
+            f'<div class="zone-label frame-label">{chrome.get("art_label","One Beautiful Thing")}</div>'
             f'<figure class="oneart"><a href="{esc(artwork.get("url","#"))}" target="_blank" rel="noopener">'
             f'<img src="{esc(artwork["image"])}" alt="{esc(artwork.get("title",""))}" loading="lazy"></a>'
             f'<figcaption><span class="art-title">{esc(artwork.get("title",""))}</span> &mdash; {meta}'
@@ -285,7 +285,12 @@ def render_html(items, columns, categories, generated, used_ai, *,
     main_items = [it for it in items if it.get("source") not in regset]
 
     def teaser(it):
-        return (f'<p class="teaser"><a href="{esc(it["link"])}" target="_blank" '
+        im = ""
+        if it.get("image"):
+            im = (f'<a class="t-imglink" href="{esc(it["link"])}" target="_blank" rel="noopener">'
+                  f'<img class="t-img" src="{esc(it["image"])}" alt="" loading="lazy" '
+                  f'onerror="this.closest(\'.t-imglink\').remove()"></a>')
+        return (f'<p class="teaser">{im}<a href="{esc(it["link"])}" target="_blank" '
                 f'rel="noopener">{esc(it["title"])}</a> &mdash; '
                 f'{esc(_short(it.get("summary","")))}'
                 f'<span class="src">{esc(it["source"])}</span></p>')
@@ -356,7 +361,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
         kicker=chrome["kicker"], pieces=chrome["pieces"], subscribe=chrome["subscribe"],
         date=generated.strftime("%A %B %-d, %Y"), mode=mode, total=len(items),
         banner=banner, oneart=oneart, regional=regional, review=review, wire=wire,
-        foot1=chrome["foot1"], foot2=chrome["foot2"], year=generated.year)
+        foot1=chrome["foot1"].replace("{year}", str(generated.year)), foot2=chrome["foot2"], year=generated.year)
 
 
 TEMPLATE = """<!DOCTYPE html>
@@ -430,6 +435,12 @@ TEMPLATE = """<!DOCTYPE html>
   .zone-label::before,.zone-label::after{{content:"";position:absolute;top:50%;width:24%;
     height:1px;background:var(--line)}}
   .zone-label::before{{left:0}} .zone-label::after{{right:0}}
+  .frame-label{{font-size:clamp(26px,3.6vw,42px);font-weight:800;letter-spacing:-.01em;
+    text-transform:none;line-height:1.0}}
+  .frame-label::before,.frame-label::after{{display:none}}
+  .t-imglink{{float:left;margin:3px 12px 2px 0}}
+  .t-img{{width:78px;height:78px;object-fit:cover;display:block;border:1px solid var(--line);background:#e9e0cf}}
+  [dir=rtl] .t-imglink{{float:right;margin:3px 0 2px 12px}}
   .zone-region{{color:var(--accent);font-size:15px;letter-spacing:.2em}}
   .section.region{{background:#b8412a0a;border:1px solid #b8412a44;
     padding:18px 18px 6px;margin-top:0}}
@@ -444,7 +455,7 @@ TEMPLATE = """<!DOCTYPE html>
   .col h3{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;
     letter-spacing:.12em;color:var(--accent);padding-bottom:8px;margin-bottom:6px;
     border-bottom:2px solid var(--accent)}}
-  .teaser{{padding:11px 0;border-bottom:1px dotted var(--line);font-size:16.5px;line-height:1.42}}
+  .teaser{{padding:11px 0;border-bottom:1px dotted var(--line);font-size:16.5px;line-height:1.42;overflow:hidden}}
   .teaser:last-child{{border-bottom:none}}
   .teaser a{{font-family:"Spectral",serif;font-weight:600;letter-spacing:-.004em}}
   .teaser a:hover{{color:var(--accent)}}
@@ -552,7 +563,7 @@ TEMPLATE = """<!DOCTYPE html>
   {regional}
   {review}
   {wire}
-  <footer><p>{foot1}</p><p>Rey Parla &copy; {year} &middot; {foot2}</p></footer>
+  <footer><p>{foot1}</p></footer>
 </div>
 <div class="aw-overlay" id="awOverlay" role="dialog" aria-modal="true" aria-label="Subscribe to The Arts Wire">
   <div class="aw-modal">
