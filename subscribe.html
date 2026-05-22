@@ -7,27 +7,27 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Newsreader:ital,opsz@0,6..72;1,6..72&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@300;500;600;700;800;900&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root{--paper:#f5efe3;--ink:#191512;--muted:#6f6253;--line:#d8cdb8;--accent:#b8412a;--gold:#9a7b32}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--paper);color:var(--ink);font-family:"Newsreader",Georgia,serif;
-    font-size:18px;line-height:1.55;
+  body{background:var(--paper);color:var(--ink);font-family:"Spectral",Georgia,serif;
+    font-size:18px;line-height:1.6;
     background-image:radial-gradient(#00000008 1px,transparent 1px);background-size:4px 4px}
   .wrap{max-width:920px;margin:0 auto;padding:0 22px 70px}
   a{color:inherit}
   header{text-align:center;padding:46px 0 16px;border-bottom:3px double var(--ink)}
-  .kicker{font-family:"Fraunces";letter-spacing:.34em;text-transform:uppercase;font-size:12px;
+  .kicker{font-family:"Saira Condensed",sans-serif;letter-spacing:.34em;text-transform:uppercase;font-size:12px;
     color:var(--accent);font-weight:600}
-  h1{font-family:"Fraunces";font-weight:900;font-size:clamp(40px,8vw,76px);line-height:.94;
+  h1{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(44px,9vw,86px);line-height:.94;
     letter-spacing:-.02em;margin:6px 0 10px}
   .lede{max-width:640px;margin:22px auto 0;text-align:center;font-size:20px;color:#3a322a}
   .lede em{color:var(--accent);font-style:italic}
 
   .pick{margin:34px auto 0;max-width:520px;background:#fbf7ee;border:1px solid var(--line);padding:18px 20px}
-  .pick label{font-family:"Fraunces";font-weight:600;font-size:13px;text-transform:uppercase;
+  .pick label{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;
     letter-spacing:.08em;color:var(--muted);display:block;margin-bottom:8px}
-  select{width:100%;font-family:"Newsreader",serif;font-size:18px;padding:10px 12px;
+  select{width:100%;font-family:"Spectral",serif;font-size:18px;padding:10px 12px;
     background:var(--paper);border:1px solid var(--line);color:var(--ink)}
 
   .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
@@ -35,16 +35,16 @@
     flex-direction:column;gap:12px}
   .tier.feature{border:2px solid var(--accent);background:#fbf7ee;position:relative}
   .flag{position:absolute;top:-12px;left:22px;background:var(--accent);color:var(--paper);
-    font-family:"Fraunces";font-weight:600;font-size:11px;letter-spacing:.08em;
+    font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:11px;letter-spacing:.08em;
     text-transform:uppercase;padding:3px 10px}
-  .tier h2{font-family:"Fraunces";font-weight:600;font-size:24px}
-  .price{font-family:"Fraunces";font-weight:900;font-size:40px;line-height:1}
-  .price small{font-family:"Newsreader";font-style:italic;font-weight:400;font-size:15px;color:var(--muted)}
+  .tier h2{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:24px}
+  .price{font-family:"Saira Condensed",sans-serif;font-weight:900;font-size:40px;line-height:1}
+  .price small{font-family:"Spectral";font-style:italic;font-weight:400;font-size:15px;color:var(--muted)}
   .note{font-size:14px;color:var(--muted);font-style:italic}
   .tier ul{list-style:none;font-size:15.5px;display:flex;flex-direction:column;gap:7px;margin-top:2px}
   .tier li::before{content:"\2014  ";color:var(--gold)}
-  .btn{margin-top:auto;display:block;text-align:center;font-family:"Fraunces";font-weight:600;
-    font-size:16px;padding:11px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+  .btn{margin-top:auto;display:block;text-align:center;font-family:"Saira Condensed",sans-serif;font-weight:600;
+    text-transform:uppercase;letter-spacing:.1em;font-size:14px;padding:12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
     cursor:pointer;text-decoration:none}
   .btn.ghost{background:transparent;color:var(--ink)}
   .btn:hover{background:var(--accent);border-color:var(--accent);color:var(--paper)}
@@ -52,7 +52,7 @@
   .pay{text-align:center;margin-top:40px;color:var(--muted);font-size:15px}
   .pay b{color:var(--ink);font-style:normal}
   .methods{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
-  .chip{font-family:"Fraunces";font-size:12px;border:1px solid var(--line);border-radius:20px;
+  .chip{font-family:"Saira Condensed",sans-serif;font-size:12px;border:1px solid var(--line);border-radius:20px;
     padding:4px 12px;color:var(--muted)}
   footer{text-align:center;margin-top:46px;padding-top:22px;border-top:1px solid var(--line);
     color:var(--muted);font-style:italic;font-size:14px}
@@ -60,7 +60,7 @@
 </style></head>
 <body>
 <div class="wrap">
-  <p style="text-align:center;padding-top:20px;margin-bottom:-8px"><a href="index.html" style="font-family:'Fraunces',serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#b8412a;text-decoration:none">&larr;&nbsp; The Arts Wire &mdash; today&rsquo;s edition</a></p>
+  <p style="text-align:center;padding-top:20px;margin-bottom:-8px"><a href="index.html" style="font-family:'Saira Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#b8412a;text-decoration:none">&larr;&nbsp; The Arts Wire &mdash; today&rsquo;s edition</a></p>
   <header>
     <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide</div>
     <h1>Read the world&rsquo;s arts,<br>in your language.</h1>

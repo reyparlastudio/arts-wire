@@ -307,41 +307,43 @@ TEMPLATE = """<!DOCTYPE html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Arts Wire">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@300;500;600;700;800;900&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{{--paper:#f5efe3;--ink:#191512;--muted:#6f6253;--line:#d8cdb8;--accent:#b8412a;--gold:#9a7b32}}
   *{{box-sizing:border-box;margin:0;padding:0}}
-  body{{background:var(--paper);color:var(--ink);font-family:"Newsreader",Georgia,serif;
-    font-size:18px;line-height:1.5;
+  body{{background:var(--paper);color:var(--ink);font-family:"Spectral",Georgia,serif;
+    font-size:18px;line-height:1.6;
     background-image:radial-gradient(#00000008 1px,transparent 1px);background-size:4px 4px}}
-  [dir=rtl] body,[dir=rtl]{{font-family:"Noto Naskh Arabic","Newsreader",serif}}
+  [dir=rtl] body,[dir=rtl]{{font-family:"Noto Naskh Arabic","Spectral",serif}}
   a{{color:inherit;text-decoration:none}}
   .wrap{{max-width:1140px;margin:0 auto;padding:0 22px}}
   .switch{{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:12px 0 0;
-    font-family:"Fraunces";font-size:13px}}
+    font-family:"Saira Condensed",sans-serif;font-size:13px}}
   .switch .lang{{color:var(--muted);border-bottom:1px solid transparent;padding-bottom:2px}}
   .switch .lang:hover{{color:var(--ink)}}
   .switch .on{{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}}
 
   header.masthead{{text-align:center;padding:14px 0 20px;border-bottom:3px double var(--ink)}}
-  .kicker{{font-family:"Fraunces";letter-spacing:.34em;text-transform:uppercase;
+  .kicker{{font-family:"Saira Condensed",sans-serif;letter-spacing:.28em;text-transform:uppercase;
     font-size:12px;color:var(--accent);font-weight:600}}
-  h1.title{{font-family:"Fraunces";font-weight:900;font-size:clamp(46px,9vw,94px);
-    line-height:.92;letter-spacing:-.02em;margin:6px 0 12px}}
-  .sub{{display:inline-block;font-family:"Fraunces";font-weight:600;font-size:16px;
-    letter-spacing:.04em;background:var(--accent);color:var(--paper);
+  h1.title{{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(52px,11vw,150px);
+    line-height:.86;letter-spacing:-.012em;margin:6px 0 12px}}
+  .title .tm{{font-size:.30em;font-weight:600;vertical-align:super;letter-spacing:0;margin-left:.04em;color:var(--accent);opacity:.8}}
+  .sub{{display:inline-block;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;
+    text-transform:uppercase;letter-spacing:.1em;background:var(--accent);color:var(--paper);
     padding:11px 28px;border-radius:2px;margin-bottom:14px;text-decoration:none;
     border:1px solid var(--accent);transition:background .15s ease,color .15s ease}}
   .sub:hover{{background:transparent;color:var(--accent)}}
   .topbar{{display:flex;justify-content:space-between;align-items:center;gap:14px;
     border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-    padding:9px 2px;font-family:"Fraunces";font-size:13.5px;flex-wrap:wrap;
+    padding:9px 2px;font-family:"Saira Condensed",sans-serif;font-size:13px;flex-wrap:wrap;
     max-width:1000px;margin:0 auto}}
-  .topbar .motto{{text-transform:uppercase;letter-spacing:.12em;font-weight:600;
+  .topbar .motto{{text-transform:uppercase;letter-spacing:.16em;font-weight:600;
     color:var(--accent);white-space:nowrap}}
-  .topbar .today{{font-weight:600;color:var(--ink);text-align:center;flex:1;white-space:nowrap}}
+  .topbar .today{{font-weight:600;color:var(--ink);text-align:center;flex:1;white-space:nowrap;
+    text-transform:uppercase;letter-spacing:.1em}}
   .topbar .support{{color:var(--accent);font-weight:600;border-bottom:1px solid transparent;
-    white-space:nowrap}}
+    white-space:nowrap;text-transform:uppercase;letter-spacing:.1em}}
   .topbar .support:hover{{border-bottom-color:var(--accent)}}
   .editionline{{text-align:center;font-style:italic;color:var(--muted);font-size:14px;padding:9px 0 0}}
   .editionline b{{font-style:normal;font-weight:600;color:var(--ink)}}
@@ -354,17 +356,17 @@ TEMPLATE = """<!DOCTYPE html>
     box-shadow:0 14px 40px #00000022;background:var(--paper)}}
   .oneart figcaption{{font-style:italic;color:var(--muted);font-size:14.5px;margin-top:10px}}
   .oneart .art-title{{font-style:normal;font-weight:600;color:var(--ink)}}
-  .oneart .art-src{{font-family:"Fraunces";font-style:normal;font-weight:600;font-size:10.5px;
-    text-transform:uppercase;letter-spacing:.06em;color:var(--gold);display:block;margin-top:4px}}
+  .oneart .art-src{{font-family:"Saira Condensed",sans-serif;font-style:normal;font-weight:700;font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.08em;color:var(--gold);display:block;margin-top:4px}}
   .frame-mid{{margin:42px auto 34px;max-width:680px}}
 
-  .zone-label{{font-family:"Fraunces";font-weight:600;text-transform:uppercase;
-    letter-spacing:.16em;font-size:13px;color:var(--accent);text-align:center;
+  .zone-label{{font-family:"Saira Condensed",sans-serif;font-weight:700;text-transform:uppercase;
+    letter-spacing:.2em;font-size:13px;color:var(--accent);text-align:center;
     margin:36px 0 14px;position:relative}}
   .zone-label::before,.zone-label::after{{content:"";position:absolute;top:50%;width:24%;
     height:1px;background:var(--line)}}
   .zone-label::before{{left:0}} .zone-label::after{{right:0}}
-  .zone-region{{color:var(--accent);font-size:15px;letter-spacing:.18em}}
+  .zone-region{{color:var(--accent);font-size:15px;letter-spacing:.2em}}
   .section.region{{background:#b8412a0a;border:1px solid #b8412a44;
     padding:18px 18px 6px;margin-top:0}}
   .section.region .card{{border-color:#b8412a3a}}
@@ -375,34 +377,35 @@ TEMPLATE = """<!DOCTYPE html>
   .col:last-child{{border-right:none}}
   [dir=rtl] .col{{border-right:none;border-left:1px solid var(--line)}}
   [dir=rtl] .col:last-child{{border-left:none}}
-  .col h3{{font-family:"Fraunces";font-weight:600;font-size:16px;text-transform:uppercase;
-    letter-spacing:.06em;color:var(--accent);padding-bottom:8px;margin-bottom:6px;
+  .col h3{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;
+    letter-spacing:.12em;color:var(--accent);padding-bottom:8px;margin-bottom:6px;
     border-bottom:2px solid var(--accent)}}
   .teaser{{padding:11px 0;border-bottom:1px dotted var(--line);font-size:16.5px;line-height:1.42}}
   .teaser:last-child{{border-bottom:none}}
-  .teaser a{{font-family:"Fraunces";font-weight:600}}
+  .teaser a{{font-family:"Spectral",serif;font-weight:600;letter-spacing:-.004em}}
   .teaser a:hover{{color:var(--accent)}}
-  .teaser .src{{display:block;font-family:"Fraunces";font-weight:600;font-size:10.5px;
-    text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-top:3px}}
+  .teaser .src{{display:block;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-top:3px}}
   .empty{{color:var(--muted);font-style:italic;padding:11px 0;font-size:15px}}
 
   .section{{padding:24px 0}}
-  h2{{font-family:"Fraunces";font-weight:600;font-size:28px;letter-spacing:-.01em;
+  h2{{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(26px,3.6vw,42px);
+    line-height:1.0;letter-spacing:-.01em;
     border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:20px;
     display:flex;align-items:baseline;gap:12px}}
-  h2 .ct{{font-family:"Newsreader";font-size:14px;font-style:italic;color:var(--muted)}}
+  h2 .ct{{font-family:"Spectral",serif;font-size:14px;font-style:italic;color:var(--muted);font-weight:400}}
   .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}}
   .card{{background:var(--paper);border:1px solid var(--line);padding:18px 18px 16px;
     display:flex;flex-direction:column;gap:8px}}
-  .card h3{{font-family:"Fraunces";font-weight:600;font-size:20px;line-height:1.18}}
+  .card h3{{font-family:"Spectral",serif;font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.005em}}
   .card h3 a:hover{{color:var(--accent)}}
   .sum{{color:#3a322a;font-size:16px}}
   .meta{{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px;
     padding-top:6px;border-top:1px solid var(--line)}}
-  .csrc{{font-family:"Fraunces";font-weight:600;font-size:11.5px;text-transform:uppercase;
-    letter-spacing:.06em;color:var(--gold)}}
-  .tag{{font-size:11px;background:#00000008;border:1px solid var(--line);padding:2px 8px;
-    border-radius:20px;color:var(--muted)}}
+  .csrc{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:11.5px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--gold)}}
+  .tag{{font-family:"Saira Condensed",sans-serif;font-size:11px;background:#00000008;border:1px solid var(--line);
+    padding:2px 8px;border-radius:20px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}}
 
   footer{{text-align:center;padding:40px 0 60px;border-top:3px double var(--ink);
     margin-top:24px;color:var(--muted);font-style:italic;font-size:14px}}
@@ -410,18 +413,18 @@ TEMPLATE = """<!DOCTYPE html>
   @media (max-width:760px){{.review{{grid-template-columns:1fr}}
     .col{{border-right:none;border-bottom:1px solid var(--line)}}.col:last-child{{border-bottom:none}}}}
 
-  /* ---- Newsletter signup + edition search (added) ---- */
+  /* ---- Newsletter signup + edition search ---- */
   .utility{{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;
     padding:18px 0 0}}
-  .news-btn{{font-family:"Fraunces";font-weight:600;font-size:14px;letter-spacing:.04em;
-    background:var(--accent);color:var(--paper);border:1px solid var(--accent);
+  .news-btn{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;
+    text-transform:uppercase;background:var(--accent);color:var(--paper);border:1px solid var(--accent);
     padding:9px 20px;border-radius:2px;cursor:pointer;transition:background .15s ease,color .15s ease}}
   .news-btn:hover{{background:transparent;color:var(--accent)}}
   .searchbar{{display:flex;border:1px solid var(--line);background:var(--paper)}}
-  .searchbar input{{font-family:"Newsreader",serif;font-size:15px;padding:8px 12px;border:none;
+  .searchbar input{{font-family:"Spectral",serif;font-size:15px;padding:8px 12px;border:none;
     background:transparent;color:var(--ink);width:210px;outline:none}}
-  .searchbar button{{font-family:"Fraunces";font-weight:600;font-size:13px;border:none;
-    background:var(--accent);color:var(--paper);padding:0 16px;cursor:pointer}}
+  .searchbar button{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;border:none;
+    text-transform:uppercase;letter-spacing:.08em;background:var(--accent);color:var(--paper);padding:0 16px;cursor:pointer}}
   .searchbar button:hover{{background:var(--ink)}}
   .search-note{{width:100%;text-align:center;font-style:italic;color:var(--muted);font-size:14px;
     margin-top:8px;min-height:1px}}
@@ -435,20 +438,20 @@ TEMPLATE = """<!DOCTYPE html>
   .aw-modal .x{{position:absolute;top:9px;right:14px;font-size:24px;line-height:1;color:var(--muted);
     background:none;border:none;cursor:pointer}}
   .aw-modal .x:hover{{color:var(--accent)}}
-  .aw-kicker{{font-family:"Fraunces";letter-spacing:.28em;text-transform:uppercase;font-size:11px;
+  .aw-kicker{{font-family:"Saira Condensed",sans-serif;letter-spacing:.24em;text-transform:uppercase;font-size:11px;
     color:var(--accent);font-weight:600}}
-  .aw-modal h2{{font-family:"Fraunces";font-weight:900;font-size:30px;line-height:1.05;
-    border:none;padding:0;margin:8px 0 8px;display:block}}
+  .aw-modal h2{{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:34px;line-height:.98;
+    border:none;padding:0;margin:8px 0 8px;display:block;letter-spacing:-.01em}}
   .aw-modal .lede{{color:#3a322a;font-size:16px;margin-bottom:18px}}
   .aw-form{{display:flex;border:1px solid var(--ink)}}
-  .aw-form input{{flex:1;min-width:0;font-family:"Newsreader",serif;font-size:16px;padding:11px 13px;
+  .aw-form input{{flex:1;min-width:0;font-family:"Spectral",serif;font-size:16px;padding:11px 13px;
     border:none;background:#fff;color:var(--ink);outline:none}}
-  .aw-form button{{font-family:"Fraunces";font-weight:600;font-size:15px;border:none;
-    background:var(--accent);color:var(--paper);padding:0 22px;cursor:pointer}}
+  .aw-form button{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;border:none;
+    text-transform:uppercase;letter-spacing:.08em;background:var(--accent);color:var(--paper);padding:0 22px;cursor:pointer}}
   .aw-form button:hover{{background:var(--ink)}}
   .aw-fine{{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:12px}}
-  .aw-msg{{font-family:"Fraunces";font-weight:600;font-size:15.5px;color:var(--accent);
-    margin-top:12px;min-height:1px}}
+  .aw-msg{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:15.5px;color:var(--accent);
+    text-transform:uppercase;letter-spacing:.06em;margin-top:12px;min-height:1px}}
   .aw-dismiss{{display:block;margin:12px auto 0;background:none;border:none;color:var(--muted);
     font-size:12px;text-decoration:underline;cursor:pointer}}
 </style></head>
@@ -457,7 +460,7 @@ TEMPLATE = """<!DOCTYPE html>
   {switch}
   <header class="masthead">
     <div class="kicker">{kicker}</div>
-    <h1 class="title">The Arts Wire</h1>
+    <h1 class="title">The Arts Wire<sup class="tm">&trade;</sup></h1>
     <a class="sub" href="subscribe.html">{subscribe}</a>
     <div class="topbar">
       <span class="motto">Ars longa, vita brevis</span>
