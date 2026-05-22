@@ -75,7 +75,7 @@ CATEGORIES = [
     ("film",        "Film &amp; Television"),
     ("theater",     "Theater &amp; Stage"),
     ("dance",       "Dance"),
-    ("music",       "Music"),
+    ("music",       "Music"), ("podcast",     "Podcasts"),
     ("art",         "Visual Art"),
     ("photography", "Photography"),
     ("design",      "Design &amp; Architecture"),
