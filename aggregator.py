@@ -16,6 +16,7 @@ import datetime as dt
 import html
 import json
 import os
+import random
 import re
 import shutil
 import sys
@@ -176,11 +177,46 @@ def switcher_html(langs, current):
     return '<nav class="switch">' + "".join(parts) + "</nav>"
 
 
+# --- Interstitial frames -----------------------------------------------------
+# The Frame, extended into a gallery that runs the length of the wire. ONLY
+# these sections get a matched frame (tasteful cadence — not after every one).
+# Each value is a list of search terms that "rhyme" with the section; one is
+# chosen at random per build, so the gallery refreshes day to day. "regional"
+# is the Latin America & the Caribbean block (not a medium in CATEGORIES).
+FRAME_SECTIONS = {
+    "film":        ["nocturne", "moonlight", "photograph", "shadow", "lantern"],
+    "music":       ["musician", "lute", "violin", "concert", "song"],
+    "photography": ["photograph", "daguerreotype", "portrait photograph"],
+    "regional":    ["Mexican", "Spanish colonial", "Latin American", "colonial"],
+    "fashion":     ["costume", "dress", "gown", "textile", "embroidery"],
+}
+
+
 def render_html(items, columns, categories, generated, used_ai, *,
-                lang="en", chrome=None, langs=("en",), artwork=None, regional_sources=()):
+                lang="en", chrome=None, langs=("en",), artwork=None,
+                regional_sources=(), frames=None):
     chrome = chrome or CHROME_EN
     esc = html.escape
     direction = "rtl" if T.is_rtl(lang) else "ltr"
+
+    # Section-matched interstitial frames (same anatomy as the hero Frame:
+    # linked, lazy-loaded, web-size image + artist / title / date / museum).
+    frames = frames or {}
+
+    def frame_block(key):
+        fr = frames.get(key)
+        if not fr or not fr.get("image"):
+            return ""
+        meta = esc(fr.get("artist", ""))
+        if fr.get("date"):
+            meta += f", {esc(fr['date'])}"
+        return (
+            f'<figure class="oneart frame-mid">'
+            f'<a href="{esc(fr.get("url","#"))}" target="_blank" rel="noopener">'
+            f'<img src="{esc(fr["image"])}" alt="{esc(fr.get("title",""))}" loading="lazy"></a>'
+            f'<figcaption><span class="art-title">{esc(fr.get("title",""))}</span> &mdash; {meta}'
+            f'<span class="art-src">{esc(fr.get("source",""))}</span></figcaption></figure>'
+        )
 
     # "One Beautiful Thing" — a daily public-domain artwork hero.
     oneart = ""
@@ -235,14 +271,16 @@ def render_html(items, columns, categories, generated, used_ai, *,
         group = [it for it in main_items if it["kind"] == "news" and it["medium"] == medium]
         if not group:
             continue
+        if medium in FRAME_SECTIONS:
+            wire_inner += frame_block(medium)
         wire_inner += (f'<section class="section"><h2>{label}<span class="ct">'
                        f'{len(group)}</span></h2><div class="grid">'
                        + "".join(card(it) for it in group) + "</div></section>")
         if medium == "design" and regional_block:
-            wire_inner += regional_block
+            wire_inner += frame_block("regional") + regional_block
             regional_done = True
     if regional_block and not regional_done:
-        wire_inner += regional_block
+        wire_inner += frame_block("regional") + regional_block
     wire = (f'<div class="zone-label">{chrome["wire_label"]}</div>' + wire_inner) if wire_inner else ""
 
     regional = ""  # regional now lives inside The Wire (after Design &amp; Architecture)
@@ -318,6 +356,7 @@ TEMPLATE = """<!DOCTYPE html>
   .oneart .art-title{{font-style:normal;font-weight:600;color:var(--ink)}}
   .oneart .art-src{{font-family:"Fraunces";font-style:normal;font-weight:600;font-size:10.5px;
     text-transform:uppercase;letter-spacing:.06em;color:var(--gold);display:block;margin-top:4px}}
+  .frame-mid{{margin:42px auto 34px;max-width:680px}}
 
   .zone-label{{font-family:"Fraunces";font-weight:600;text-transform:uppercase;
     letter-spacing:.16em;font-size:13px;color:var(--accent);text-align:center;
@@ -655,6 +694,7 @@ def main():
 
     # "One Beautiful Thing" — daily public-domain artwork hero.
     art = None
+    frames = {}
     if not args.no_art:
         if args.demo:
             import base64
@@ -666,10 +706,23 @@ def main():
             art = {"image": img_uri, "title": "Sample image",
                    "artist": "Live editions feature a real public-domain masterwork",
                    "date": "", "source": "Met / Art Institute (open access)", "url": "#"}
+            # Demo only: reuse the sample so frame placement is visible offline.
+            frames = {k: {**art, "title": f"Sample frame ({k})"}
+                      for k in ("film", "music", "photography", "regional", "fashion")}
         else:
             import artwork as A
             art = A.fetch_artwork()
             print(f"Artwork: {('featured — ' + art['source']) if art else 'none reachable; hero skipped'}.")
+            # The gallery: one matched, web-size, public-domain work per framed
+            # section, deduped against the hero and one another.
+            used = {art["image"]} if art and art.get("image") else set()
+            for key, terms in FRAME_SECTIONS.items():
+                fr = A.fetch_section_frame(random.choice(terms), exclude=used)
+                if fr and fr.get("image"):
+                    frames[key] = fr
+                    used.add(fr["image"])
+            print(f"Frames: {len(frames)} section-matched works"
+                  f"{(' — ' + ', '.join(frames)) if frames else ' (none reachable)'}.")
 
     def write(page, lang):
         name = "index.html" if lang == "en" else f"index.{lang}.html"
@@ -680,7 +733,7 @@ def main():
 
     # English
     write(render_html(items, COLUMNS, CATEGORIES, now, used_ai, lang="en",
-                       chrome=CHROME_EN, langs=langs, artwork=art,
+                       chrome=CHROME_EN, langs=langs, artwork=art, frames=frames,
                        regional_sources=REGIONAL_SOURCES), "en")
 
     # Other languages
@@ -702,7 +755,7 @@ def main():
             else:
                 print(f"  ({lang}: needs ANTHROPIC_API_KEY; skipped)"); continue
             write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
-                              chrome=tchrome, langs=langs, artwork=art,
+                              chrome=tchrome, langs=langs, artwork=art, frames=frames,
                               regional_sources=REGIONAL_SOURCES), lang)
             print(f"  translated -> {lang}")
         except Exception as exc:                        # noqa: BLE001
