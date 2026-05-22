@@ -43,6 +43,10 @@ FEEDS = [
     # --- Podcasts ---
     ("Pop Culture Happy Hour", "https://feeds.npr.org/510282/podcast.xml", "podcast", "news"),
     ("Fresh Air",              "https://feeds.npr.org/381444908/podcast.xml", "podcast", "news"),
+    ("Talk Art",                "https://feeds.acast.com/public/shows/f6a980f6-3f5c-482b-9da0-1b92892998da", "podcast", "news"),
+    ("The Great Women Artists", "https://feeds.soundcloud.com/users/soundcloud:users:698800785/sounds.rss", "podcast", "news"),
+    ("99% Invisible",           "https://feeds.simplecast.com/BqbsxVfO", "podcast", "news"),
+    ("The Slowdown",            "https://feeds.publicradio.org/public_feeds/the-slowdown", "podcast", "news"),
     # --- Photography ---
     ("PetaPixel",            "https://petapixel.com/feed/",            "photography", "news"),
     # --- Visual Art (painting, sculpture) ---
