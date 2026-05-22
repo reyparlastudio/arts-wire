@@ -40,6 +40,7 @@ CHROME_EN = {
     "wire_label": "The Wire &mdash; today&rsquo;s news, by medium",
     "subscribe": "Subscribe &middot; $1/month",
     "art_label": "The Frame",
+    "regional_label": "Cuba, the Caribbean &amp; Latin America",
     "foot1": "Curated and assembled by reyparla.com & automatically by Time & Space Art, LLC for The Arts Wire. Every title links to its original publisher; summaries are written fresh and link out to the full piece.",
     "foot2": "built with care, run on autopilot.",
     "empty": "Nothing today.",
@@ -176,7 +177,7 @@ def switcher_html(langs, current):
 
 
 def render_html(items, columns, categories, generated, used_ai, *,
-                lang="en", chrome=None, langs=("en",), artwork=None):
+                lang="en", chrome=None, langs=("en",), artwork=None, regional_sources=()):
     chrome = chrome or CHROME_EN
     esc = html.escape
     direction = "rtl" if T.is_rtl(lang) else "ltr"
@@ -195,6 +196,10 @@ def render_html(items, columns, categories, generated, used_ai, *,
             f'<span class="art-src">{esc(artwork.get("source",""))}</span></figcaption></figure>'
         )
 
+    regset = set(regional_sources or ())
+    reg_items = [it for it in items if it.get("source") in regset]
+    main_items = [it for it in items if it.get("source") not in regset]
+
     def teaser(it):
         return (f'<p class="teaser"><a href="{esc(it["link"])}" target="_blank" '
                 f'rel="noopener">{esc(it["title"])}</a> &mdash; '
@@ -210,7 +215,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
 
     cols_html = ""
     for kind, label in columns:
-        picks = [it for it in items if it["kind"] == kind]
+        picks = [it for it in main_items if it["kind"] == kind]
         body = "".join(teaser(it) for it in picks) or f'<p class="empty">{chrome["empty"]}</p>'
         cols_html += f'<div class="col"><h3>{label}</h3>{body}</div>'
     review = (f'<div class="zone-label">{chrome["review_label"]}</div>'
@@ -218,7 +223,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
 
     wire_inner = ""
     for medium, label in categories:
-        group = [it for it in items if it["kind"] == "news" and it["medium"] == medium]
+        group = [it for it in main_items if it["kind"] == "news" and it["medium"] == medium]
         if not group:
             continue
         wire_inner += (f'<section class="section"><h2>{label}<span class="ct">'
@@ -226,13 +231,20 @@ def render_html(items, columns, categories, generated, used_ai, *,
                        + "".join(card(it) for it in group) + "</div></section>")
     wire = (f'<div class="zone-label">{chrome["wire_label"]}</div>' + wire_inner) if wire_inner else ""
 
+    regional = ""
+    if reg_items:
+        rcards = "".join(card(it) for it in reg_items)
+        regional = (f'<div class="zone-label zone-region">'
+                    f'{chrome.get("regional_label","Cuba, the Caribbean &amp; Latin America")}</div>'
+                    f'<section class="section region"><div class="grid">{rcards}</div></section>')
+
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
     mode = "AI-curated edition" if used_ai else "source-summary edition"
     return TEMPLATE.format(
         lang=lang, dir=direction, switch=switcher_html(langs, lang),
         kicker=chrome["kicker"], pieces=chrome["pieces"], subscribe=chrome["subscribe"],
         date=generated.strftime("%A %B %-d, %Y"), mode=mode, total=len(items),
-        banner=banner, oneart=oneart, review=review, wire=wire,
+        banner=banner, oneart=oneart, regional=regional, review=review, wire=wire,
         foot1=chrome["foot1"], foot2=chrome["foot2"], year=generated.year)
 
 
@@ -304,6 +316,10 @@ TEMPLATE = """<!DOCTYPE html>
   .zone-label::before,.zone-label::after{{content:"";position:absolute;top:50%;width:24%;
     height:1px;background:var(--line)}}
   .zone-label::before{{left:0}} .zone-label::after{{right:0}}
+  .zone-region{{color:var(--accent);font-size:15px;letter-spacing:.18em}}
+  .section.region{{background:#b8412a0a;border:1px solid #b8412a44;
+    padding:18px 18px 6px;margin-top:0}}
+  .section.region .card{{border-color:#b8412a3a}}
 
   .review{{display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid var(--ink);
     border-bottom:2px solid var(--ink)}}
@@ -412,6 +428,7 @@ TEMPLATE = """<!DOCTYPE html>
   </div>
   {banner}
   {oneart}
+  {regional}
   {review}
   {wire}
   <footer><p>{foot1}</p><p>Rey Parla &copy; {year} &middot; {foot2}</p></footer>
@@ -541,6 +558,10 @@ def demo_items():
          "A strong evening sale suggests the high end of the market is stabilizing.", ["market", "auction"]),
         ("A Striking New Museum Opens on a Reclaimed Waterfront", "Dezeen", "design", "news",
          "The architects turned a derelict pier into a daylit hall for contemporary work.", ["architecture", "museum"]),
+        ("Tania Bruguera y el arte de conducta, de La Habana a Nueva York", "Rialta", "art", "news",
+         "Una mirada al arte político cubano dentro y fuera de la isla.", ["cuba", "arte"]),
+        ("El nuevo pop caribeño: identidad y reinvención", "Remezcla", "music", "news",
+         "Cómo una generación caribeña rehace el sonido del pop global.", ["caribbean", "music"]),
     ]
     now = dt.datetime.now(dt.timezone.utc).isoformat()
     return [{"title": t, "link": "https://example.com", "source": s, "medium": m,
@@ -581,7 +602,11 @@ def main():
     ap.add_argument("--out", default=OUTPUT_DIR)
     args = ap.parse_args()
 
-    from feeds import FEEDS, CATEGORIES, COLUMNS
+    try:
+        from feeds import FEEDS, CATEGORIES, COLUMNS, REGIONAL_SOURCES
+    except ImportError:
+        from feeds import FEEDS, CATEGORIES, COLUMNS
+        REGIONAL_SOURCES = set()
     media = [m for m, _ in CATEGORIES]
     os.makedirs(args.out, exist_ok=True)
 
@@ -646,7 +671,8 @@ def main():
 
     # English
     write(render_html(items, COLUMNS, CATEGORIES, now, used_ai, lang="en",
-                       chrome=CHROME_EN, langs=langs, artwork=art), "en")
+                       chrome=CHROME_EN, langs=langs, artwork=art,
+                       regional_sources=REGIONAL_SOURCES), "en")
 
     # Other languages
     client = None
@@ -667,7 +693,8 @@ def main():
             else:
                 print(f"  ({lang}: needs ANTHROPIC_API_KEY; skipped)"); continue
             write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
-                              chrome=tchrome, langs=langs, artwork=art), lang)
+                              chrome=tchrome, langs=langs, artwork=art,
+                              regional_sources=REGIONAL_SOURCES), lang)
             print(f"  translated -> {lang}")
         except Exception as exc:                        # noqa: BLE001
             print(f"  ! {lang} failed: {exc}", file=sys.stderr)
