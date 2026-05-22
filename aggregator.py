@@ -239,7 +239,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
                     f'<section class="section region"><div class="grid">{rcards}</div></section>')
 
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
-    mode = "AI-curated edition" if used_ai else "source-summary edition"
+    mode = "Curated by Rey Parl&aacute;"
     return TEMPLATE.format(
         lang=lang, dir=direction, switch=switcher_html(langs, lang),
         kicker=chrome["kicker"], pieces=chrome["pieces"], subscribe=chrome["subscribe"],
