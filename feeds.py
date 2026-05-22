@@ -117,12 +117,20 @@ CATEGORIES = [
     ("art",         "Visual Art"),
     ("photography", "Photography"),
     ("design",      "Design &amp; Architecture"),
+    ("gastronomy",  "Gastronomy &amp; Culinary Arts"),
+    ("fashion",     "Fashion &amp; Style"),
     ("literature",  "Literature &amp; Poetry"),
     ("ideas",       "Ideas &amp; Humanities"),
 ]
 
 # THE REVIEW: the three Arts & Letters Daily-style columns, in display order.
 COLUMNS = [
+  REGIONAL_SOURCES = {
+    "Rialta", "OnCuba News", "Hypermedia Magazine", "El Estornudo",
+    "Repeating Islands", "80grados", "Artburst Miami", "Artishock",
+    "Terremoto", "Puerto Rico Art News", "Letras Libres",
+    "Latin American Literature Today", "Remezcla",
+}
     ("note",  "Articles of Note"),
     ("book",  "New Books"),
     ("essay", "Essays &amp; Opinions"),
