@@ -346,7 +346,7 @@ TEMPLATE = """<!DOCTYPE html>
   {oneart}
   {review}
   {wire}
-  <footer><p>{foot1}</p><p>&copy; {year} &middot; {foot2}</p></footer>
+  <footer><p>{foot1}</p><p>Rey Parla &copy; {year} &middot; {foot2}</p></footer>
 </div>
 <script>
 if("serviceWorker" in navigator){{
