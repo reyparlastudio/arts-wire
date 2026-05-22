@@ -35,7 +35,7 @@ REVIEW_KINDS = ("note", "book", "essay")
 ALL_KINDS = REVIEW_KINDS + ("news",)
 
 CHROME_EN = {
-    "kicker": "Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide",
+    "kicker": "Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas",
     "pieces": "pieces",
     "review_label": "The Review &mdash; long reads, books &amp; ideas",
     "wire_label": "The Wire &mdash; today&rsquo;s news, by medium",
@@ -389,18 +389,18 @@ TEMPLATE = """<!DOCTYPE html>
 
   header.masthead{{text-align:center;padding:14px 0 20px;border-bottom:3px double var(--ink)}}
   .kicker{{font-family:"Saira Condensed",sans-serif;letter-spacing:.28em;text-transform:uppercase;
-    font-size:12px;color:var(--accent);font-weight:600}}
+    font-size:12px;color:var(--accent);font-weight:600;margin:2px 0 16px}}
   h1.title{{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(52px,11vw,150px);
     line-height:.86;letter-spacing:-.012em;margin:6px 0 12px}}
   .title .tm{{font-size:.30em;font-weight:600;vertical-align:super;letter-spacing:0;margin-left:.04em;color:var(--accent);opacity:.8}}
   .sub{{display:inline-block;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;
     text-transform:uppercase;letter-spacing:.1em;background:var(--accent);color:var(--paper);
-    padding:11px 28px;border-radius:2px;margin-bottom:14px;text-decoration:none;
+    padding:9px 22px;border-radius:2px;text-decoration:none;
     border:1px solid var(--accent);transition:background .15s ease,color .15s ease}}
   .sub:hover{{background:transparent;color:var(--accent)}}
   .topbar{{display:flex;justify-content:space-between;align-items:center;gap:14px;
     border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-    padding:9px 2px;font-family:"Saira Condensed",sans-serif;font-size:13px;flex-wrap:wrap;
+    padding:9px 2px;font-family:"Saira Condensed",sans-serif;font-size:14px;flex-wrap:wrap;
     max-width:1000px;margin:0 auto}}
   .topbar .motto{{text-transform:uppercase;letter-spacing:.16em;font-weight:600;
     color:var(--accent);white-space:nowrap}}
@@ -409,7 +409,7 @@ TEMPLATE = """<!DOCTYPE html>
   .topbar .support{{color:var(--accent);font-weight:600;border-bottom:1px solid transparent;
     white-space:nowrap;text-transform:uppercase;letter-spacing:.1em}}
   .topbar .support:hover{{border-bottom-color:var(--accent)}}
-  .editionline{{text-align:center;font-style:italic;color:var(--muted);font-size:14px;padding:9px 0 0}}
+  .editionline{{text-align:center;font-style:italic;color:var(--muted);font-size:15px;padding:9px 0 0}}
   .editionline b{{font-style:normal;font-weight:600;color:var(--ink)}}
   @media (max-width:640px){{.topbar{{justify-content:center;text-align:center}}
     .topbar .today{{flex:100%;order:-1;margin-bottom:2px}}}}
@@ -418,7 +418,7 @@ TEMPLATE = """<!DOCTYPE html>
   .oneart{{margin:6px auto 0;max-width:760px;text-align:center}}
   .oneart img{{width:100%;height:auto;border:1px solid var(--line);
     box-shadow:0 14px 40px #00000022;background:var(--paper)}}
-  .oneart figcaption{{font-style:italic;color:var(--muted);font-size:14.5px;margin-top:10px}}
+  .oneart figcaption{{font-style:italic;color:var(--muted);font-size:15.5px;margin-top:10px}}
   .oneart .art-title{{font-style:normal;font-weight:600;color:var(--ink)}}
   .oneart .art-src{{font-family:"Saira Condensed",sans-serif;font-style:normal;font-weight:700;font-size:10.5px;
     text-transform:uppercase;letter-spacing:.08em;color:var(--gold);display:block;margin-top:4px}}
@@ -529,9 +529,8 @@ TEMPLATE = """<!DOCTYPE html>
 <div class="wrap">
   {switch}
   <header class="masthead">
-    <div class="kicker">{kicker}</div>
     <h1 class="title">The Arts Wire<sup class="tm">&trade;</sup></h1>
-    <a class="sub" href="subscribe.html">{subscribe}</a>
+    <div class="kicker">{kicker}</div>
     <div class="topbar">
       <span class="motto">Ars longa, vita brevis</span>
       <span class="today">{date}</span>
@@ -545,6 +544,7 @@ TEMPLATE = """<!DOCTYPE html>
       <input id="awSearch" type="search" placeholder="Search this edition&hellip;" aria-label="Search this edition">
       <button onclick="awDoSearch()">Go</button>
     </div>
+    <a class="sub" href="subscribe.html">{subscribe}</a>
     <div class="search-note" id="awSearchNote"></div>
   </div>
   {banner}
