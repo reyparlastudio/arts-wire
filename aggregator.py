@@ -178,17 +178,27 @@ def switcher_html(langs, current):
 
 
 # --- Interstitial frames -----------------------------------------------------
-# The Frame, extended into a gallery that runs the length of the wire. ONLY
-# these sections get a matched frame (tasteful cadence — not after every one).
-# Each value is a list of search terms that "rhyme" with the section; one is
-# chosen at random per build, so the gallery refreshes day to day. "regional"
-# is the Latin America & the Caribbean block (not a medium in CATEGORIES).
+# The Frame, extended into a gallery that runs the full length of the wire: a
+# matched public-domain artwork falls BETWEEN every section, each one rhyming
+# with the section that follows it. Add a category here (and to CATEGORIES) and
+# it joins the rhythm automatically — the page extends as far as the content
+# does. Each value is a list of search terms; one is chosen at random per build,
+# so the gallery refreshes day to day. "regional" is the Latin America & the
+# Caribbean block (curated by source, not a medium in CATEGORIES).
 FRAME_SECTIONS = {
-    "film":        ["nocturne", "moonlight", "photograph", "shadow", "lantern"],
+    "film":        ["nocturne", "moonlight", "shadow", "lantern", "night"],
+    "theater":     ["theater", "stage", "harlequin", "masquerade", "opera"],
+    "dance":       ["dancer", "ballet", "dance", "Degas dancer"],
     "music":       ["musician", "lute", "violin", "concert", "song"],
+    "art":         ["painting", "palette", "studio", "still life", "easel"],
     "photography": ["photograph", "daguerreotype", "portrait photograph"],
-    "regional":    ["Mexican", "Spanish colonial", "Latin American", "colonial"],
+    "design":      ["architecture", "ornament", "interior", "facade", "pattern"],
+    "gastronomy":  ["still life fruit", "banquet", "kitchen", "feast", "table"],
     "fashion":     ["costume", "dress", "gown", "textile", "embroidery"],
+    "literature":  ["book", "manuscript", "letter", "library", "reading"],
+    "ideas":       ["philosopher", "allegory", "scholar", "study", "manuscript"],
+    "podcast":     ["conversation", "salon", "gathering", "two figures"],
+    "regional":    ["Mexican", "Spanish colonial", "Latin American", "colonial"],
 }
 
 
@@ -257,30 +267,40 @@ def render_html(items, columns, categories, generated, used_ai, *,
     review = (f'<div class="zone-label">{chrome["review_label"]}</div>'
               f'<section class="review">{cols_html}</section>')
 
-    # Build the pinned regional block first, so it can be slotted inside The Wire.
+    # The Latin America & the Caribbean block — rendered exactly like every other
+    # category (same <h2>: Saira Condensed, ink, underlined, with a count) so it
+    # reads in the same visual language as the rest of The Wire.
     regional_block = ""
     if reg_items:
         rcards = "".join(card(it) for it in reg_items)
-        regional_block = (f'<div class="zone-label zone-region">'
-                          f'{chrome.get("regional_label","Latin America &amp; the Caribbean")}</div>'
-                          f'<section class="section region"><div class="grid">{rcards}</div></section>')
+        regional_block = (f'<section class="section"><h2>'
+                          f'{chrome.get("regional_label","Latin America &amp; the Caribbean")}'
+                          f'<span class="ct">{len(reg_items)}</span></h2>'
+                          f'<div class="grid">{rcards}</div></section>')
 
-    wire_inner = ""
-    regional_done = False
+    # Assemble the wire as an ordered list of blocks, then drop a section-matched
+    # frame BETWEEN each pair (it rhymes with the section that follows). The first
+    # block has no frame above it, so the rhythm reads "section, frame, section,
+    # frame…" — and it extends automatically as new categories are added.
+    blocks = []  # list of (frame_key, section_html)
     for medium, label in categories:
         group = [it for it in main_items if it["kind"] == "news" and it["medium"] == medium]
         if not group:
             continue
-        if medium in FRAME_SECTIONS:
-            wire_inner += frame_block(medium)
-        wire_inner += (f'<section class="section"><h2>{label}<span class="ct">'
+        blocks.append((medium,
+                       f'<section class="section"><h2>{label}<span class="ct">'
                        f'{len(group)}</span></h2><div class="grid">'
-                       + "".join(card(it) for it in group) + "</div></section>")
+                       + "".join(card(it) for it in group) + "</div></section>"))
         if medium == "design" and regional_block:
-            wire_inner += frame_block("regional") + regional_block
-            regional_done = True
-    if regional_block and not regional_done:
-        wire_inner += frame_block("regional") + regional_block
+            blocks.append(("regional", regional_block))
+    if regional_block and not any(k == "regional" for k, _ in blocks):
+        blocks.append(("regional", regional_block))
+
+    wire_inner = ""
+    for i, (key, block_html) in enumerate(blocks):
+        if i > 0:
+            wire_inner += frame_block(key)   # a frame between sections, matched to what follows
+        wire_inner += block_html
     wire = (f'<div class="zone-label">{chrome["wire_label"]}</div>' + wire_inner) if wire_inner else ""
 
     regional = ""  # regional now lives inside The Wire (after Design &amp; Architecture)
@@ -711,7 +731,7 @@ def main():
                    "date": "", "source": "Met / Art Institute (open access)", "url": "#"}
             # Demo only: reuse the sample so frame placement is visible offline.
             frames = {k: {**art, "title": f"Sample frame ({k})"}
-                      for k in ("film", "music", "photography", "regional", "fashion")}
+                      for k in FRAME_SECTIONS}
         else:
             import artwork as A
             art = A.fetch_artwork()
