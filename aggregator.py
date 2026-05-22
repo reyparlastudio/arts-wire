@@ -231,7 +231,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
     return TEMPLATE.format(
         lang=lang, dir=direction, switch=switcher_html(langs, lang),
         kicker=chrome["kicker"], pieces=chrome["pieces"], subscribe=chrome["subscribe"],
-        date=generated.strftime("%Y-%m-%d"), mode=mode, total=len(items),
+        date=generated.strftime("%A %B %-d, %Y"), mode=mode, total=len(items),
         banner=banner, oneart=oneart, review=review, wire=wire,
         foot1=chrome["foot1"], foot2=chrome["foot2"], year=generated.year)
 
@@ -269,12 +269,25 @@ TEMPLATE = """<!DOCTYPE html>
     font-size:12px;color:var(--accent);font-weight:600}}
   h1.title{{font-family:"Fraunces";font-weight:900;font-size:clamp(46px,9vw,94px);
     line-height:.92;letter-spacing:-.02em;margin:6px 0 12px}}
-  .sub{{display:inline-block;font-family:"Fraunces";font-weight:600;font-size:14px;
-    background:var(--accent);color:var(--paper);padding:7px 18px;border-radius:2px;margin-bottom:12px}}
-  .dateline{{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-style:italic;
-    color:var(--muted);font-size:15px;border-top:1px solid var(--line);
-    border-bottom:1px solid var(--line);padding:8px 0;max-width:700px;margin:0 auto}}
-  .dateline b{{font-style:normal;font-weight:600;color:var(--ink)}}
+  .sub{{display:inline-block;font-family:"Fraunces";font-weight:600;font-size:16px;
+    letter-spacing:.04em;background:var(--accent);color:var(--paper);
+    padding:11px 28px;border-radius:2px;margin-bottom:14px;text-decoration:none;
+    border:1px solid var(--accent);transition:background .15s ease,color .15s ease}}
+  .sub:hover{{background:transparent;color:var(--accent)}}
+  .topbar{{display:flex;justify-content:space-between;align-items:center;gap:14px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:9px 2px;font-family:"Fraunces";font-size:13.5px;flex-wrap:wrap;
+    max-width:1000px;margin:0 auto}}
+  .topbar .motto{{text-transform:uppercase;letter-spacing:.12em;font-weight:600;
+    color:var(--accent);white-space:nowrap}}
+  .topbar .today{{font-weight:600;color:var(--ink);text-align:center;flex:1;white-space:nowrap}}
+  .topbar .support{{color:var(--accent);font-weight:600;border-bottom:1px solid transparent;
+    white-space:nowrap}}
+  .topbar .support:hover{{border-bottom-color:var(--accent)}}
+  .editionline{{text-align:center;font-style:italic;color:var(--muted);font-size:14px;padding:9px 0 0}}
+  .editionline b{{font-style:normal;font-weight:600;color:var(--ink)}}
+  @media (max-width:640px){{.topbar{{justify-content:center;text-align:center}}
+    .topbar .today{{flex:100%;order:-1;margin-bottom:2px}}}}
   .banner{{background:#00000008;border:1px solid var(--line);color:var(--muted);
     font-style:italic;text-align:center;padding:10px 16px;margin:16px 0 0;font-size:14px}}
   .oneart{{margin:6px auto 0;max-width:760px;text-align:center}}
@@ -332,6 +345,48 @@ TEMPLATE = """<!DOCTYPE html>
   footer b{{font-style:normal}}
   @media (max-width:760px){{.review{{grid-template-columns:1fr}}
     .col{{border-right:none;border-bottom:1px solid var(--line)}}.col:last-child{{border-bottom:none}}}}
+
+  /* ---- Newsletter signup + edition search (added) ---- */
+  .utility{{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;
+    padding:18px 0 0}}
+  .news-btn{{font-family:"Fraunces";font-weight:600;font-size:14px;letter-spacing:.04em;
+    background:var(--accent);color:var(--paper);border:1px solid var(--accent);
+    padding:9px 20px;border-radius:2px;cursor:pointer;transition:background .15s ease,color .15s ease}}
+  .news-btn:hover{{background:transparent;color:var(--accent)}}
+  .searchbar{{display:flex;border:1px solid var(--line);background:var(--paper)}}
+  .searchbar input{{font-family:"Newsreader",serif;font-size:15px;padding:8px 12px;border:none;
+    background:transparent;color:var(--ink);width:210px;outline:none}}
+  .searchbar button{{font-family:"Fraunces";font-weight:600;font-size:13px;border:none;
+    background:var(--accent);color:var(--paper);padding:0 16px;cursor:pointer}}
+  .searchbar button:hover{{background:var(--ink)}}
+  .search-note{{width:100%;text-align:center;font-style:italic;color:var(--muted);font-size:14px;
+    margin-top:8px;min-height:1px}}
+  .hidden-by-search{{display:none !important}}
+
+  .aw-overlay{{position:fixed;inset:0;background:#191512cc;display:none;align-items:center;
+    justify-content:center;z-index:9999;padding:20px}}
+  .aw-overlay.show{{display:flex}}
+  .aw-modal{{background:var(--paper);max-width:460px;width:100%;padding:36px 30px 24px;
+    border:1px solid var(--ink);box-shadow:0 22px 64px #00000055;position:relative;text-align:center}}
+  .aw-modal .x{{position:absolute;top:9px;right:14px;font-size:24px;line-height:1;color:var(--muted);
+    background:none;border:none;cursor:pointer}}
+  .aw-modal .x:hover{{color:var(--accent)}}
+  .aw-kicker{{font-family:"Fraunces";letter-spacing:.28em;text-transform:uppercase;font-size:11px;
+    color:var(--accent);font-weight:600}}
+  .aw-modal h2{{font-family:"Fraunces";font-weight:900;font-size:30px;line-height:1.05;
+    border:none;padding:0;margin:8px 0 8px;display:block}}
+  .aw-modal .lede{{color:#3a322a;font-size:16px;margin-bottom:18px}}
+  .aw-form{{display:flex;border:1px solid var(--ink)}}
+  .aw-form input{{flex:1;min-width:0;font-family:"Newsreader",serif;font-size:16px;padding:11px 13px;
+    border:none;background:#fff;color:var(--ink);outline:none}}
+  .aw-form button{{font-family:"Fraunces";font-weight:600;font-size:15px;border:none;
+    background:var(--accent);color:var(--paper);padding:0 22px;cursor:pointer}}
+  .aw-form button:hover{{background:var(--ink)}}
+  .aw-fine{{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:12px}}
+  .aw-msg{{font-family:"Fraunces";font-weight:600;font-size:15.5px;color:var(--accent);
+    margin-top:12px;min-height:1px}}
+  .aw-dismiss{{display:block;margin:12px auto 0;background:none;border:none;color:var(--muted);
+    font-size:12px;text-decoration:underline;cursor:pointer}}
 </style></head>
 <body>
 <div class="wrap">
@@ -340,14 +395,43 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="kicker">{kicker}</div>
     <h1 class="title">The Arts Wire</h1>
     <a class="sub" href="subscribe.html">{subscribe}</a>
-    <div class="dateline"><span>{date}</span><span><b>{total}</b> {pieces}</span><span>{mode}</span></div>
+    <div class="topbar">
+      <span class="motto">Ars longa, vita brevis</span>
+      <span class="today">{date}</span>
+      <a class="support" href="subscribe.html">Support Independent Journalists</a>
+    </div>
+    <div class="editionline"><b>{total}</b> {pieces} &middot; {mode}</div>
   </header>
+  <div class="utility">
+    <button class="news-btn" onclick="awOpenNews()">Sign Up for our Newsletter</button>
+    <div class="searchbar">
+      <input id="awSearch" type="search" placeholder="Search this edition&hellip;" aria-label="Search this edition">
+      <button onclick="awDoSearch()">Go</button>
+    </div>
+    <div class="search-note" id="awSearchNote"></div>
+  </div>
   {banner}
   {oneart}
   {review}
   {wire}
   <footer><p>{foot1}</p><p>Rey Parla &copy; {year} &middot; {foot2}</p></footer>
 </div>
+<div class="aw-overlay" id="awOverlay" role="dialog" aria-modal="true" aria-label="Subscribe to The Arts Wire">
+  <div class="aw-modal">
+    <button class="x" onclick="awCloseNews()" aria-label="Close">&times;</button>
+    <div class="aw-kicker">The Arts Wire</div>
+    <h2>Read the world&rsquo;s arts, in your language.</h2>
+    <p class="lede">A daily, no-doom dispatch of film, theater, art, books &amp; ideas &mdash; free, to your inbox.</p>
+    <form class="aw-form" id="awNewsForm" action="" method="post" target="aw_sink" onsubmit="return awSubmitNews(event)">
+      <input id="awNewsEmail" type="email" name="email" placeholder="Your email&hellip;" required>
+      <button type="submit">Subscribe</button>
+    </form>
+    <p class="aw-msg" id="awNewsMsg"></p>
+    <p class="aw-fine">Free. One edition a day. Unsubscribe anytime.</p>
+    <button class="aw-dismiss" onclick="awDontShow()">Don&rsquo;t show this again</button>
+  </div>
+</div>
+<iframe name="aw_sink" style="display:none" title="signup target" tabindex="-1"></iframe>
 <script>
 if("serviceWorker" in navigator){{
   if(window.top===window.self){{
@@ -356,6 +440,74 @@ if("serviceWorker" in navigator){{
     navigator.serviceWorker.getRegistrations().then(function(rs){{rs.forEach(function(r){{r.unregister();}});}}).catch(function(){{}});
   }}
 }}
+
+/* ---- Newsletter signup + edition search (added by request) -----------------
+   TO COLLECT EMAILS: paste your signup form's POST URL into NEWSLETTER.endpoint
+   below. MailerLite / Mailchimp / Buttondown each give you one. Set emailField
+   to the field name your provider expects (usually "email"; Mailchimp uses
+   "EMAIL"; MailerLite classic uses "fields[email]"). Until you do, the form
+   politely says signups are opening soon instead of pretending to subscribe. */
+var NEWSLETTER = {{ endpoint: "", emailField: "email" }};
+
+function awOpenNews(){{
+  document.getElementById("awOverlay").classList.add("show");
+  setTimeout(function(){{ var e=document.getElementById("awNewsEmail"); if(e){{ e.focus(); }} }}, 80);
+}}
+function awCloseNews(){{ document.getElementById("awOverlay").classList.remove("show"); }}
+function awDontShow(){{ try{{ localStorage.setItem("aw_news_dismissed","1"); }}catch(e){{}} awCloseNews(); }}
+
+function awSubmitNews(ev){{
+  var msg=document.getElementById("awNewsMsg");
+  if(!NEWSLETTER.endpoint){{
+    ev.preventDefault();
+    msg.textContent="Thank you \u2014 signups open in just a moment.";
+    console.log("[Arts Wire] Newsletter not wired. Paste your form POST URL into NEWSLETTER.endpoint.");
+    return false;
+  }}
+  var f=document.getElementById("awNewsForm");
+  f.setAttribute("action", NEWSLETTER.endpoint);
+  document.getElementById("awNewsEmail").setAttribute("name", NEWSLETTER.emailField);
+  setTimeout(function(){{
+    msg.textContent="You\u2019re in \u2014 check your inbox to confirm.";
+    try{{ localStorage.setItem("aw_news_done","1"); }}catch(e){{}}
+  }}, 350);
+  return true;
+}}
+
+function awDoSearch(){{
+  var q=(document.getElementById("awSearch").value||"").trim().toLowerCase();
+  var items=document.querySelectorAll(".card,.teaser");
+  var shown=0;
+  items.forEach(function(el){{
+    var hit = !q || el.textContent.toLowerCase().indexOf(q) >= 0;
+    el.classList.toggle("hidden-by-search", !hit);
+    if(hit){{ shown++; }}
+  }});
+  document.querySelectorAll(".section,.col").forEach(function(sec){{
+    var its=sec.querySelectorAll(".card,.teaser");
+    if(its.length===0){{ return; }}
+    var anyShown=Array.prototype.some.call(its, function(el){{ return !el.classList.contains("hidden-by-search"); }});
+    sec.style.display = anyShown ? "" : "none";
+  }});
+  var note=document.getElementById("awSearchNote");
+  note.textContent = q ? (shown + " " + (shown===1?"piece":"pieces") + " match \u201c" + q + "\u201d") : "";
+}}
+
+(function(){{
+  var s=document.getElementById("awSearch");
+  if(s){{
+    s.addEventListener("input", awDoSearch);
+    s.addEventListener("keydown", function(e){{ if(e.key==="Enter"){{ e.preventDefault(); awDoSearch(); }} }});
+  }}
+  try{{
+    var done=localStorage.getItem("aw_news_done");
+    var dismissed=localStorage.getItem("aw_news_dismissed");
+    if(!done && !dismissed){{ setTimeout(awOpenNews, 3500); }}
+  }}catch(e){{}}
+  var ov=document.getElementById("awOverlay");
+  if(ov){{ ov.addEventListener("click", function(e){{ if(e.target===ov){{ awCloseNews(); }} }}); }}
+  document.addEventListener("keydown", function(e){{ if(e.key==="Escape"){{ awCloseNews(); }} }});
+}})();
 </script>
 </body></html>"""
 
