@@ -42,6 +42,7 @@ CHROME_EN = {
     "subscribe": "Subscribe &middot; $1/month",
     "art_label": "The Frame",
     "regional_label": "Latin America &amp; the Caribbean",
+    "threads_label": "Threads &mdash; reading across the arts",
     "foot1": "Curated by reyparla.com &copy; Time &amp; Space Art, LLC {year} for The Arts Wire&trade;. Every title links to its original publisher; summaries are written fresh and link out to the full piece. Built with care.",
     "foot2": "built with care, run on autopilot.",
     "empty": "Nothing today.",
@@ -289,6 +290,49 @@ FRAME_SECTIONS = {
     "regional":    ["Mexican", "Spanish colonial", "Latin American", "colonial"],
 }
 
+# ---------------------------------------------------------------------------
+# THREADS — cross-cutting themes. The robot reads every story's title, summary,
+# and tags and pulls matches into a slim themed list, so these gather strength
+# from the WHOLE edition instead of needing their own (scarce) feeds. A story
+# can appear both in its medium section and in a thread — the thread is a lens,
+# not a duplicate. Tune the keyword lists freely; matching is whole-word and
+# case-insensitive, so add distinctive words/phrases (avoid short ambiguous ones).
+THEMES = [
+    ("artsci", "Art &amp; Science", [
+        "science", "scientific", "scientist", "physics", "biology", "biologist",
+        "neuroscience", "neuroscientist", "astronomy", "astrophysics", "cosmos",
+        "cosmic", "quantum", "mathematics", "mathematician", "chemistry",
+        "genetics", "genome", "evolution", "evolutionary", "ecology",
+        "ecological", "climate", "laboratory", "experiment", "algorithm",
+        "artificial intelligence", "machine learning", "robotics", "telescope",
+        "botanical", "naturalist", "anatomy", "biotech", "bioart", "bio-art",
+        "natural history", "species", "fossil", "paleontology", "the brain",
+    ]),
+    ("artjustice", "Art &amp; Social Justice", [
+        "social justice", "activism", "activist", "civil rights", "human rights",
+        "racism", "racial", "anti-racist", "antiracist", "equity", "inequality",
+        "feminism", "feminist", "queer", "lgbtq", "transgender", "trans rights",
+        "indigenous", "decoloniz", "decolonis", "decolonial", "colonialism",
+        "reparations", "immigration", "immigrant", "refugee", "migrant",
+        "disability", "disabled", "accessibility", "censorship", "banned",
+        "oppression", "liberation", "solidarity", "marginaliz", "marginalis",
+        "apartheid", "slavery", "segregation", "abolition", "incarceration",
+        "climate justice", "environmental justice", "protest",
+    ]),
+]
+
+
+def _theme_rx(terms):
+    return re.compile(r"\b(?:" + "|".join(re.escape(t) for t in terms) + r")", re.I)
+
+
+_THEME_RX = [(k, label, _theme_rx(terms)) for k, label, terms in THEMES]
+
+
+def _theme_text(it):
+    return " ".join([it.get("title", ""), it.get("summary", ""),
+                     it.get("raw_summary", ""), " ".join(it.get("tags", []))])
+
 
 def render_html(items, columns, categories, generated, used_ai, *,
                 lang="en", chrome=None, langs=("en",), artwork=None,
@@ -404,6 +448,19 @@ def render_html(items, columns, categories, generated, used_ai, *,
 
     regional = ""  # regional now lives inside The Wire (after Design &amp; Architecture)
 
+    # THREADS — cross-cutting themed lists drawn from the entire edition.
+    thread_blocks = []
+    for key, label, rx in _THEME_RX:
+        picks = [it for it in items if rx.search(_theme_text(it))][:10]
+        if not picks:
+            continue
+        thread_blocks.append(
+            f'<section class="section thread"><h2>{label}'
+            f'<span class="ct">{len(picks)}</span></h2>'
+            f'<div class="threadlist">{"".join(teaser(it) for it in picks)}</div></section>')
+    threads = ((f'<div class="zone-label">{chrome.get("threads_label","Threads")}</div>'
+                + "".join(thread_blocks)) if thread_blocks else "")
+
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
     mode = "Curated by Rey Parl&aacute;"
     return TEMPLATE.format(
@@ -411,6 +468,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
         kicker=chrome["kicker"], pieces=chrome["pieces"], subscribe=chrome["subscribe"],
         date=generated.strftime("%A %B %-d, %Y"), mode=mode, total=len(items),
         banner=banner, oneart=oneart, regional=regional, review=review, wire=wire,
+        threads=threads,
         foot1=chrome["foot1"].replace("{year}", str(generated.year)), foot2=chrome["foot2"], year=generated.year)
 
 
@@ -491,6 +549,10 @@ TEMPLATE = """<!DOCTYPE html>
   .t-imglink{{float:left;margin:3px 12px 2px 0}}
   .t-img{{width:78px;height:78px;object-fit:cover;display:block;border:1px solid var(--line);background:#e9e0cf}}
   [dir=rtl] .t-imglink{{float:right;margin:3px 0 2px 12px}}
+  .thread h2{{border-bottom-color:var(--accent)}}
+  .threadlist{{column-count:2;column-gap:36px}}
+  .threadlist .teaser{{break-inside:avoid;-webkit-column-break-inside:avoid}}
+  @media (max-width:760px){{.threadlist{{column-count:1}}}}
   .zone-region{{color:var(--accent);font-size:15px;letter-spacing:.2em}}
   .section.region{{background:#b8412a0a;border:1px solid #b8412a44;
     padding:18px 18px 6px;margin-top:0}}
@@ -612,6 +674,7 @@ TEMPLATE = """<!DOCTYPE html>
   {oneart}
   {regional}
   {wire}
+  {threads}
   {review}
   <footer><p>{foot1}</p></footer>
 </div>
