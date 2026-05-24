@@ -597,6 +597,14 @@ XPRMNTL_TRANSMISSIONS = [
      "Signed &lsquo;R. Mutt&rsquo; and titled <em>Fountain</em>, Duchamp&rsquo;s readymade proposed that choosing could be making: that the idea, not the hand, might be the art.", ""),
     ("1948", "Music Built From Recorded Reality",
      "In a Paris radio studio, Pierre Schaeffer spliced whistles, tops and voices into <em>musique concr&egrave;te</em>, composing with the recorded world itself, years before the synthesizer.", ""),
+    ("1964", "She Invited the Audience to Cut",
+     "Yoko Ono knelt still on a stage as visitors came up one at a time and cut away pieces of her clothing. <em>Cut Piece</em> made the viewer the maker and the artist the material, before performance art even had a name.", ""),
+    ("1963", "A Room of Prepared Televisions",
+     "Nam June Paik scattered altered TV sets through a Wuppertal gallery, their pictures bent by magnets and live signal. <em>Exposition of Music, Electronic Television</em> opened the screen itself as a medium an artist could compose.", ""),
+    ("1960", "Drawing a Single Straight Line",
+     "La Monte Young&rsquo;s event scores cut a work down to one instruction: a line drawn, a tone held. They asked how little could still be art, and how long a single sound could hold the ear.", ""),
+    ("1922", "Photographs Made Without a Camera",
+     "Man Ray laid objects straight onto light-sensitive paper to make his <em>rayographs</em>, letting contact and shadow draw the image, proving a photograph need not point a lens at the world.", ""),
 ]
 
 # Where to actually hear it, established, free-to-browse archives.
@@ -677,7 +685,17 @@ def xprmntl_block(generated, live_items=None, ai_transmissions=None):
     quote = (f'<blockquote class="xpr-quote">&ldquo;{esc(q[0])}&rdquo;'
              f'<span class="who">{esc(q[1])} &middot; {esc(q[2])}</span></blockquote>')
 
-    rows = list(ai_transmissions or []) + list(XPRMNTL_TRANSMISSIONS)
+    # Daily rotation: the two AI transmissions already change subject each day;
+    # here we also rotate WHICH curated capsules appear and reshuffle the whole
+    # stream, seeded by the date. So the section changes every day, holds steady
+    # within a day, and reshuffles at midnight, like the colour, skin and
+    # section order. Even if the AI step is skipped, the canon still rotates.
+    canon = list(XPRMNTL_TRANSMISSIONS)
+    window = min(4, len(canon))
+    start = generated.toordinal() % len(canon)
+    canon_today = [canon[(start + i) % len(canon)] for i in range(window)]
+    rows = list(ai_transmissions or []) + canon_today
+    random.Random(generated.toordinal()).shuffle(rows)
     stream = ""
     for row in rows:
         era, title, body = row[0], row[1], row[2]
