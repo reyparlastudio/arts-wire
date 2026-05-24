@@ -1,0 +1,32 @@
+name: Draft the weekly letter
+
+# Runs every Friday, and any time you trigger it by hand from the Actions tab.
+# It drafts the letter in Buttondown and emails YOU a [PREVIEW]. It never sends
+# anything to your subscribers: you do that with one tap in Buttondown after you
+# review and edit.
+
+on:
+  schedule:
+    - cron: "0 13 * * 5"   # Fridays, 13:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install anthropic
+      - name: Draft the letter and email a preview
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          NEWSLETTER_MODEL: ${{ vars.NEWSLETTER_MODEL }}
+        run: python newsletter.py --out ./_preview
