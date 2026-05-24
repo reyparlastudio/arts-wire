@@ -2,202 +2,167 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Subscribe &middot; The Arts Wire</title>
-<meta name="theme-color" content="#191512">
+<meta name="theme-color" content="#817e30">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@300;500;600;700;800;900&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Saira+Condensed:wght@500;600;700;800;900&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root{--paper:#f5efe3;--ink:#191512;--muted:#6f6253;--line:#d8cdb8;--accent:#b8412a;--gold:#9a7b32}
+  /* Same design language as the site: white column on a warm surround, the
+     daily Parla accent (set by the script below), Saira + Spectral + Archivo. */
+  :root{--paper:#ffffff;--alt:#f7f7f6;--ink:#0b0b0b;--soft:#6f6f6f;--line:#e9e9e9;
+    --accent:#817e30;--accent-ink:#47451a;--on-accent:#ffffff}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--paper);color:var(--ink);font-family:"Spectral",Georgia,serif;
-    font-size:18px;line-height:1.6;
-    background-image:radial-gradient(#00000008 1px,transparent 1px);background-size:4px 4px}
-  .wrap{max-width:920px;margin:0 auto;padding:0 22px 70px}
-  a{color:inherit}
-  header{text-align:center;padding:46px 0 16px;border-bottom:3px double var(--ink)}
-  .kicker{font-family:"Saira Condensed",sans-serif;letter-spacing:.34em;text-transform:uppercase;font-size:12px;
-    color:var(--accent);font-weight:600}
-  h1{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(44px,9vw,86px);line-height:.94;
-    letter-spacing:-.02em;margin:6px 0 10px}
-  .lede{max-width:640px;margin:22px auto 0;text-align:center;font-size:20px;color:#3a322a}
-  .lede em{color:var(--accent);font-style:italic}
+  body{background:#e4e2dd;color:var(--ink);font-family:"Spectral",Georgia,serif;
+    font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:660px;margin:0 auto;background:var(--paper);min-height:100vh;
+    box-shadow:0 0 0 1px #00000010,0 30px 80px #00000022;padding:0 26px 60px}
 
-  .pick{margin:34px auto 0;max-width:520px;background:#fbf7ee;border:1px solid var(--line);padding:18px 20px}
-  .pick label{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;
-    letter-spacing:.08em;color:var(--muted);display:block;margin-bottom:8px}
-  select{width:100%;font-family:"Spectral",serif;font-size:18px;padding:10px 12px;
+  .top{display:flex;justify-content:space-between;align-items:center;height:54px;border-bottom:1px solid var(--line)}
+  .brand{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:20px;letter-spacing:.01em}
+  .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
+  .back{font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--accent-ink)}
+
+  header.hero{text-align:center;padding:40px 0 6px}
+  .kicker{font-family:"Archivo",sans-serif;font-weight:800;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent)}
+  h1{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(40px,10vw,64px);
+    line-height:.95;letter-spacing:-.012em;margin:12px 0 0}
+  .lede{max-width:520px;margin:18px auto 0;font-size:18px;color:#2c2c2c}
+  .lede em{color:var(--accent-ink);font-style:italic}
+  .versus{max-width:520px;margin:18px auto 0;font-family:"Spectral",serif;font-style:italic;
+    color:var(--soft);font-size:15.5px;line-height:1.5}
+  .versus b{color:var(--ink);font-style:normal;font-weight:500}
+
+  .rule{height:0;border-top:1px solid var(--ink);margin:30px 0 0}
+
+  .plan{border:1px solid var(--line);background:var(--alt);padding:28px 26px;margin-top:30px}
+  .pk{font-family:"Archivo",sans-serif;font-weight:800;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent)}
+  .price{font-family:"Saira Condensed",sans-serif;font-weight:900;font-size:62px;line-height:1;margin:4px 0 2px}
+  .price small{font-family:"Spectral",serif;font-style:italic;font-weight:400;font-size:18px;color:var(--soft)}
+  .pnote{font-style:italic;color:var(--soft);font-size:15px;margin-bottom:18px}
+
+  .field{margin:2px 0 18px}
+  .field label{display:block;font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--soft);margin-bottom:7px}
+  .field select{width:100%;font-family:"Spectral",serif;font-size:17px;padding:11px 12px;
     background:var(--paper);border:1px solid var(--line);color:var(--ink)}
 
-  .signup{margin:34px auto 0;max-width:520px;background:#fbf7ee;border:1px solid var(--line);padding:18px 20px}
-  .signup>label{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;
-    letter-spacing:.08em;color:var(--muted);display:block;margin:0 0 8px}
-  .signup select{margin-bottom:14px}
-  .signup .row{display:flex;gap:10px;flex-wrap:wrap}
-  .signup input[type=email]{flex:1;min-width:180px;font-family:"Spectral",serif;font-size:18px;padding:10px 12px;
-    background:var(--paper);border:1px solid var(--line);color:var(--ink)}
-  .signup button{font-family:"Saira Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
-    font-size:14px;padding:10px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
-  .signup button:hover{background:var(--accent);border-color:var(--accent)}
-  .sub-msg{font-style:italic;color:var(--accent);font-size:14px;margin-top:10px;min-height:1px}
+  .plan ul{list-style:none;display:flex;flex-direction:column;gap:9px;font-size:16px;margin:0 0 22px}
+  .plan li::before{content:"\2013  ";color:var(--accent);font-weight:700}
 
-  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
-  .tier{border:1px solid var(--line);background:var(--paper);padding:24px 22px;display:flex;
-    flex-direction:column;gap:12px}
-  .tier.feature{border:2px solid var(--accent);background:#fbf7ee;position:relative}
-  .flag{position:absolute;top:-12px;left:22px;background:var(--accent);color:var(--paper);
-    font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:11px;letter-spacing:.08em;
-    text-transform:uppercase;padding:3px 10px}
-  .tier h2{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:24px}
-  .price{font-family:"Saira Condensed",sans-serif;font-weight:900;font-size:40px;line-height:1}
-  .price small{font-family:"Spectral";font-style:italic;font-weight:400;font-size:15px;color:var(--muted)}
-  .note{font-size:14px;color:var(--muted);font-style:italic}
-  .tier ul{list-style:none;font-size:15.5px;display:flex;flex-direction:column;gap:7px;margin-top:2px}
-  .tier li::before{content:"\2013  ";color:var(--gold)}
-  .btn{margin-top:auto;display:block;text-align:center;font-family:"Saira Condensed",sans-serif;font-weight:600;
-    text-transform:uppercase;letter-spacing:.1em;font-size:14px;padding:12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
-    cursor:pointer;text-decoration:none}
-  .btn.ghost{background:transparent;color:var(--ink)}
-  .btn:hover{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+  .btn{display:block;width:100%;text-align:center;font-family:"Archivo",sans-serif;font-weight:800;
+    text-transform:uppercase;letter-spacing:.1em;font-size:14px;padding:16px;border:none;
+    background:var(--accent);color:var(--on-accent);cursor:pointer}
+  .btn:hover{filter:brightness(.94)}
 
-  .pay{text-align:center;margin-top:40px;color:var(--muted);font-size:15px}
+  .pay{text-align:center;color:var(--soft);font-size:13.5px;margin-top:18px}
   .pay b{color:var(--ink);font-style:normal}
-  .methods{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
-  .chip{font-family:"Saira Condensed",sans-serif;font-size:12px;border:1px solid var(--line);border-radius:20px;
-    padding:4px 12px;color:var(--muted)}
-  footer{text-align:center;margin-top:46px;padding-top:22px;border-top:1px solid var(--line);
-    color:var(--muted);font-style:italic;font-size:14px}
-  @media (max-width:720px){.tiers{grid-template-columns:1fr}}
+  .methods{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:11px}
+  .chip{font-family:"Archivo",sans-serif;font-size:11px;border:1px solid var(--line);border-radius:20px;
+    padding:4px 11px;color:var(--soft)}
+
+  footer{text-align:center;margin-top:40px;padding-top:22px;border-top:1px solid var(--line);
+    color:var(--soft);font-size:13.5px}
+  footer .m{font-style:italic;font-family:"Spectral",serif}
+  footer a{color:var(--accent-ink);font-weight:600}
 </style></head>
 <body>
 <div class="wrap">
-  <p style="text-align:center;padding-top:20px;margin-bottom:-8px"><a href="index.html" style="font-family:'Saira Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#b8412a;text-decoration:none">&larr;&nbsp; The Arts Wire: today&rsquo;s edition</a></p>
-  <header>
+  <div class="top">
+    <span class="brand">The Arts Wire<sup class="tm">&trade;</sup></span>
+    <a class="back" href="index.html">&larr;&nbsp; Today&rsquo;s edition</a>
+  </div>
+
+  <header class="hero">
     <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide</div>
     <h1>Read the world&rsquo;s arts,<br>in your language.</h1>
-    <p class="lede">A daily review of film, theater, art, books and ideas from across the globe,
-    delivered to your inbox and <em>translated into the language you choose</em>, wherever you are.</p>
+    <p class="lede">A weekly review of film, theater, art, books, and ideas from across the globe,
+      written for you and <em>delivered in the language you choose</em>, wherever you are.</p>
+    <p class="versus">The great papers report the world in English. <b>The Arts Wire reports it in yours.</b>
+      The first arts review written for every reader on earth, in their own language.</p>
   </header>
 
-  <form class="signup embeddable-buttondown-form" id="awSub"
-        action="https://buttondown.com/api/emails/embed-subscribe/theartswire"
-        method="post" target="aw_sink">
-    <label for="lang">Deliver my edition in</label>
-    <select id="lang" name="metadata__language">
-      <option value="en">English</option>
-      <option value="es">Español (Spanish)</option>
-      <option value="fr">Français (French)</option>
-      <option value="pt">Português (Portuguese)</option>
-      <option value="de">Deutsch (German)</option>
-      <option value="it">Italiano (Italian)</option>
-      <option value="ar">العربية (Arabic)</option>
-      <option value="hi">हिन्दी (Hindi)</option>
-      <option value="zh">中文 (Chinese)</option>
-      <option value="ja">日本語 (Japanese)</option>
-      <option value="ko">한국어 (Korean)</option>
-      <option value="ru">Русский (Russian)</option>
-      <option value="other">Another language, just ask</option>
-    </select>
-    <label for="bd-email">Your email</label>
-    <div class="row">
-      <input id="bd-email" type="email" name="email" required placeholder="you@example.com">
-      <button type="submit">Subscribe free</button>
-    </div>
-    <input type="hidden" name="tag" id="bd-tag" value="en">
-    <input type="hidden" name="embed" value="1">
-    <p class="sub-msg" id="bd-msg"></p>
-  </form>
-  <iframe name="aw_sink" style="display:none" title="signup target" tabindex="-1"></iframe>
+  <div class="rule"></div>
 
-  <section class="tiers">
-    <div class="tier">
-      <h2>Reader</h2>
-      <div class="price">Free</div>
-      <p class="note">The daily edition, online.</p>
-      <ul><li>Full daily digest on the web</li><li>Any language</li><li>No account needed</li></ul>
-      <a class="btn ghost" href="index.html">Start reading</a>
+  <div class="plan">
+    <div class="pk">The weekly letter</div>
+    <div class="price">$12 <small>/ year</small></div>
+    <p class="pnote">One email a week, fifty-two a year. Less than a dollar a month, paid once.</p>
+
+    <div class="field">
+      <label for="lang">Deliver my edition in</label>
+      <select id="lang">
+        <option value="en">English</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="fr">Français (French)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="it">Italiano (Italian)</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="zh">中文 (Chinese)</option>
+        <option value="ja">日本語 (Japanese)</option>
+        <option value="ko">한국어 (Korean)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="other">Another language, just ask</option>
+      </select>
     </div>
 
-    <div class="tier feature">
-      <span class="flag">Most popular</span>
-      <h2>Supporter</h2>
-      <div class="price">$1<small> / month</small></div>
-      <p class="note">Billed $12 once a year, keeps the dollar honest.</p>
-      <ul><li>Edition emailed daily</li><li>Your chosen language</li><li>Keeps it free for everyone</li></ul>
-      <a class="btn" data-plan="supporter" href="#">Subscribe</a>
-    </div>
+    <ul>
+      <li>A new letter every week, in the language you choose</li>
+      <li>Original essays, stories, and curation by Rey Parl&aacute;</li>
+      <li>Exclusive: written for members, never posted on the site</li>
+      <li>Read from anywhere in the world</li>
+      <li>One payment a year, cancel anytime</li>
+    </ul>
 
-    <div class="tier">
-      <h2>Patron</h2>
-      <div class="price">$10<small> / month</small></div>
-      <p class="note">For those who can give more.</p>
-      <ul><li>Everything in Supporter</li><li>Weekly long-read roundup</li><li>Your name in the colophon</li></ul>
-      <a class="btn ghost" data-plan="patron" href="#">Become a patron</a>
-    </div>
-  </section>
+    <button class="btn" id="sub">Subscribe for $12 a year</button>
 
-  <div class="pay">
-    <p>Pay securely from <b>almost anywhere in the world</b>. Taxes handled for you.</p>
-    <div class="methods">
-      <span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span>
-      <span class="chip">PayPal</span><span class="chip">Apple Pay</span><span class="chip">Google Pay</span>
-      <span class="chip">iDEAL</span><span class="chip">SEPA</span><span class="chip">Alipay</span>
-      <span class="chip">+ local methods</span>
+    <div class="pay">
+      <p>Pay securely from <b>almost anywhere in the world</b>. Taxes handled for you.</p>
+      <div class="methods">
+        <span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span>
+        <span class="chip">PayPal</span><span class="chip">Apple Pay</span><span class="chip">Google Pay</span>
+        <span class="chip">+ local methods</span>
+      </div>
     </div>
   </div>
 
   <footer>
-    <p>The daily edition stays free to read. Subscriptions keep it independent and ad-free.</p>
-    <p style="margin-top:12px"><a href="index.html" style="color:#b8412a;font-style:normal;text-decoration:none;font-weight:600">&larr; Back to today&rsquo;s edition</a></p>
+    <p class="m">World arts in your language.</p>
+    <p style="margin-top:10px"><a href="index.html">&larr; Back to today&rsquo;s edition</a></p>
   </footer>
 </div>
 
 <script>
-/* ----------------------------------------------------------------------------
-   WIRING THE CHECKOUT  (one-time setup, explained in ARCHITECTURE.md)
-   --------------------------------------------------------------------------
-   This page is static (no server needed). To take real payments worldwide:
+/* Daily Parla color, matching the site so this page wears the color of the day. */
+(function(){
+  var PAL=["#7593BA","#9FD5BD","#E7AB48","#817E30","#F37E66"];
+  function rgb(h){h=h.replace("#","");return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+  function hx(r,g,b){function f(x){x=Math.max(0,Math.min(255,Math.round(x)));return ("0"+x.toString(16)).slice(-2);}return "#"+f(r)+f(g)+f(b);}
+  var c=PAL[Math.floor(Date.now()/86400000)%PAL.length],r=rgb(c);
+  var lum=(0.299*r[0]+0.587*r[1]+0.114*r[2])/255,s=document.documentElement.style;
+  s.setProperty("--accent",c);
+  s.setProperty("--accent-ink",hx(r[0]*0.55,r[1]*0.55,r[2]*0.55));
+  s.setProperty("--on-accent",lum<0.5?"#ffffff":"#111111");
+  var m=document.querySelector('meta[name=theme-color]');if(m){m.setAttribute("content",c);}
+})();
 
-   1) Create products in a Merchant-of-Record checkout (Paddle or Lemon Squeezy
-      recommended, they collect global VAT/sales tax FOR you).
-        - "Supporter"  -> a $12/year subscription
-        - "Patron"     -> a $120/year (or $10/mo) subscription
-   2) Paste each product's hosted checkout link below.
-   3) The reader's language choice is passed along so your sending tool knows
-      which translated edition to send them.
----------------------------------------------------------------------------- */
-const CHECKOUT = {
-  supporter: "https://YOUR-STORE.lemonsqueezy.com/checkout/buy/SUPPORTER_ID",
-  patron:    "https://YOUR-STORE.lemonsqueezy.com/checkout/buy/PATRON_ID"
-};
-
-document.querySelectorAll("[data-plan]").forEach(function (btn) {
-  btn.addEventListener("click", function (e) {
-    e.preventDefault();
-    const plan = btn.getAttribute("data-plan");
-    const lang = document.getElementById("lang").value;
-    const base = CHECKOUT[plan];
-    if (base.includes("YOUR-STORE")) {
-      alert("Checkout not wired yet.\n\nPlan: " + plan + "\nLanguage: " + lang +
-            "\n\nPaste your Paddle/Lemon Squeezy link into CHECKOUT in this file" +
-            " (see ARCHITECTURE.md). The language is carried through as ?lang=" + lang + ".");
-      return;
-    }
-    // Pass language as checkout metadata so the sender picks the right edition.
-    window.location.href = base + "?checkout[custom][lang]=" + encodeURIComponent(lang);
-  });
-});
-
-// Free signup -> Buttondown (posts into the hidden frame, so the page never leaves)
-var awSub=document.getElementById("awSub");
-if(awSub){
-  awSub.addEventListener("submit",function(){
+/* Subscribe -> Buttondown checkout, carrying the chosen language as a tag so the
+   reader is filed into that language's edition. Payment happens on Buttondown. */
+(function(){
+  var b=document.getElementById("sub");if(!b){return;}
+  b.addEventListener("click",function(){
     var lang=document.getElementById("lang").value;
-    var t=document.getElementById("bd-tag");if(t){t.value=lang;}
-    var m=document.getElementById("bd-msg");
-    setTimeout(function(){if(m){m.textContent="You are in. Check your inbox to confirm.";}},400);
+    var url="https://buttondown.com/theartswire";
+    if(lang && lang!=="other"){url+="?tag="+encodeURIComponent(lang);}
+    window.location.href=url;
   });
-}
+})();
 </script>
 </body></html>
