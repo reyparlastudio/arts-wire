@@ -126,6 +126,13 @@ FEEDS = [
     ("Chicago Review of Books","https://chireviewofbooks.com/feed/",    "literature", "book"),
     ("Public Books",         "https://www.publicbooks.org/feed/",      "ideas", "book"),
     ("The Millions",         "https://themillions.com/feed",           "literature", "book"),
+
+    # ===================== XPRMNTL (experimental & sound art, live) =======
+    # Medium "experimental" is surfaced only in the XPRMNTL band, never as a
+    # normal Wire section, and is protected from AI re-labeling in ai_enrich.
+    ("The Quietus",          "https://thequietus.com/feed",            "experimental", "news"),
+    ("Fact Magazine",        "https://www.factmag.com/feed/",          "experimental", "news"),
+    ("XLR8R",                "https://xlr8r.com/feed/",                "experimental", "news"),
 ]
 
 # THE WIRE: medium sections, in display order.

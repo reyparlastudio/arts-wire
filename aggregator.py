@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-THE ARTS WIRE  —  automated culture review, now multilingual
+THE ARTS WIRE, automated culture review, now multilingual
 =============================================================
 Two zones (The Review + The Wire), assembled daily, and publishable in any
 language: pass --langs and the robot writes one page per language, with a
@@ -37,12 +37,12 @@ ALL_KINDS = REVIEW_KINDS + ("news",)
 CHROME_EN = {
     "kicker": "Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas",
     "pieces": "pieces",
-    "review_label": "The Review &mdash; long reads, books &amp; ideas",
-    "wire_label": "The Wire &mdash; today&rsquo;s news, by medium",
+    "review_label": "The Review: long reads, books &amp; ideas",
+    "wire_label": "The Wire: today&rsquo;s news, by medium",
     "subscribe": "Subscribe &middot; $1/month",
     "art_label": "The Frame",
     "regional_label": "Latin America &amp; the Caribbean",
-    "threads_label": "Threads &mdash; reading across the arts",
+    "threads_label": "Threads: reading across the arts",
     "foot1": "Curated by reyparla.com &copy; Time &amp; Space Art, LLC {year} for The Arts Wire&trade;. Every title links to its original publisher; summaries are written fresh and link out to the full piece. Built with care.",
     "foot2": "built with care, run on autopilot.",
     "empty": "Nothing today.",
@@ -54,7 +54,7 @@ CHROME_EN = {
 # COLLECT / DEDUPE / ENRICH  (unchanged core)
 # ----------------------------------------------------------------------------
 def _entry_image(e):
-    """Best-effort lead image straight from the feed entry — no page fetch, so
+    """Best-effort lead image straight from the feed entry, no page fetch, so
     it stays fast for ~120 stories. Tries media:thumbnail, media:content,
     image enclosures, then the first <img> in the content/summary HTML. Returns
     an https URL or "" (cards with no image fall back cleanly)."""
@@ -209,7 +209,7 @@ def ai_enrich(items, media, batch_size=10):
                     "blurb": b["raw_summary"]} for i, b in enumerate(batch)]
         prompt = (
             "You are an arts-and-letters desk editor. For each item return:\n"
-            "- summary: a neutral 1-2 sentence summary IN YOUR OWN WORDS\n"
+            "- summary: a neutral 1-2 sentence summary IN YOUR OWN WORDS (no em dashes; use commas, colons, or periods)\n"
             "- kind: news (a timely report), note (a long feature or profile), "
             "book (a review of or essay about a specific book or author), "
             "essay (an opinion or argument)\n"
@@ -224,13 +224,13 @@ def ai_enrich(items, media, batch_size=10):
                 d = by_i.get(i, {})
                 b["summary"] = d.get("summary") or b["raw_summary"] or "(Open the piece.)"
                 b["tags"] = d.get("tags") or [b["medium"]]
-                # Trust dedicated review outlets — their column is their specialty.
+                # Trust dedicated review outlets, their column is their specialty.
                 # Only let the AI set 'kind' for sources that default to news
                 # (so a book review on a news site can still reach New Books),
                 # while a dedicated book/essay/note source keeps its column.
                 if b["kind"] not in REVIEW_KINDS and d.get("kind") in ALL_KINDS:
                     b["kind"] = d["kind"]
-                if d.get("medium") in media:
+                if b["medium"] != "experimental" and d.get("medium") in media:
                     b["medium"] = d["medium"]
         except Exception as exc:                        # noqa: BLE001
             print(f"  ! AI batch failed ({exc}).", file=sys.stderr)
@@ -255,19 +255,25 @@ def _short(text, n=170):
 
 
 def switcher_html(langs, current):
+    # Show only the OTHER languages, a quiet "read in" strip. The current
+    # language (e.g. English on the English edition) never labels itself, so the
+    # word "English" no longer sits at the top of the English page.
+    others = [c for c in langs if c != current]
+    if not others:
+        return ""
     parts = []
-    for code in langs:
+    for code in others:
         target = "index.html" if code == "en" else f"index.{code}.html"
-        cls = "lang on" if code == current else "lang"
-        parts.append(f'<a class="{cls}" href="{target}">{T.autonym(code)}</a>')
-    return '<nav class="switch">' + "".join(parts) + "</nav>"
+        parts.append(f'<a class="lang" href="{target}">{T.autonym(code)}</a>')
+    return ('<nav class="switch"><span class="globe" aria-hidden="true">\u25c9</span>'
+            + "".join(parts) + "</nav>")
 
 
 # --- Interstitial frames -----------------------------------------------------
 # The Frame, extended into a gallery that runs the full length of the wire: a
 # matched public-domain artwork falls BETWEEN every section, each one rhyming
 # with the section that follows it. Add a category here (and to CATEGORIES) and
-# it joins the rhythm automatically — the page extends as far as the content
+# it joins the rhythm automatically, the page extends as far as the content
 # does. Each value is a list of search terms; one is chosen at random per build,
 # so the gallery refreshes day to day. "regional" is the Latin America & the
 # Caribbean block (curated by source, not a medium in CATEGORIES).
@@ -290,10 +296,11 @@ FRAME_SECTIONS = {
     "regional":    ["Mexican", "Spanish colonial", "Latin American", "colonial"],
     "artsci":      ["botanical", "anatomical", "astronomical chart", "scientific illustration", "natural history"],
     "artjustice":  ["allegory of justice", "liberty", "crowd", "procession", "laborer"],
+    "review":      ["reading", "open book", "scholar", "letter", "study"],
 }
 
 
-# The page's section order — edit this single list to reorder the whole site.
+# The page's section order, edit this single list to reorder the whole site.
 # Keys are the medium keys from feeds.CATEGORIES, plus "artsci" / "artjustice"
 # (the cross-cutting Art & Science / Art & Social Justice lenses) and "regional"
 # (Latin America & the Caribbean). Any medium NOT named here is appended at the
@@ -319,10 +326,10 @@ SECTION_ORDER = [
 ]
 
 # ---------------------------------------------------------------------------
-# THREADS — cross-cutting themes. The robot reads every story's title, summary,
+# THREADS, cross-cutting themes. The robot reads every story's title, summary,
 # and tags and pulls matches into a slim themed list, so these gather strength
 # from the WHOLE edition instead of needing their own (scarce) feeds. A story
-# can appear both in its medium section and in a thread — the thread is a lens,
+# can appear both in its medium section and in a thread, the thread is a lens,
 # not a duplicate. Tune the keyword lists freely; matching is whole-word and
 # case-insensitive, so add distinctive words/phrases (avoid short ambiguous ones).
 THEMES = [
@@ -385,7 +392,7 @@ def _art_filters(it):
 
 
 def _save_image(url, dest, timeout=20):
-    """Download an image to a local file. Returns True on success, else False —
+    """Download an image to a local file. Returns True on success, else False ,
     never raises, so a museum hiccup can't break the build (we fall back to the
     remote URL, and the <img> hides itself if even that fails in the browser)."""
     try:
@@ -402,9 +409,160 @@ def _save_image(url, dest, timeout=20):
         return False
 
 
+# ---------------------------------------------------------------------------
+# XPRMNTL, the experimental core. Avant-garde across time: the long-ago, the
+# now, and the not-yet, written here with AI. A daily artist quote (verified,
+# with attribution) sits on top; non-linear "transmissions" run beneath; and a
+# short set of links points to where experimental & sound art can be heard.
+# Quotes are real and sourced; transmissions are original editorial prose about
+# well-documented works (no invented quotations). Expand these lists freely.
+# ---------------------------------------------------------------------------
+XPRMNTL_QUOTES = [
+    ("I am interested in ideas, not merely in visual products.", "Marcel Duchamp", "1946"),
+    ("The creative act is not performed by the artist alone.", "Marcel Duchamp", "1957"),
+    ("I have nothing to say and I am saying it.", "John Cage", "1949"),
+    ("In the nineteenth century, with the invention of the machine, Noise was born.", "Luigi Russolo", "1913"),
+    ("We must enlarge and enrich more and more the domain of musical sounds.", "Luigi Russolo", "1913"),
+    ("Imagine an eye unruled by man-made laws of perspective.", "Stan Brakhage", "1963"),
+    ("Dada means nothing.", "Tristan Tzara", "1918"),
+    ("Honour thy error as a hidden intention.", "Brian Eno & Peter Schmidt", "1975"),
+    ("Someday artists will work with capacitors, resistors and semiconductors.", "Nam June Paik", "1965"),
+    ("Listen to the sound of the earth turning.", "Yoko Ono", "1964"),
+]
+
+# (era, title, body[HTML ok], link), chronology intentionally non-linear.
+XPRMNTL_TRANSMISSIONS = [
+    ("1952", "Four Minutes of the Room Listening to Itself",
+     "David Tudor sat at the piano and played nothing. John Cage&rsquo;s <em>4&prime;33&Prime;</em> framed the hall&rsquo;s own sounds as the music, and reopened the question of where a work begins and ends.", ""),
+    ("1913", "The First Orchestra of Machines",
+     "In a Milan studio, Luigi Russolo built the <em>intonarumori</em>: cranked boxes that hummed, roared and hissed. <em>The Art of Noises</em> insisted the modern ear had outgrown pure tone.", ""),
+    ("the not-yet", "Toward a Generative Avant-Garde",
+     "What happens when the readymade is a prompt and the studio is a model? XPRMNTL will follow artists who treat AI as a material, a collaborator and not a vending machine, and ask what is gained and what is lost.", ""),
+    ("1963", "Painting Directly on Light",
+     "Stan Brakhage pressed moth wings and seed-pods between strips of film for <em>Mothlight</em>, and scratched the emulsion by hand, frame by frame: cinema made by the hand, not only the lens.", ""),
+    ("1917", "A Urinal Asks a Question We Never Stopped Answering",
+     "Signed &lsquo;R. Mutt&rsquo; and titled <em>Fountain</em>, Duchamp&rsquo;s readymade proposed that choosing could be making: that the idea, not the hand, might be the art.", ""),
+    ("1948", "Music Built From Recorded Reality",
+     "In a Paris radio studio, Pierre Schaeffer spliced whistles, tops and voices into <em>musique concr&egrave;te</em>, composing with the recorded world itself, years before the synthesizer.", ""),
+]
+
+# Where to actually hear it, established, free-to-browse archives.
+XPRMNTL_SOUND = [
+    ("UbuWeb Sound", "https://www.ubu.com/sound/"),
+    ("WFMU freeform radio", "https://www.wfmu.org/"),
+    ("Internet Archive Audio", "https://archive.org/details/audio"),
+    ("Bandcamp Experimental", "https://bandcamp.com/tag/experimental"),
+]
+
+# A rotating cast of figures and movements the robot draws from to compose a
+# fresh transmission (or two) each day. Seeds only: the model writes original,
+# factual prose about the real work, with no fabricated quotations. The cast
+# leans global and includes Cuban, Caribbean and Latin American voices.
+XPRMNTL_CAST = [
+    ("Ana Mendieta and her earth-body Siluetas", "1973"),
+    ("Wifredo Lam and the Afro-Cuban avant-garde", "1943"),
+    ("H&eacute;lio Oiticica and the Tropic&aacute;lia environments", "1967"),
+    ("Lygia Clark and her participatory Bichos", "1960"),
+    ("Maya Deren and the trance film", "1943"),
+    ("Pauline Oliveros and Deep Listening", "1989"),
+    ("Hannah H&ouml;ch and Dada photomontage", "1919"),
+    ("Delia Derbyshire and the BBC Radiophonic Workshop", "1963"),
+    ("La Monte Young and sustained-tone minimalism", "1964"),
+    ("Daphne Oram and the Oramics drawn-sound machine", "1957"),
+    ("Sun Ra and the Arkestra&rsquo;s cosmic jazz", "1972"),
+    ("Tony Conrad and structural film", "1966"),
+    ("Meredith Monk and the extended voice", "1971"),
+    ("Carolee Schneemann and the body as material", "1964"),
+]
+
+
+def generate_ai_transmissions(generated, n=2):
+    """Compose fresh XPRMNTL transmissions for today through the model.
+    Factual notes on real avant-garde work, no invented quotations, no em
+    dashes. Returns a list of (era, title, body, "") or [] on any failure."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return []
+    try:
+        from anthropic import Anthropic
+        client = Anthropic()
+        idx = generated.toordinal()
+        picks = [XPRMNTL_CAST[(idx + i) % len(XPRMNTL_CAST)] for i in range(n)]
+        seeds = "; ".join(f"{name} (around {era})" for name, era in picks)
+        prompt = (
+            "You write XPRMNTL, a dispatch on avant-garde art history for an arts wire. "
+            "For EACH subject below, write one short 'transmission':\n"
+            f"{seeds}\n\n"
+            "Each transmission is two sentences of vivid, accurate prose about the real "
+            "work and why it mattered to experimental art, music, film, or performance. "
+            "Rules: do NOT invent, paraphrase, or fabricate any quotation, and do not put "
+            "words in anyone's mouth. Never use em dashes; use commas, colons, or periods. "
+            "Give each a short evocative title (under eight words) and an era tag (a year "
+            "or short epoch). If unsure of a specific detail, stay general rather than guess.\n"
+            'Reply ONLY a JSON array of {"era":str,"title":str,"body":str}.'
+        )
+        resp = client.messages.create(model=MODEL, max_tokens=900,
+                                      messages=[{"role": "user", "content": prompt}])
+        out = []
+        for d in _parse_arr(resp.content[0].text):
+            era = str(d.get("era", "")).strip().replace("\u2014", ", ")
+            title = str(d.get("title", "")).strip().replace("\u2014", ", ")
+            body = str(d.get("body", "")).strip().replace("\u2014", ", ")
+            if title and body:
+                out.append((era or "now", title, body, ""))
+        return out
+    except Exception as exc:                            # noqa: BLE001
+        print(f"  ! XPRMNTL transmissions skipped ({exc}).", file=sys.stderr)
+        return []
+
+
+def xprmntl_block(generated, live_items=None, ai_transmissions=None):
+    """Render the XPRMNTL signature section: a daily verified quote, fresh AI
+    transmissions ahead of the curated canon, a live experimental strip, and
+    listening links. The daily quote rotates by date."""
+    esc = html.escape
+    q = XPRMNTL_QUOTES[generated.toordinal() % len(XPRMNTL_QUOTES)]
+    quote = (f'<blockquote class="xpr-quote">&ldquo;{esc(q[0])}&rdquo;'
+             f'<span class="who">{esc(q[1])} &middot; {esc(q[2])}</span></blockquote>')
+
+    rows = list(ai_transmissions or []) + list(XPRMNTL_TRANSMISSIONS)
+    stream = ""
+    for row in rows:
+        era, title, body = row[0], row[1], row[2]
+        link = row[3] if len(row) > 3 else ""
+        more = (f' <a class="xpr-link" href="{esc(link)}" target="_blank" rel="noopener">read &rarr;</a>'
+                if link else "")
+        stream += (f'<div class="xpr-item"><span class="xpr-era">{era}</span>'
+                   f'<div class="xpr-ttl">{title}</div>'
+                   f'<p class="xpr-body">{body}{more}</p></div>')
+
+    live = ""
+    if live_items:
+        rowhtml = ""
+        for it in live_items[:5]:
+            rowhtml += (f'<a class="xpr-liveitem" href="{esc(it.get("link", "#"))}" '
+                        f'target="_blank" rel="noopener">'
+                        f'<span class="xpr-livesrc">{esc(it.get("source", ""))}</span>'
+                        f'<span class="xpr-livettl">{esc(it.get("title", ""))}</span></a>')
+        live = (f'<div class="xpr-live"><span class="xpr-livehead">On the wire now: '
+                f'experimental &amp; sound art</span>{rowhtml}</div>')
+
+    sound = "".join(
+        f'<a class="xpr-snd" href="{esc(u)}" target="_blank" rel="noopener">{name} &nearr;</a>'
+        for name, u in XPRMNTL_SOUND)
+    return (
+        '<section class="xprmntl" id="xprmntl">'
+        '<div class="xpr-head"><span class="xpr-word">XPRMNTL</span>'
+        '<span class="xpr-tag">Avant-garde across time: the long-ago, the now, the not-yet.'
+        '</span></div>'
+        f'{quote}<div class="xpr-stream">{stream}</div>{live}'
+        '<div class="xpr-sound"><span class="xpr-sndhead">Listen: experimental &amp; sound art</span>'
+        f'{sound}</div></section>'
+    )
+
+
 def render_html(items, columns, categories, generated, used_ai, *,
                 lang="en", chrome=None, langs=("en",), artwork=None,
-                regional_sources=(), frames=None):
+                regional_sources=(), frames=None, ai_transmissions=None):
     chrome = chrome or CHROME_EN
     esc = html.escape
     direction = "rtl" if T.is_rtl(lang) else "ltr"
@@ -425,11 +583,11 @@ def render_html(items, columns, categories, generated, used_ai, *,
             f'<a href="{esc(fr.get("url","#"))}" target="_blank" rel="noopener">'
             f'<img src="{esc(fr["image"])}" alt="{esc(fr.get("title",""))}" loading="lazy" '
             f'onerror="this.closest(\'.oneart\').style.display=\'none\'"></a>'
-            f'<figcaption><span class="art-title">{esc(fr.get("title",""))}</span> &mdash; {meta}'
+            f'<figcaption><span class="art-title">{esc(fr.get("title",""))}</span>. {meta}'
             f'<span class="art-src">{esc(fr.get("source",""))}</span></figcaption></figure>'
         )
 
-    # "One Beautiful Thing" — a daily public-domain artwork hero.
+    # "One Beautiful Thing", a daily public-domain artwork hero.
     oneart = ""
     if artwork and artwork.get("image"):
         meta = esc(artwork.get("artist", ""))
@@ -440,13 +598,16 @@ def render_html(items, columns, categories, generated, used_ai, *,
             f'<figure class="oneart"><a href="{esc(artwork.get("url","#"))}" target="_blank" rel="noopener">'
             f'<img src="{esc(artwork["image"])}" alt="{esc(artwork.get("title",""))}" loading="lazy" '
             f'onerror="this.closest(\'.oneart\').style.display=\'none\'"></a>'
-            f'<figcaption><span class="art-title">{esc(artwork.get("title",""))}</span> &mdash; {meta}'
+            f'<figcaption><span class="art-title">{esc(artwork.get("title",""))}</span>. {meta}'
             f'<span class="art-src">{esc(artwork.get("source",""))}</span></figcaption></figure>'
         )
 
     regset = set(regional_sources or ())
     reg_items = [it for it in items if it.get("source") in regset]
     main_items = [it for it in items if it.get("source") not in regset]
+    # Experimental items live only in the XPRMNTL band, never as a Wire section.
+    xpr_live = [it for it in main_items if it.get("medium") == "experimental"]
+    main_items = [it for it in main_items if it.get("medium") != "experimental"]
 
     def teaser(it):
         im = ""
@@ -455,7 +616,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
                   f'<img class="t-img" src="{esc(it["image"])}" alt="" loading="lazy" '
                   f'onerror="this.closest(\'.t-imglink\').remove()"></a>')
         return (f'<p class="teaser">{im}<a href="{esc(it["link"])}" target="_blank" '
-                f'rel="noopener">{esc(it["title"])}</a> &mdash; '
+                f'rel="noopener">{esc(it["title"])}</a>. '
                 f'{esc(_short(it.get("summary","")))}'
                 f'<span class="src">{esc(it["source"])}</span></p>')
 
@@ -482,10 +643,11 @@ def render_html(items, columns, categories, generated, used_ai, *,
         picks = [it for it in main_items if it["kind"] == kind]
         body = "".join(teaser(it) for it in picks) or f'<p class="empty">{chrome["empty"]}</p>'
         cols_html += f'<div class="col"><h3>{label}</h3>{body}</div>'
-    review = (f'<div class="zone-label">{chrome["review_label"]}</div>'
+    review = (frame_block("review")
+              + f'<div class="zone-label">{chrome["review_label"]}</div>'
               f'<section class="review">{cols_html}</section>')
 
-    # The Latin America & the Caribbean block — rendered exactly like every other
+    # The Latin America & the Caribbean block, rendered exactly like every other
     # category (same <h2>: Saira Condensed, ink, underlined, with a count) so it
     # reads in the same visual language as the rest of The Wire.
     regional_block = ""
@@ -565,20 +727,27 @@ def render_html(items, columns, categories, generated, used_ai, *,
 
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
     mode = "Curated by Rey Parl&aacute;"
-    return TEMPLATE.format(
-        lang=lang, dir=direction, switch=switcher_html(langs, lang),
-        kicker=chrome["kicker"], pieces=chrome["pieces"], subscribe=chrome["subscribe"],
-        date=generated.strftime("%A %B %-d, %Y"), mode=mode, total=len(items),
-        banner=banner, oneart=oneart, regional=regional, review=review, wire=wire,
-        threads=threads,
-        foot1=chrome["foot1"].replace("{year}", str(generated.year)), foot2=chrome["foot2"], year=generated.year)
+    repl = {
+        "LANG": lang, "DIR": direction, "SWITCH": switcher_html(langs, lang),
+        "KICKER": chrome["kicker"], "PIECES": chrome["pieces"], "SUBSCRIBE": chrome["subscribe"],
+        "DATE": generated.strftime("%A %B %-d, %Y"), "MODE": mode, "TOTAL": len(items),
+        "BANNER": banner, "ONEART": oneart, "REGIONAL": regional, "REVIEW": review,
+        "WIRE": wire, "THREADS": threads,
+        "XPRMNTL": xprmntl_block(generated, xpr_live, ai_transmissions),
+        "FOOT1": chrome["foot1"].replace("{year}", str(generated.year)),
+        "FOOT2": chrome["foot2"], "YEAR": generated.year,
+    }
+    page = TEMPLATE
+    for _k, _v in repl.items():
+        page = page.replace("@@" + _k + "@@", str(_v))
+    return page
 
 
 TEMPLATE = """<!DOCTYPE html>
-<html lang="{lang}" dir="{dir}"><head>
+<html lang="@@LANG@@" dir="@@DIR@@"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Arts Wire</title>
-<meta name="theme-color" content="#191512">
+<meta name="theme-color" content="#0b0b0b">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -586,318 +755,352 @@ TEMPLATE = """<!DOCTYPE html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Arts Wire">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@300;500;600;700;800;900&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Saira+Condensed:wght@500;600;700;800&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{{--paper:#f5efe3;--ink:#191512;--muted:#6f6253;--line:#d8cdb8;--accent:#b8412a;--gold:#9a7b32}}
-  *{{box-sizing:border-box;margin:0;padding:0}}
-  body{{background:var(--paper);color:var(--ink);font-family:"Spectral",Georgia,serif;
-    font-size:18px;line-height:1.6;
-    background-image:radial-gradient(#00000008 1px,transparent 1px);background-size:4px 4px}}
-  [dir=rtl] body,[dir=rtl]{{font-family:"Noto Naskh Arabic","Spectral",serif}}
-  a{{color:inherit;text-decoration:none}}
-  .wrap{{max-width:1140px;margin:0 auto;padding:0 22px}}
-  .switch{{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:12px 0 0;
-    font-family:"Saira Condensed",sans-serif;font-size:13px}}
-  .switch .lang{{color:var(--muted);border-bottom:1px solid transparent;padding-bottom:2px}}
-  .switch .lang:hover{{color:var(--ink)}}
-  .switch .on{{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}}
+  :root{
+    --paper:#ffffff;--alt:#f7f7f6;--ink:#0b0b0b;--soft:#6f6f6f;--line:#e9e9e9;
+    /* Parlá rotating accent, set per-day by the script below; olive defaults */
+    --accent:#817e30;--accent-ink:#47451a;--on-accent:#ffffff;
+    --phone:500px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:#e4e2dd;color:var(--ink);font-family:"Spectral",Georgia,serif;
+    font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  [dir=rtl] body{font-family:"Noto Naskh Arabic","Spectral",serif}
+  a{color:inherit;text-decoration:none}
+  /* the phone column, one design on every device, vertical scroll */
+  .wrap{position:relative;width:100%;max-width:var(--phone);margin:0 auto;background:var(--paper);
+    min-height:100vh;overflow-x:hidden;box-shadow:0 0 0 1px #00000010,0 30px 80px #00000026;padding:0 20px}
 
-  header.masthead{{text-align:center;padding:14px 0 20px;border-bottom:3px double var(--ink)}}
-  .kicker{{font-family:"Saira Condensed",sans-serif;letter-spacing:.28em;text-transform:uppercase;
-    font-size:12px;color:var(--accent);font-weight:600;margin:2px 0 16px}}
-  h1.title{{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(52px,11vw,150px);
-    line-height:.86;letter-spacing:-.012em;margin:6px 0 12px}}
-  .title .tm{{font-size:.30em;font-weight:600;vertical-align:super;letter-spacing:0;margin-left:.04em;color:var(--accent);opacity:.8}}
-  .sub{{display:inline-block;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;
-    text-transform:uppercase;letter-spacing:.1em;background:var(--accent);color:var(--paper);
-    padding:9px 22px;border-radius:2px;text-decoration:none;
-    border:1px solid var(--accent);transition:background .15s ease,color .15s ease}}
-  .sub:hover{{background:transparent;color:var(--accent)}}
-  .topbar{{display:flex;justify-content:space-between;align-items:center;gap:14px;
-    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-    padding:9px 2px;font-family:"Saira Condensed",sans-serif;font-size:14px;flex-wrap:wrap;
-    max-width:1000px;margin:0 auto}}
-  .topbar .motto{{text-transform:uppercase;letter-spacing:.16em;font-weight:600;
-    color:var(--accent);white-space:nowrap}}
-  .topbar .today{{font-weight:600;color:var(--ink);text-align:center;flex:1;white-space:nowrap;
-    text-transform:uppercase;letter-spacing:.1em}}
-  .topbar .support{{color:var(--accent);font-weight:600;border-bottom:1px solid transparent;
-    white-space:nowrap;text-transform:uppercase;letter-spacing:.1em}}
-  .topbar .support:hover{{border-bottom-color:var(--accent)}}
-  .editionline{{text-align:center;font-style:italic;color:var(--muted);font-size:15px;padding:9px 0 0}}
-  .editionline b{{font-style:normal;font-weight:600;color:var(--ink)}}
-  @media (max-width:640px){{.topbar{{justify-content:center;text-align:center}}
-    .topbar .today{{flex:100%;order:-1;margin-bottom:2px}}}}
-  .banner{{background:#00000008;border:1px solid var(--line);color:var(--muted);
-    font-style:italic;text-align:center;padding:10px 16px;margin:16px 0 0;font-size:14px}}
-  .oneart{{margin:6px auto 0;max-width:760px;text-align:center}}
-  .oneart img{{width:100%;height:auto;border:1px solid var(--line);
-    box-shadow:0 14px 40px #00000022;background:var(--paper)}}
-  .oneart figcaption{{font-style:italic;color:var(--muted);font-size:15.5px;margin-top:10px}}
-  .oneart .art-title{{font-style:normal;font-weight:600;color:var(--ink)}}
-  .oneart .art-src{{font-family:"Saira Condensed",sans-serif;font-style:normal;font-weight:700;font-size:10.5px;
-    text-transform:uppercase;letter-spacing:.08em;color:var(--gold);display:block;margin-top:4px}}
-  .frame-mid{{margin:42px auto 34px;max-width:680px}}
+  /* language switch, slim strip */
+  .switch{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding:10px 0 0;
+    font-family:"DM Mono",monospace;font-size:11px}
+  .switch .lang{color:var(--soft)}
+  .switch .lang:hover{color:var(--ink)}
+  .switch .on{color:var(--accent-ink);font-weight:500}
+  .switch .globe{color:var(--soft);font-size:12px}
 
-  .zone-label{{font-family:"Saira Condensed",sans-serif;font-weight:700;text-transform:uppercase;
-    letter-spacing:.2em;font-size:13px;color:var(--accent);text-align:center;
-    margin:36px 0 14px;position:relative}}
-  .zone-label::before,.zone-label::after{{content:"";position:absolute;top:50%;width:24%;
-    height:1px;background:var(--line)}}
-  .zone-label::before{{left:0}} .zone-label::after{{right:0}}
-  .frame-label{{font-size:clamp(26px,3.6vw,42px);font-weight:800;letter-spacing:-.01em;
-    text-transform:none;line-height:1.0}}
-  .frame-label::before,.frame-label::after{{display:none}}
-  .t-imglink{{float:left;margin:3px 12px 2px 0}}
-  .t-img{{width:78px;height:78px;object-fit:cover;display:block;border:1px solid var(--line);background:#e9e0cf}}
-  [dir=rtl] .t-imglink{{float:right;margin:3px 0 2px 12px}}
-  .thread h2{{border-bottom-color:var(--accent)}}
-  .threadlist{{column-count:2;column-gap:36px}}
-  .threadlist .teaser{{break-inside:avoid;-webkit-column-break-inside:avoid}}
-  @media (max-width:760px){{.threadlist{{column-count:1}}}}
-  .vfilter{{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 18px}}
-  .vchip{{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:12.5px;
-    letter-spacing:.04em;text-transform:uppercase;padding:5px 13px;cursor:pointer;
-    background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:20px}}
-  .vchip:hover{{color:var(--ink);border-color:var(--ink)}}
-  .vchip.active{{background:var(--ink);color:var(--paper);border-color:var(--ink)}}
-  .zone-region{{color:var(--accent);font-size:15px;letter-spacing:.2em}}
-  .section.region{{background:#b8412a0a;border:1px solid #b8412a44;
-    padding:18px 18px 6px;margin-top:0}}
-  .section.region .card{{border-color:#b8412a3a}}
+  /* masthead = sticky bar + ticker */
+  header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
+    margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
+  .mast-bar{display:grid;grid-template-columns:34px 1fr auto;align-items:center;height:52px}
+  .mast-bar .menu{font-size:20px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;text-align:left}
+  .navdrawer{display:none;border-top:1px solid var(--line);background:var(--paper);padding:8px 0 12px}
+  .navdrawer.open{display:block}
+  .navdrawer .nd-label{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;
+    text-transform:uppercase;letter-spacing:.1em;color:var(--soft);padding:8px 2px 4px}
+  .navdrawer a{display:block;font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:18px;
+    color:var(--ink);padding:7px 2px;letter-spacing:.01em}
+  .navdrawer a:hover{color:var(--accent-ink)}
+  .navdrawer .nd-div{display:block;height:1px;background:var(--line);margin:7px 0}
+  .brand{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:20px;letter-spacing:.01em;
+    text-align:center;white-space:nowrap;cursor:pointer}
+  .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
+  .sub{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;
+    letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
+  .ticker{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);text-align:center;
+    padding:7px 0;border-bottom:1px solid var(--line);background:var(--alt);margin:0 -20px;
+    overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .ticker b{font-weight:500}
+  .editionline{text-align:center;font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);
+    padding:11px 0 0;line-height:1.5}
+  .editionline b{color:var(--ink);font-weight:500}
+  .editionline .curator{display:block;margin-top:5px;color:var(--ink);letter-spacing:.02em}
 
-  .review{{display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid var(--ink);
-    border-bottom:2px solid var(--ink)}}
-  .col{{padding:18px 22px;border-right:1px solid var(--line)}}
-  .col:last-child{{border-right:none}}
-  [dir=rtl] .col{{border-right:none;border-left:1px solid var(--line)}}
-  [dir=rtl] .col:last-child{{border-left:none}}
-  .col h3{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;
-    letter-spacing:.12em;color:var(--accent);padding-bottom:8px;margin-bottom:6px;
-    border-bottom:2px solid var(--accent)}}
-  .teaser{{padding:11px 0;border-bottom:1px dotted var(--line);font-size:16.5px;line-height:1.42;overflow:hidden}}
-  .teaser:last-child{{border-bottom:none}}
-  .teaser a{{font-family:"Spectral",serif;font-weight:600;letter-spacing:-.004em}}
-  .teaser a:hover{{color:var(--accent)}}
-  .teaser .src{{display:block;font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:10.5px;
-    text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-top:3px}}
-  .empty{{color:var(--muted);font-style:italic;padding:11px 0;font-size:15px}}
+  /* utility: newsletter + search */
+  .utility{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;padding:14px 0 2px}
+  .news-btn{font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.05em;
+    text-transform:uppercase;background:transparent;color:var(--accent-ink);border:1px solid var(--line);
+    padding:8px 13px;border-radius:2px;cursor:pointer}
+  .news-btn:hover{border-color:var(--accent-ink)}
+  .searchbar{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden;flex:1;min-width:150px}
+  .searchbar input{font-family:"DM Mono",monospace;font-size:12px;padding:8px 11px;border:none;
+    background:transparent;color:var(--ink);flex:1;min-width:0;outline:none}
+  .searchbar button{font-family:"Archivo",sans-serif;font-weight:700;font-size:11px;border:none;
+    text-transform:uppercase;letter-spacing:.05em;background:var(--accent);color:var(--on-accent);padding:0 14px;cursor:pointer}
+  .search-note{width:100%;text-align:center;font-style:italic;color:var(--soft);font-size:13px;margin-top:6px;min-height:1px}
+  .hidden-by-search{display:none !important}
 
-  .section{{padding:24px 0}}
-  h2{{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(26px,3.6vw,42px);
-    line-height:1.0;letter-spacing:-.01em;
-    border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:20px;
-    display:flex;align-items:baseline;gap:12px}}
-  h2 .ct{{font-family:"Spectral",serif;font-size:14px;font-style:italic;color:var(--muted);font-weight:400}}
-  .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}}
-  .card{{background:var(--paper);border:1px solid var(--line);padding:18px 18px 16px;
-    display:flex;flex-direction:column;gap:8px}}
-  .card-img{{display:block;margin:-18px -18px 12px;overflow:hidden;background:#e9e0cf;
-    border-bottom:1px solid var(--line)}}
-  .card-img img{{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;display:block;
-    transition:transform .5s cubic-bezier(.2,.7,.2,1)}}
-  .card:hover .card-img img{{transform:scale(1.04)}}
-  .card.noimg .card-img{{display:none}}
-  .card h3{{font-family:"Spectral",serif;font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.005em}}
-  .card h3 a:hover{{color:var(--accent)}}
-  .sum{{color:#3a322a;font-size:16px}}
-  .meta{{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px;
-    padding-top:6px;border-top:1px solid var(--line)}}
-  .csrc{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:11.5px;text-transform:uppercase;
-    letter-spacing:.08em;color:var(--gold)}}
-  .tag{{font-family:"Saira Condensed",sans-serif;font-size:11px;background:#00000008;border:1px solid var(--line);
-    padding:2px 8px;border-radius:20px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}}
+  .banner{background:var(--alt);border:1px solid var(--line);color:var(--soft);font-style:italic;
+    text-align:center;padding:10px 14px;margin:14px 0 0;font-size:13.5px}
 
-  footer{{text-align:center;padding:40px 0 60px;border-top:3px double var(--ink);
-    margin-top:24px;color:var(--muted);font-style:italic;font-size:14px}}
-  footer b{{font-style:normal}}
-  @media (max-width:760px){{.review{{grid-template-columns:1fr}}
-    .col{{border-right:none;border-bottom:1px solid var(--line)}}.col:last-child{{border-bottom:none}}}}
+  .anchor{display:block;height:0;scroll-margin-top:92px}
+  /* ---- XPRMNTL, the experimental core (dark signature band) ---- */
+  .xprmntl{background:var(--ink);color:var(--paper);margin:16px -20px 0;padding:28px 20px 30px;scroll-margin-top:92px}
+  .xpr-head{border-bottom:1px solid #ffffff22;padding-bottom:14px;margin-bottom:18px}
+  .xpr-word{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(40px,13vw,58px);
+    letter-spacing:.07em;line-height:.9;display:block;color:var(--paper)}
+  .xpr-tag{font-family:"Archivo",sans-serif;font-size:11px;letter-spacing:.04em;color:#b9b9b9;
+    display:block;margin-top:10px;line-height:1.45;max-width:36ch}
+  .xpr-quote{font-family:"Spectral",serif;font-style:italic;font-weight:400;font-size:21px;line-height:1.34;
+    color:var(--paper);border-left:2px solid var(--accent);padding:2px 0 2px 16px;margin:6px 0 22px}
+  .xpr-quote .who{display:block;font-family:"Archivo",sans-serif;font-style:normal;font-weight:700;
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-top:10px}
+  .xpr-item{padding:14px 0;border-bottom:1px solid #ffffff14}
+  .xpr-item:last-child{border-bottom:none}
+  .xpr-era{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.04em;color:var(--accent);text-transform:uppercase}
+  .xpr-ttl{font-family:"Spectral",serif;font-weight:500;font-size:18px;line-height:1.22;margin-top:5px;color:var(--paper)}
+  .xpr-body{font-family:"Spectral",serif;font-size:14.5px;line-height:1.5;color:#c4c4c4;margin-top:6px}
+  .xpr-link{font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);white-space:nowrap}
+  .xpr-sound{margin-top:20px;padding-top:16px;border-top:1px solid #ffffff22}
+  .xpr-sndhead{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#b9b9b9;margin-bottom:12px}
+  .xpr-snd{display:inline-block;font-family:"Archivo",sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;
+    color:var(--paper);border:1px solid #ffffff3a;border-radius:2px;padding:8px 12px;margin:0 8px 8px 0}
+  .xpr-snd:hover{border-color:var(--accent);color:var(--accent)}
+  .xpr-live{margin-top:20px;padding-top:16px;border-top:1px solid #ffffff22}
+  .xpr-livehead{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:10px}
+  .xpr-liveitem{display:block;padding:9px 0;border-bottom:1px solid #ffffff14;font-family:"Spectral",serif;font-size:14.5px;line-height:1.3}
+  .xpr-liveitem:last-child{border-bottom:none}
+  .xpr-livesrc{display:block;font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#9a9a9a;margin-bottom:2px}
+  .xpr-livettl{color:var(--paper)}
+  .xpr-liveitem:hover .xpr-livettl{color:var(--accent)}
 
-  /* ---- Newsletter signup + edition search ---- */
-  .utility{{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;
-    padding:18px 0 0}}
-  .news-btn{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;
-    text-transform:uppercase;background:var(--accent);color:var(--paper);border:1px solid var(--accent);
-    padding:9px 20px;border-radius:2px;cursor:pointer;transition:background .15s ease,color .15s ease}}
-  .news-btn:hover{{background:transparent;color:var(--accent)}}
-  .searchbar{{display:flex;border:1px solid var(--line);background:var(--paper)}}
-  .searchbar input{{font-family:"Spectral",serif;font-size:15px;padding:8px 12px;border:none;
-    background:transparent;color:var(--ink);width:210px;outline:none}}
-  .searchbar button{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;border:none;
-    text-transform:uppercase;letter-spacing:.08em;background:var(--accent);color:var(--paper);padding:0 16px;cursor:pointer}}
-  .searchbar button:hover{{background:var(--ink)}}
-  .search-note{{width:100%;text-align:center;font-style:italic;color:var(--muted);font-size:14px;
-    margin-top:8px;min-height:1px}}
-  .hidden-by-search{{display:none !important}}
+  /* the Frame + interstitial frames, full-bleed images */
+  .oneart{margin:18px -20px 0;text-align:left}
+  .oneart img{width:100%;height:auto;display:block;background:var(--alt)}
+  .oneart figcaption{font-style:italic;color:var(--soft);font-size:13.5px;margin:10px 20px 0;line-height:1.45}
+  .oneart .art-title{font-style:normal;font-weight:600;color:var(--ink)}
+  .oneart .art-src{font-family:"Archivo",sans-serif;font-style:normal;font-weight:700;font-size:10px;
+    text-transform:uppercase;letter-spacing:.06em;color:var(--accent-ink);display:block;margin-top:4px}
+  .frame-mid{margin:30px -20px}
 
-  .aw-overlay{{position:fixed;inset:0;background:#191512cc;display:none;align-items:center;
-    justify-content:center;z-index:9999;padding:20px}}
-  .aw-overlay.show{{display:flex}}
-  .aw-modal{{background:var(--paper);max-width:460px;width:100%;padding:36px 30px 24px;
-    border:1px solid var(--ink);box-shadow:0 22px 64px #00000055;position:relative;text-align:center}}
-  .aw-modal .x{{position:absolute;top:9px;right:14px;font-size:24px;line-height:1;color:var(--muted);
-    background:none;border:none;cursor:pointer}}
-  .aw-modal .x:hover{{color:var(--accent)}}
-  .aw-kicker{{font-family:"Saira Condensed",sans-serif;letter-spacing:.24em;text-transform:uppercase;font-size:11px;
-    color:var(--accent);font-weight:600}}
-  .aw-modal h2{{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:34px;line-height:.98;
-    border:none;padding:0;margin:8px 0 8px;display:block;letter-spacing:-.01em}}
-  .aw-modal .lede{{color:#3a322a;font-size:16px;margin-bottom:18px}}
-  .aw-form{{display:flex;border:1px solid var(--ink)}}
-  .aw-form input{{flex:1;min-width:0;font-family:"Spectral",serif;font-size:16px;padding:11px 13px;
-    border:none;background:#fff;color:var(--ink);outline:none}}
-  .aw-form button{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:14px;border:none;
-    text-transform:uppercase;letter-spacing:.08em;background:var(--accent);color:var(--paper);padding:0 22px;cursor:pointer}}
-  .aw-form button:hover{{background:var(--ink)}}
-  .aw-fine{{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:12px}}
-  .aw-msg{{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:15.5px;color:var(--accent);
-    text-transform:uppercase;letter-spacing:.06em;margin-top:12px;min-height:1px}}
-  .aw-dismiss{{display:block;margin:12px auto 0;background:none;border:none;color:var(--muted);
-    font-size:12px;text-decoration:underline;cursor:pointer}}
+  /* zone labels: The Wire / The Review */
+  .zone-label{font-family:"Saira Condensed",sans-serif;font-weight:800;text-transform:none;
+    letter-spacing:-.005em;font-size:22px;color:var(--ink);border-bottom:1.5px solid var(--ink);
+    padding-bottom:9px;margin:42px 0 20px;line-height:1.05}
+  .frame-label{font-size:26px;border-bottom:none;margin-bottom:12px}
+
+  /* per-medium section header */
+  .section{padding:6px 0}
+  h2{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:28px;line-height:1;
+    letter-spacing:-.005em;border-bottom:1.5px solid var(--ink);padding-bottom:9px;margin:34px 0 18px;
+    display:flex;align-items:baseline;gap:10px}
+  h2 .ct{font-family:"DM Mono",monospace;font-size:12px;color:var(--soft);font-weight:400}
+
+  /* card grid -> single-column stack */
+  .grid{display:grid;grid-template-columns:1fr;gap:0}
+  .card{display:flex;flex-direction:column;padding:0 0 22px;margin-bottom:22px;
+    border-bottom:1px solid var(--line);background:transparent}
+  .card:last-child{border-bottom:none}
+  .card-img{order:1;display:block;overflow:hidden;background:var(--alt);margin:0 -20px}
+  .card-img img{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;display:block}
+  .card.noimg .card-img{display:none}
+  .card .meta{order:2;margin:13px 0 0;padding:0;border:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .card h3{order:3;font-family:"Spectral",serif;font-weight:500;font-size:21px;line-height:1.2;
+    letter-spacing:-.005em;margin-top:6px}
+  .card h3 a:hover{color:var(--accent-ink)}
+  .card .sum{order:4;color:#2c2c2c;font-size:15.5px;margin-top:7px;line-height:1.42}
+  .csrc{font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.05em;color:var(--accent-ink)}
+  .tag{font-family:"Archivo",sans-serif;font-size:9.5px;background:var(--alt);border:1px solid var(--line);
+    padding:2px 7px;border-radius:20px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+
+  /* visual-art filter chips */
+  .vfilter{display:flex;flex-wrap:wrap;gap:7px;margin:-2px 0 16px}
+  .vchip{font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.04em;
+    text-transform:uppercase;padding:6px 12px;cursor:pointer;background:transparent;color:var(--soft);
+    border:1px solid var(--line);border-radius:20px}
+  .vchip:hover{color:var(--ink);border-color:var(--ink)}
+  .vchip.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  /* lens threads + teasers (compact list rows) */
+  .threadlist{display:block}
+  .teaser{padding:13px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.32;overflow:hidden}
+  .teaser:last-child{border-bottom:none}
+  .teaser a{font-family:"Spectral",serif;font-weight:500;letter-spacing:-.004em}
+  .teaser a:hover{color:var(--accent-ink)}
+  .teaser .src{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;
+    text-transform:uppercase;letter-spacing:.05em;color:var(--accent-ink);margin-top:4px}
+  .t-imglink{float:left;margin:2px 12px 2px 0}
+  .t-img{width:70px;height:70px;object-fit:cover;display:block;background:var(--alt)}
+  [dir=rtl] .t-imglink{float:right;margin:2px 0 2px 12px}
+  .empty{color:var(--soft);font-style:italic;padding:11px 0;font-size:14px}
+
+  /* the review -> stacked columns */
+  .review{display:block;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);padding:2px 0}
+  .col{padding:14px 0;border-bottom:1px solid var(--line)}
+  .col:last-child{border-bottom:none}
+  .col h3{font-family:"Archivo",sans-serif;font-weight:700;font-size:11.5px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--accent-ink);border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:4px}
+
+  footer{text-align:left;padding:34px 0 28px;border-top:1px solid var(--line);margin-top:30px;
+    color:var(--soft);font-family:"DM Mono",monospace;font-size:11px;line-height:1.7;font-style:normal}
+  footer b{color:var(--ink);font-weight:500}
+
+  /* sticky bottom CTA */
+  .cta{position:sticky;bottom:0;z-index:35;display:flex;align-items:center;gap:12px;
+    background:var(--accent);color:var(--on-accent);margin:24px -20px 0;
+    padding:11px 16px calc(11px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px #00000022}
+  .cta .t{flex:1;font-family:"Spectral",serif;font-size:13.5px;line-height:1.25}
+  .cta .t b{font-family:"Archivo",sans-serif;font-weight:800;letter-spacing:.02em}
+  .cta a{font-family:"Archivo",sans-serif;font-weight:800;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.05em;background:var(--paper);color:var(--accent-ink);padding:10px 12px;border-radius:2px;white-space:nowrap}
+
+  .cta .totop{font-family:"Archivo",sans-serif;font-weight:800;font-size:14px;line-height:1;
+    background:transparent;color:var(--on-accent);border:1px solid var(--on-accent);
+    width:30px;height:30px;border-radius:50%;cursor:pointer;flex:0 0 auto;opacity:.8}
+  .cta .totop:hover{opacity:1}
+
+  /* newsletter modal */
+  .aw-overlay{position:fixed;inset:0;background:#0b0b0bcc;display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+  .aw-overlay.show{display:flex}
+  .aw-modal{background:var(--paper);max-width:430px;width:100%;padding:34px 26px 22px;border:1px solid var(--ink);
+    box-shadow:0 22px 64px #00000055;position:relative;text-align:center}
+  .aw-modal .x{position:absolute;top:9px;right:14px;font-size:24px;line-height:1;color:var(--soft);background:none;border:none;cursor:pointer}
+  .aw-modal .x:hover{color:var(--accent-ink)}
+  .aw-kicker{font-family:"Archivo",sans-serif;letter-spacing:.12em;text-transform:uppercase;font-size:10px;color:var(--accent-ink);font-weight:700}
+  .aw-modal h2{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:30px;line-height:1;border:none;padding:0;margin:8px 0;display:block;letter-spacing:-.01em;color:var(--ink)}
+  .aw-modal .lede{color:#2c2c2c;font-size:15px;margin-bottom:16px}
+  .aw-form{display:flex;border:1px solid var(--ink)}
+  .aw-form input{flex:1;min-width:0;font-family:"DM Mono",monospace;font-size:14px;padding:11px 12px;border:none;background:#fff;color:var(--ink);outline:none}
+  .aw-form button{font-family:"Archivo",sans-serif;font-weight:800;font-size:13px;border:none;text-transform:uppercase;letter-spacing:.05em;background:var(--accent);color:var(--on-accent);padding:0 20px;cursor:pointer}
+  .aw-fine{font-size:12px;color:var(--soft);font-style:italic;margin-top:12px}
+  .aw-msg{font-family:"Archivo",sans-serif;font-weight:700;font-size:14px;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.05em;margin-top:12px;min-height:1px}
+  .aw-dismiss{display:block;margin:12px auto 0;background:none;border:none;color:var(--soft);font-size:12px;text-decoration:underline;cursor:pointer}
 </style></head>
 <body>
 <div class="wrap">
-  {switch}
   <header class="masthead">
-    <h1 class="title">The Arts Wire<sup class="tm">&trade;</sup></h1>
-    <div class="kicker">{kicker}</div>
-    <div class="topbar">
-      <span class="motto">Ars longa, vita brevis</span>
-      <span class="today">{date}</span>
-      <a class="support" href="subscribe.html">Support Independent Journalists</a>
+    <div class="mast-bar">
+      <button class="menu" id="navToggle" aria-label="Open index" aria-expanded="false">&#9776;</button>
+      <span class="brand" id="brand" title="Tap to preview the next color">The Arts Wire<sup class="tm">&trade;</sup></span>
+      <a class="sub" href="subscribe.html">Subscribe</a>
     </div>
-    <div class="editionline"><b>{total}</b> {pieces} &middot; {mode}</div>
+    <nav class="navdrawer" id="navdrawer" aria-label="Index">
+      <span class="nd-label">Index</span>
+      <a href="#xprmntl">XPRMNTL</a>
+      <a href="#frame">The Frame</a>
+      <a href="#wire">The Wire</a>
+      <a href="#review">The Review</a>
+      <span class="nd-div"></span>
+      <a href="subscribe.html">Subscribe</a>
+      <a href="#" onclick="awOpenNews();return false;">Newsletter</a>
+      <span class="nd-div"></span>
+      <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
+      <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
+    </nav>
+    <div class="ticker">@@DATE@@ &nbsp;&middot;&nbsp; <b>World Arts in Your Language</b></div>
   </header>
+  @@SWITCH@@
+  <div class="editionline">@@KICKER@@<span class="curator">@@MODE@@</span></div>
   <div class="utility">
-    <button class="news-btn" onclick="awOpenNews()">Sign Up for our Newsletter</button>
+    <button class="news-btn" onclick="awOpenNews()">Newsletter</button>
     <div class="searchbar">
       <input id="awSearch" type="search" placeholder="Search this edition&hellip;" aria-label="Search this edition">
       <button onclick="awDoSearch()">Go</button>
     </div>
-    <a class="sub" href="subscribe.html">{subscribe}</a>
     <div class="search-note" id="awSearchNote"></div>
   </div>
-  {banner}
-  {oneart}
-  {regional}
-  {wire}
-  {threads}
-  {review}
-  <footer><p>{foot1}</p></footer>
+  @@XPRMNTL@@
+  @@BANNER@@
+  <span class="anchor" id="frame"></span>@@ONEART@@
+  @@REGIONAL@@
+  <span class="anchor" id="wire"></span>@@WIRE@@
+  @@THREADS@@
+  <span class="anchor" id="review"></span>@@REVIEW@@
+  <footer><p>@@FOOT1@@</p></footer>
+  <div class="cta">
+    <button class="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&uarr;</button>
+    <div class="t"><b>World Arts in Your Language.</b></div>
+    <a href="subscribe.html">@@SUBSCRIBE@@</a>
+  </div>
 </div>
 <div class="aw-overlay" id="awOverlay" role="dialog" aria-modal="true" aria-label="Subscribe to The Arts Wire">
   <div class="aw-modal">
     <button class="x" onclick="awCloseNews()" aria-label="Close">&times;</button>
     <div class="aw-kicker">The Arts Wire</div>
-    <h2>Read the world&rsquo;s arts, in your language.</h2>
-    <p class="lede">A daily, no-doom dispatch of film, theater, art, books &amp; ideas &mdash; free, to your inbox.</p>
+    <h2>World Arts in Your Language.</h2>
+    <p class="lede">A daily dispatch of film, theater, art, books, fashion, culture, and much more.</p>
     <form class="aw-form" id="awNewsForm" action="" method="post" target="aw_sink" onsubmit="return awSubmitNews(event)">
       <input id="awNewsEmail" type="email" name="email" placeholder="Your email&hellip;" required>
       <button type="submit">Subscribe</button>
     </form>
     <p class="aw-msg" id="awNewsMsg"></p>
-    <p class="aw-fine">Free. One edition a day. Unsubscribe anytime.</p>
+    <p class="aw-fine">One edition a day. Unsubscribe anytime.</p>
     <button class="aw-dismiss" onclick="awDontShow()">Don&rsquo;t show this again</button>
   </div>
 </div>
 <iframe name="aw_sink" style="display:none" title="signup target" tabindex="-1"></iframe>
 <script>
-if("serviceWorker" in navigator){{
-  if(window.top===window.self){{
-    window.addEventListener("load",function(){{navigator.serviceWorker.register("sw.js").catch(function(){{}});}});
-  }}else{{
-    navigator.serviceWorker.getRegistrations().then(function(rs){{rs.forEach(function(r){{r.unregister();}});}}).catch(function(){{}});
-  }}
-}}
+/* ---- Daily Parlá color rotation (mirrors parlastudios.com's rotating menu) ---- */
+(function(){
+  var PAL=[{n:"Slate Blue",c:"#7593BA"},{n:"Seafoam",c:"#9FD5BD"},{n:"Marigold",c:"#E7AB48"},{n:"Olive",c:"#817E30"},{n:"Coral",c:"#F37E66"}];
+  function rgb(h){h=h.replace("#","");return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+  function hx(r,g,b){function f(x){x=Math.max(0,Math.min(255,Math.round(x)));return ("0"+x.toString(16)).slice(-2);}return "#"+f(r)+f(g)+f(b);}
+  function apply(i){
+    var p=PAL[((i%PAL.length)+PAL.length)%PAL.length],c=rgb(p.c);
+    var ink=hx(c[0]*0.55,c[1]*0.55,c[2]*0.55);
+    var lum=(0.299*c[0]+0.587*c[1]+0.114*c[2])/255;
+    var on=lum<0.5?"#ffffff":"#111111";
+    var s=document.documentElement.style;
+    s.setProperty("--accent",p.c);s.setProperty("--accent-ink",ink);s.setProperty("--on-accent",on);
+    var m=document.querySelector('meta[name=theme-color]');if(m){m.setAttribute("content",p.c);}
+  }
+  var today=Math.floor(Date.now()/86400000)%PAL.length,view=today;
+  apply(view);
+  var b=document.getElementById("brand");
+  if(b){b.addEventListener("click",function(){view=(view+1)%PAL.length;apply(view);});}
+})();
 
-/* ---- Newsletter signup + edition search (added by request) -----------------
-   TO COLLECT EMAILS: paste your signup form's POST URL into NEWSLETTER.endpoint
-   below. MailerLite / Mailchimp / Buttondown each give you one. Set emailField
-   to the field name your provider expects (usually "email"; Mailchimp uses
-   "EMAIL"; MailerLite classic uses "fields[email]"). Until you do, the form
-   politely says signups are opening soon instead of pretending to subscribe. */
-var NEWSLETTER = {{ endpoint: "", emailField: "email" }};
+/* ---- Index drop-down (the hamburger) ---- */
+(function(){
+  var t=document.getElementById("navToggle"),d=document.getElementById("navdrawer");
+  if(!t||!d){return;}
+  t.addEventListener("click",function(){var o=d.classList.toggle("open");t.setAttribute("aria-expanded",o?"true":"false");});
+  d.addEventListener("click",function(e){if(e.target.tagName==="A"){d.classList.remove("open");t.setAttribute("aria-expanded","false");}});
+})();
 
-function awOpenNews(){{
-  document.getElementById("awOverlay").classList.add("show");
-  setTimeout(function(){{ var e=document.getElementById("awNewsEmail"); if(e){{ e.focus(); }} }}, 80);
-}}
-function awCloseNews(){{ document.getElementById("awOverlay").classList.remove("show"); }}
-function awDontShow(){{ try{{ localStorage.setItem("aw_news_dismissed","1"); }}catch(e){{}} awCloseNews(); }}
+if("serviceWorker" in navigator){
+  if(window.top===window.self){
+    window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});
+  }else{
+    navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});}).catch(function(){});
+  }
+}
 
-function awSubmitNews(ev){{
+var NEWSLETTER={ endpoint:"", emailField:"email" };
+function awOpenNews(){document.getElementById("awOverlay").classList.add("show");setTimeout(function(){var e=document.getElementById("awNewsEmail");if(e){e.focus();}},80);}
+function awCloseNews(){document.getElementById("awOverlay").classList.remove("show");}
+function awDontShow(){try{localStorage.setItem("aw_news_dismissed","1");}catch(e){}awCloseNews();}
+function awSubmitNews(ev){
   var msg=document.getElementById("awNewsMsg");
-  if(!NEWSLETTER.endpoint){{
-    ev.preventDefault();
-    msg.textContent="Thank you \u2014 signups open in just a moment.";
-    console.log("[Arts Wire] Newsletter not wired. Paste your form POST URL into NEWSLETTER.endpoint.");
-    return false;
-  }}
-  var f=document.getElementById("awNewsForm");
-  f.setAttribute("action", NEWSLETTER.endpoint);
-  document.getElementById("awNewsEmail").setAttribute("name", NEWSLETTER.emailField);
-  setTimeout(function(){{
-    msg.textContent="You\u2019re in \u2014 check your inbox to confirm.";
-    try{{ localStorage.setItem("aw_news_done","1"); }}catch(e){{}}
-  }}, 350);
+  if(!NEWSLETTER.endpoint){ev.preventDefault();msg.textContent="Thank you. Signups open in just a moment.";return false;}
+  var f=document.getElementById("awNewsForm");f.setAttribute("action",NEWSLETTER.endpoint);
+  document.getElementById("awNewsEmail").setAttribute("name",NEWSLETTER.emailField);
+  setTimeout(function(){msg.textContent="You\u2019re in. Check your inbox to confirm.";try{localStorage.setItem("aw_news_done","1");}catch(e){}},350);
   return true;
-}}
-
-function awDoSearch(){{
+}
+function awDoSearch(){
   var q=(document.getElementById("awSearch").value||"").trim().toLowerCase();
-  var items=document.querySelectorAll(".card,.teaser");
-  var shown=0;
-  items.forEach(function(el){{
-    var hit = !q || el.textContent.toLowerCase().indexOf(q) >= 0;
-    el.classList.toggle("hidden-by-search", !hit);
-    if(hit){{ shown++; }}
-  }});
-  document.querySelectorAll(".section,.col").forEach(function(sec){{
-    var its=sec.querySelectorAll(".card,.teaser");
-    if(its.length===0){{ return; }}
-    var anyShown=Array.prototype.some.call(its, function(el){{ return !el.classList.contains("hidden-by-search"); }});
-    sec.style.display = anyShown ? "" : "none";
-  }});
-  // While searching, set aside the decorative chrome so results read cleanly.
-  document.querySelectorAll(".zone-label,.oneart,.banner").forEach(function(el){{
-    el.style.display = q ? "none" : "";
-  }});
+  var items=document.querySelectorAll(".card,.teaser");var shown=0;
+  items.forEach(function(el){var hit=!q||el.textContent.toLowerCase().indexOf(q)>=0;el.classList.toggle("hidden-by-search",!hit);if(hit){shown++;}});
+  document.querySelectorAll(".section,.col").forEach(function(sec){
+    var its=sec.querySelectorAll(".card,.teaser");if(its.length===0){return;}
+    var anyShown=Array.prototype.some.call(its,function(el){return !el.classList.contains("hidden-by-search");});
+    sec.style.display=anyShown?"":"none";
+  });
+  document.querySelectorAll(".zone-label,.oneart,.banner,.xprmntl").forEach(function(el){el.style.display=q?"none":"";});
   var note=document.getElementById("awSearchNote");
-  note.textContent = q ? (shown + " " + (shown===1?"piece":"pieces") + " match \u201c" + q + "\u201d") : "";
-}}
-
-(function(){{
+  note.textContent=q?(shown+" "+(shown===1?"piece":"pieces")+" match \u201c"+q+"\u201d"):"";
+}
+(function(){
   var s=document.getElementById("awSearch");
-  if(s){{
-    s.addEventListener("input", awDoSearch);
-    s.addEventListener("keydown", function(e){{ if(e.key==="Enter"){{ e.preventDefault(); awDoSearch(); }} }});
-  }}
-  try{{
-    var done=localStorage.getItem("aw_news_done");
-    var dismissed=localStorage.getItem("aw_news_dismissed");
-    if(!done && !dismissed){{ setTimeout(awOpenNews, 3500); }}
-  }}catch(e){{}}
+  if(s){s.addEventListener("input",awDoSearch);s.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();awDoSearch();}});}
+  try{var done=localStorage.getItem("aw_news_done");var dismissed=localStorage.getItem("aw_news_dismissed");if(!done&&!dismissed){setTimeout(awOpenNews,3500);}}catch(e){}
   var ov=document.getElementById("awOverlay");
-  if(ov){{ ov.addEventListener("click", function(e){{ if(e.target===ov){{ awCloseNews(); }} }}); }}
-  document.addEventListener("keydown", function(e){{ if(e.key==="Escape"){{ awCloseNews(); }} }});
-}})();
-
-/* Visual Art sub-filters: chips show/hide cards by their data-vsub. */
-document.querySelectorAll(".vfilter").forEach(function(bar){{
-  var grid=bar.parentElement.querySelector(".art-grid");
-  if(!grid){{ return; }}
-  bar.addEventListener("click", function(e){{
-    var b=e.target.closest(".vchip"); if(!b){{ return; }}
-    bar.querySelectorAll(".vchip").forEach(function(c){{ c.classList.remove("active"); }});
-    b.classList.add("active");
-    var f=b.getAttribute("data-f");
-    grid.querySelectorAll(".card").forEach(function(card){{
-      var subs=(card.getAttribute("data-vsub")||"").split(" ");
-      card.style.display=(f==="all"||subs.indexOf(f)>=0)?"":"none";
-    }});
-  }});
-}});
+  if(ov){ov.addEventListener("click",function(e){if(e.target===ov){awCloseNews();}});}
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"){awCloseNews();}});
+})();
+document.querySelectorAll(".vfilter").forEach(function(bar){
+  var grid=bar.parentElement.querySelector(".art-grid");if(!grid){return;}
+  bar.addEventListener("click",function(e){
+    var bb=e.target.closest(".vchip");if(!bb){return;}
+    bar.querySelectorAll(".vchip").forEach(function(c){c.classList.remove("active");});
+    bb.classList.add("active");var f=bb.getAttribute("data-f");
+    grid.querySelectorAll(".card").forEach(function(card){var subs=(card.getAttribute("data-vsub")||"").split(" ");card.style.display=(f==="all"||subs.indexOf(f)>=0)?"":"none";});
+  });
+});
 </script>
 </body></html>"""
 
@@ -935,6 +1138,12 @@ def demo_items():
          "Una mirada al arte político cubano dentro y fuera de la isla.", ["cuba", "arte"]),
         ("El nuevo pop caribeño: identidad y reinvención", "Remezcla", "music", "news",
          "Cómo una generación caribeña rehace el sonido del pop global.", ["caribbean", "music"]),
+        ("A Modular-Synth Composer Maps the Sound of Melting Ice", "The Quietus", "experimental", "news",
+         "Field recordings from a retreating glacier become a slow, generative drone work.", ["sound", "drone"]),
+        ("Inside a New Generation of Tape-Loop Improvisers", "Fact Magazine", "experimental", "news",
+         "A scene built on degraded magnetic tape finds beauty in hiss, wow and flutter.", ["tape", "improv"]),
+        ("AI as Bandmate: Live Coders Trade Sets With a Model", "XLR8R", "experimental", "news",
+         "At a Berlin night, performers improvised against a system writing patches in real time.", ["live-coding", "ai"]),
     ]
     now = dt.datetime.now(dt.timezone.utc).isoformat()
     return [{"title": t, "link": "https://example.com", "source": s, "medium": m,
@@ -966,7 +1175,7 @@ def demo_translation(lang, items, columns, categories):
 # MAIN
 # ----------------------------------------------------------------------------
 def main():
-    ap = argparse.ArgumentParser(description="The Arts Wire — multilingual culture review")
+    ap = argparse.ArgumentParser(description="The Arts Wire: multilingual culture review")
     ap.add_argument("--demo", action="store_true")
     ap.add_argument("--langs", default="", help="comma list, e.g. es,fr,ja,ar")
     ap.add_argument("--hours", type=int, default=48)
@@ -1017,7 +1226,7 @@ def main():
         items, used_ai = ai_enrich(items, media)
         print(f"AI: {'on' if used_ai else 'off (source blurbs)'}.")
 
-    # "One Beautiful Thing" — daily public-domain artwork hero.
+    # "One Beautiful Thing", daily public-domain artwork hero.
     art = None
     frames = {}
     if not args.no_art:
@@ -1037,7 +1246,7 @@ def main():
         else:
             import artwork as A
             art = A.fetch_artwork()
-            print(f"Artwork: {('featured — ' + art['source']) if art else 'none reachable; hero skipped'}.")
+            print(f"Artwork: {('featured: ' + art['source']) if art else 'none reachable; hero skipped'}.")
             # The gallery: one matched, web-size, public-domain work per framed
             # section, deduped against the hero and one another.
             used = {art["image"]} if art and art.get("image") else set()
@@ -1047,7 +1256,7 @@ def main():
                     frames[key] = fr
                     used.add(fr["image"])
             print(f"Frames: {len(frames)} section-matched works"
-                  f"{(' — ' + ', '.join(frames)) if frames else ' (none reachable)'}.")
+                  f"{(': ' + ', '.join(frames)) if frames else ' (none reachable)'}.")
 
             # Self-host the artwork so the browser never depends on a museum CDN
             # (which has 404'd before). Any failure falls back to the remote URL.
@@ -1071,10 +1280,14 @@ def main():
             with open(path, "w", encoding="utf-8") as f:
                 f.write(page)
 
+    # Fresh XPRMNTL transmissions, composed once per build (English, shared by
+    # every edition). Falls back to the curated canon when AI is unavailable.
+    xpr_ai = [] if args.demo else generate_ai_transmissions(now)
+
     # English
     write(render_html(items, COLUMNS, CATEGORIES, now, used_ai, lang="en",
                        chrome=CHROME_EN, langs=langs, artwork=art, frames=frames,
-                       regional_sources=REGIONAL_SOURCES), "en")
+                       regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), "en")
 
     # Other languages
     client = None
@@ -1096,7 +1309,7 @@ def main():
                 print(f"  ({lang}: needs ANTHROPIC_API_KEY; skipped)"); continue
             write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
                               chrome=tchrome, langs=langs, artwork=art, frames=frames,
-                              regional_sources=REGIONAL_SOURCES), lang)
+                              regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), lang)
             print(f"  translated -> {lang}")
         except Exception as exc:                        # noqa: BLE001
             print(f"  ! {lang} failed: {exc}", file=sys.stderr)
