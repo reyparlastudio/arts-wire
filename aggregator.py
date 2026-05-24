@@ -133,6 +133,57 @@ def _clean(text):
     return re.sub(r"\s+", " ", html.unescape(text)).strip()
 
 
+# Commerce and affiliate URL verticals that some arts/entertainment outlets
+# (Variety, and others) pipe through their MAIN rss feed. These are shopping
+# and "how to watch" posts, never arts coverage, so we drop them outright.
+_JUNK_PATH = re.compile(
+    r"/(shopping|commerce|deals?|coupons?|buying-guides?|best-deals|affiliate)(/|$)", re.I)
+
+# Headline patterns for shopping round-ups and streaming/sports "how to watch"
+# guides. Kept deliberately specific so genuine arts pieces survive: a film
+# "now streaming," a studio "deal," or a "best films of 2026" list all stay in.
+_JUNK_TITLE = re.compile(
+    r"\bhow to watch\b|\bwhere to watch\b|\blive ?stream\b|\bstreaming guide\b|"
+    r"\bbest deals?\b|\bdeals? on\b|\bsave on\b|\b\d{1,3}% off\b|\bcoupon\b|"
+    r"\bpromo code\b|\bblack friday\b|\bcyber monday\b|\bprime day\b|"
+    r"\bwhere to buy\b|\bgift guide\b|\bbest gifts?\b", re.I)
+
+
+# Names and brands you have chosen to keep off the Arts Wire entirely. Matched
+# as whole words, case-insensitive, in BOTH the headline and the source blurb,
+# so the item is dropped before it can reach any section, lens, or the AI.
+# Edit freely: add or remove a name on its own line, in quotes, with a comma.
+BLOCKLIST = [
+    "trump",
+    "melania",
+    "ivanka",
+    "kushner",
+]
+_BLOCK = (re.compile(r"\b(?:" + "|".join(re.escape(w) for w in BLOCKLIST) + r")\b", re.I)
+          if BLOCKLIST else None)
+
+
+def _is_blocked(it):
+    if _BLOCK is None:
+        return False
+    return bool(_BLOCK.search(it.get("title") or "")
+                or _BLOCK.search(it.get("raw_summary") or ""))
+
+
+def _is_offtopic(it):
+    if _JUNK_PATH.search(it.get("link") or ""):
+        return True
+    return bool(_JUNK_TITLE.search(it.get("title") or ""))
+
+
+def drop_offtopic(items):
+    """Remove (1) shopping, affiliate, and 'how to watch' streaming guides that
+    some entertainment feeds mix into their main RSS, and (2) any item naming a
+    person or brand on the BLOCKLIST above. Applied to ALL feeds before
+    de-duplication, so neither class ever reaches a section, a lens, or the AI."""
+    return [it for it in items if not _is_offtopic(it) and not _is_blocked(it)]
+
+
 def dedupe(items):
     """Drop duplicates and near-duplicates. A story is a dup of one we've kept if
     ANY of: same link; titles are >80% character-identical; their significant
@@ -154,13 +205,21 @@ def dedupe(items):
             if SequenceMatcher(None, norm, m["norm"]).ratio() > 0.80:
                 dup = True
                 break
-            inter = len(toks & m["toks"])
+            shared = toks & m["toks"]
+            inter = len(shared)
             if inter:
                 union = len(toks | m["toks"]) or 1
                 jaccard = inter / union
                 contain = inter / min(len(toks), len(m["toks"]))
+                # Distinctive shared words: proper nouns, titles, places (5+
+                # letters). Three or more in common is a strong same-story signal
+                # even when outlets word the rest of the headline very differently
+                # (e.g. one says "seven", another "seventh"), or pad it with extra
+                # names. This is what catches cross-outlet repeats of one event.
+                strong = sum(1 for w in shared if len(w) >= 5)
                 if (jaccard >= 0.5
                         or (contain >= 0.55 and inter >= 4)
+                        or strong >= 3
                         or (img and img == m["img"] and inter >= 2)):
                     dup = True
                     break
@@ -1267,6 +1326,10 @@ def main():
         print("\nFeed health:")
         for name, status, n in health:
             print(f"  {'OK ' if status=='ok' else '-- '}{name:<28} {n if status=='ok' else status}")
+        before = len(raw)
+        raw = drop_offtopic(raw)
+        if before - len(raw):
+            print(f"\nFiltered {before - len(raw)} off-topic or blocked item(s).")
         items = dedupe(raw)[:args.max_items]
         print(f"\n{len(raw)} -> {len(items)} after de-duplication.")
         items, used_ai = ai_enrich(items, media)
