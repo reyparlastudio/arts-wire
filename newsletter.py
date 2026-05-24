@@ -49,13 +49,13 @@ LINKS = [("reyparla.com", "https://reyparla.com"),
          ("The Arts Wire", SITE_URL)]
 
 BD_BASE = "https://api.buttondown.com"
-DEFAULT_MODEL = os.environ.get("NEWSLETTER_MODEL", "claude-sonnet-4-6")
+DEFAULT_MODEL = os.environ.get("NEWSLETTER_MODEL") or "claude-sonnet-4-6"
 
 # The Back Room is members-only. "premium" means it is delivered ONLY to paying
 # subscribers and stays paywalled (locked) in any public archive. Free readers
 # never receive it and cannot read it on the web. Set to "public" only if you
 # ever deliberately want a free, openly readable issue.
-EMAIL_TYPE = os.environ.get("NEWSLETTER_EMAIL_TYPE", "premium")
+EMAIL_TYPE = os.environ.get("NEWSLETTER_EMAIL_TYPE") or "premium"
 
 # ----------------------------------------------------------------------------
 # The voice. This is what the model is told about who is writing and how.
