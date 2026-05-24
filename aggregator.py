@@ -1292,7 +1292,9 @@ function awDoSearch(){
 (function(){
   var s=document.getElementById("awSearch");
   if(s){s.addEventListener("input",awDoSearch);s.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();awDoSearch();}});}
-  try{var done=localStorage.getItem("aw_news_done");var dismissed=localStorage.getItem("aw_news_dismissed");if(!done&&!dismissed){setTimeout(awOpenNews,3500);}}catch(e){}
+  /* No auto-popup. The Newsletter link goes to the subscribe page only when a
+     reader taps it, never on a timer, so the edition never pulls anyone away
+     from their reading on its own. */
   var ov=document.getElementById("awOverlay");
   if(ov){ov.addEventListener("click",function(e){if(e.target===ov){awCloseNews();}});}
   document.addEventListener("keydown",function(e){if(e.key==="Escape"){awCloseNews();}});
