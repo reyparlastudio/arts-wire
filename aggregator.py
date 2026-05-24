@@ -51,6 +51,87 @@ CHROME_EN = {
 
 
 # ----------------------------------------------------------------------------
+# IMAGE QUALITY STANDARD
+# A weak image cheapens the page, so every lead image must clear a measurable
+# "golden standard" or it is dropped and the card / section simply renders with
+# no image, which reads far better than a blurry or tiny one. The gate is
+# deliberately conservative: it never *guesses* an image is bad.
+#   1. Obvious non-photos (logos, icons, spacers, tracking pixels, svg, gif)
+#      are rejected by URL and format before anything is downloaded.
+#   2. Real photos are measured in actual pixels (via Pillow); anything below
+#      the minimum resolution or outside a sane shape is dropped.
+#   3. If an image cannot be measured (a transient build-time hiccup), it is
+#      KEPT, since a timeout is not proof of poor quality, and the browser still
+#      hides anything that genuinely fails to load.
+# Tune the two numbers below: raise them for a stricter wall, lower for more art.
+MIN_IMG_W = 680            # px. below this a photo looks soft stretched in a card
+MIN_IMG_H = 400            # px
+_IMG_ASPECT_MIN = 0.62     # drop slivers / skyscrapers that crop to nothing at 3:2
+_IMG_ASPECT_MAX = 2.60     # drop ultra-wide banner strips
+_JUNK_IMG = re.compile(
+    r"(logo|sprite|favicon|/icon|placeholder|default-|blank|spacer|avatar|"
+    r"gravatar|pixel|1x1|transparent|doubleclick|feedburner|/ads?[/_-])", re.I)
+
+try:
+    from PIL import Image as _PILImage          # pillow: the pixel-level gate
+except Exception:                               # noqa: BLE001
+    _PILImage = None
+
+
+def _img_url_ok(u):
+    """Cheap pre-filter, no network: reject vector/animated formats and the
+    usual logo / icon / tracking-pixel junk by extension and URL pattern."""
+    u = (u or "").strip()
+    if not u:
+        return False
+    if re.search(r"\.(svg|gif)(\?|$)", u, re.I):
+        return False
+    return not _JUNK_IMG.search(u)
+
+
+def _dims_from_bytes(data):
+    """Pixel size (w, h) from an image's bytes, or None if unreadable or Pillow
+    is unavailable. Never raises."""
+    if not _PILImage or not data:
+        return None
+    try:
+        import io
+        with _PILImage.open(io.BytesIO(data)) as im:
+            return im.size
+    except Exception:                            # noqa: BLE001
+        return None
+
+
+def _meets_standard(w, h):
+    """True only if the image is big enough and sanely shaped for a card."""
+    if not w or not h:
+        return False
+    if w < MIN_IMG_W or h < MIN_IMG_H:
+        return False
+    return _IMG_ASPECT_MIN <= (w / float(h)) <= _IMG_ASPECT_MAX
+
+
+def _probe_image_ok(url, timeout=8):
+    """Fetch a card image, measure it, and decide if it clears the standard.
+    Returns True (keep) or False (drop). Unmeasurable -> True (keep), so a
+    transient build hiccup never strips a good image."""
+    if not _img_url_ok(url):
+        return False
+    if not _PILImage:
+        return True                              # no gauge here; browser backstops
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (The Arts Wire)"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            data = r.read(3_000_000)             # 3 MB is plenty to read dimensions
+        dims = _dims_from_bytes(data)
+        return True if dims is None else _meets_standard(*dims)
+    except Exception:                            # noqa: BLE001
+        return True                              # transient; keep, do not penalize
+
+
+# ----------------------------------------------------------------------------
 # COLLECT / DEDUPE / ENRICH  (unchanged core)
 # ----------------------------------------------------------------------------
 def _entry_image(e):
@@ -64,7 +145,7 @@ def _entry_image(e):
             return ""
         if u.startswith("http://"):          # the site is https; upgrade or it's blocked
             u = "https://" + u[len("http://"):]
-        return u if u.startswith("https://") else ""
+        return u if (u.startswith("https://") and _img_url_ok(u)) else ""
     for th in (e.get("media_thumbnail") or []):
         u = _ok(th.get("url"))
         if u:
@@ -457,10 +538,12 @@ def _art_filters(it):
     return " ".join(k for k, rx in _ART_RX if rx.search(text))
 
 
-def _save_image(url, dest, timeout=20):
+def _save_image(url, dest, timeout=20, enforce=True):
     """Download an image to a local file. Returns True on success, else False ,
     never raises, so a museum hiccup can't break the build (we fall back to the
-    remote URL, and the <img> hides itself if even that fails in the browser)."""
+    remote URL, and the <img> hides itself if even that fails in the browser).
+    With enforce=True, an image that reads below the golden standard is refused
+    so a tiny or oddly-shaped artwork never lands in a frame."""
     try:
         import urllib.request
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (The Arts Wire)"})
@@ -468,6 +551,10 @@ def _save_image(url, dest, timeout=20):
             data = r.read()
         if not data or len(data) < 512:          # too small to be a real image
             return False
+        if enforce:
+            dims = _dims_from_bytes(data)
+            if dims is not None and not _meets_standard(*dims):
+                return False                     # below the golden standard
         with open(dest, "wb") as f:
             f.write(data)
         return True
@@ -1347,6 +1434,26 @@ def main():
         print(f"\n{len(raw)} -> {len(items)} after de-duplication.")
         items, used_ai = ai_enrich(items, media)
         print(f"AI: {'on' if used_ai else 'off (source blurbs)'}.")
+
+        # Image quality gate: measure each lead image and drop any that fails
+        # the golden standard, so that card (and its teaser thumb) runs clean
+        # with no image rather than a weak one. Only the final, surviving
+        # stories are probed, so it stays fast.
+        seen, dropped = {}, 0
+        for it in items:
+            u = (it.get("image") or "").strip()
+            if not u.startswith("http"):
+                continue
+            ok = seen.get(u)
+            if ok is None:
+                ok = _probe_image_ok(u)
+                seen[u] = ok
+            if not ok:
+                it["image"] = ""
+                dropped += 1
+        if dropped:
+            print(f"Image gate: dropped {dropped} sub-standard image(s); "
+                  f"those cards run clean.")
 
     # "One Beautiful Thing", daily public-domain artwork hero.
     art = None

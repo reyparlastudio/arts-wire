@@ -30,6 +30,18 @@
   select{width:100%;font-family:"Spectral",serif;font-size:18px;padding:10px 12px;
     background:var(--paper);border:1px solid var(--line);color:var(--ink)}
 
+  .signup{margin:34px auto 0;max-width:520px;background:#fbf7ee;border:1px solid var(--line);padding:18px 20px}
+  .signup>label{font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:13px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--muted);display:block;margin:0 0 8px}
+  .signup select{margin-bottom:14px}
+  .signup .row{display:flex;gap:10px;flex-wrap:wrap}
+  .signup input[type=email]{flex:1;min-width:180px;font-family:"Spectral",serif;font-size:18px;padding:10px 12px;
+    background:var(--paper);border:1px solid var(--line);color:var(--ink)}
+  .signup button{font-family:"Saira Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+    font-size:14px;padding:10px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+  .signup button:hover{background:var(--accent);border-color:var(--accent)}
+  .sub-msg{font-style:italic;color:var(--accent);font-size:14px;margin-top:10px;min-height:1px}
+
   .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
   .tier{border:1px solid var(--line);background:var(--paper);padding:24px 22px;display:flex;
     flex-direction:column;gap:12px}
@@ -42,7 +54,7 @@
   .price small{font-family:"Spectral";font-style:italic;font-weight:400;font-size:15px;color:var(--muted)}
   .note{font-size:14px;color:var(--muted);font-style:italic}
   .tier ul{list-style:none;font-size:15.5px;display:flex;flex-direction:column;gap:7px;margin-top:2px}
-  .tier li::before{content:"\2014  ";color:var(--gold)}
+  .tier li::before{content:"\2013  ";color:var(--gold)}
   .btn{margin-top:auto;display:block;text-align:center;font-family:"Saira Condensed",sans-serif;font-weight:600;
     text-transform:uppercase;letter-spacing:.1em;font-size:14px;padding:12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
     cursor:pointer;text-decoration:none}
@@ -60,17 +72,19 @@
 </style></head>
 <body>
 <div class="wrap">
-  <p style="text-align:center;padding-top:20px;margin-bottom:-8px"><a href="index.html" style="font-family:'Saira Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#b8412a;text-decoration:none">&larr;&nbsp; The Arts Wire &mdash; today&rsquo;s edition</a></p>
+  <p style="text-align:center;padding-top:20px;margin-bottom:-8px"><a href="index.html" style="font-family:'Saira Condensed',sans-serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#b8412a;text-decoration:none">&larr;&nbsp; The Arts Wire: today&rsquo;s edition</a></p>
   <header>
     <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide</div>
     <h1>Read the world&rsquo;s arts,<br>in your language.</h1>
-    <p class="lede">A daily review of film, theater, art, books and ideas from across the globe &mdash;
+    <p class="lede">A daily review of film, theater, art, books and ideas from across the globe,
     delivered to your inbox and <em>translated into the language you choose</em>, wherever you are.</p>
   </header>
 
-  <div class="pick">
+  <form class="signup embeddable-buttondown-form" id="awSub"
+        action="https://buttondown.com/api/emails/embed-subscribe/theartswire"
+        method="post" target="aw_sink">
     <label for="lang">Deliver my edition in</label>
-    <select id="lang">
+    <select id="lang" name="metadata__language">
       <option value="en">English</option>
       <option value="es">Español (Spanish)</option>
       <option value="fr">Français (French)</option>
@@ -83,9 +97,18 @@
       <option value="ja">日本語 (Japanese)</option>
       <option value="ko">한국어 (Korean)</option>
       <option value="ru">Русский (Russian)</option>
-      <option value="other">Another language &mdash; just ask</option>
+      <option value="other">Another language, just ask</option>
     </select>
-  </div>
+    <label for="bd-email">Your email</label>
+    <div class="row">
+      <input id="bd-email" type="email" name="email" required placeholder="you@example.com">
+      <button type="submit">Subscribe free</button>
+    </div>
+    <input type="hidden" name="tag" id="bd-tag" value="en">
+    <input type="hidden" name="embed" value="1">
+    <p class="sub-msg" id="bd-msg"></p>
+  </form>
+  <iframe name="aw_sink" style="display:none" title="signup target" tabindex="-1"></iframe>
 
   <section class="tiers">
     <div class="tier">
@@ -100,7 +123,7 @@
       <span class="flag">Most popular</span>
       <h2>Supporter</h2>
       <div class="price">$1<small> / month</small></div>
-      <p class="note">Billed $12 once a year &mdash; keeps the dollar honest.</p>
+      <p class="note">Billed $12 once a year, keeps the dollar honest.</p>
       <ul><li>Edition emailed daily</li><li>Your chosen language</li><li>Keeps it free for everyone</li></ul>
       <a class="btn" data-plan="supporter" href="#">Subscribe</a>
     </div>
@@ -137,7 +160,7 @@
    This page is static (no server needed). To take real payments worldwide:
 
    1) Create products in a Merchant-of-Record checkout (Paddle or Lemon Squeezy
-      recommended — they collect global VAT/sales tax FOR you).
+      recommended, they collect global VAT/sales tax FOR you).
         - "Supporter"  -> a $12/year subscription
         - "Patron"     -> a $120/year (or $10/mo) subscription
    2) Paste each product's hosted checkout link below.
@@ -165,5 +188,16 @@ document.querySelectorAll("[data-plan]").forEach(function (btn) {
     window.location.href = base + "?checkout[custom][lang]=" + encodeURIComponent(lang);
   });
 });
+
+// Free signup -> Buttondown (posts into the hidden frame, so the page never leaves)
+var awSub=document.getElementById("awSub");
+if(awSub){
+  awSub.addEventListener("submit",function(){
+    var lang=document.getElementById("lang").value;
+    var t=document.getElementById("bd-tag");if(t){t.value=lang;}
+    var m=document.getElementById("bd-msg");
+    setTimeout(function(){if(m){m.textContent="You are in. Check your inbox to confirm.";}},400);
+  });
+}
 </script>
 </body></html>
