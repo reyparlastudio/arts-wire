@@ -384,6 +384,13 @@ SECTION_ORDER = [
     "games",         # Games & Interactive
 ]
 
+# Set to False to keep the fixed SECTION_ORDER above every day. True means the
+# running order reorganizes itself each day, seeded by the date, so it is stable
+# for the whole day and reshuffles at midnight, exactly the way the daily color
+# and the design skin rotate. XPRMNTL still opens the page and The Review still
+# closes it; only the sequence of sections inside The Wire is reshuffled.
+SHUFFLE_SECTIONS = True
+
 # ---------------------------------------------------------------------------
 # THREADS, cross-cutting themes. The robot reads every story's title, summary,
 # and tags and pulls matches into a slim themed list, so these gather strength
@@ -762,6 +769,12 @@ def render_html(items, columns, categories, generated, used_ai, *,
     for m, _ in categories:                 # append any medium not explicitly ordered
         if m not in order:
             order.append(m)
+    # Daily reshuffle: like the color and the skin, the running order of the
+    # sections reorganizes itself each day. The seed is the date, so the order is
+    # identical for every reader all day and changes at midnight. SECTION_ORDER
+    # is just the starting deck. XPRMNTL, the Frame, and the Review are untouched.
+    if SHUFFLE_SECTIONS:
+        random.Random(generated.toordinal()).shuffle(order)
 
     blocks = []  # list of (frame_key, section_html)
     for key in order:
