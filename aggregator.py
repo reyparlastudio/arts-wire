@@ -15,6 +15,7 @@ import argparse
 import datetime as dt
 import html
 import json
+import math
 import os
 import random
 import re
@@ -266,11 +267,13 @@ def drop_offtopic(items):
 
 
 def dedupe(items):
-    """Drop duplicates and near-duplicates. A story is a dup of one we've kept if
-    ANY of: same link; titles are >80% character-identical; their significant
-    words overlap strongly (same event under a different headline); or they share
-    the SAME photo and at least two key words (the cross-outlet case). Guarded so
-    unrelated stories that merely share a stock/logo image are NOT merged."""
+    """Cluster coverage into one story per event, Techmeme-style packages. The
+    newest item of a cluster becomes the lead; later items that are the same
+    story do not vanish, they attach to the lead as corroborators (it['also'])
+    and raise its cluster count (it['cluster']), which the ranking rewards. The
+    similarity test is the same trusted one as before: same link, near-identical
+    title, strong word overlap, or a shared photo plus shared words. Guarded so
+    unrelated stories that merely share a stock or logo image are NOT merged."""
     kept, meta, seen_links = [], [], set()
     for it in sorted(items, key=lambda x: x["published"], reverse=True):
         link = it["link"].rstrip("/").lower()
@@ -281,33 +284,38 @@ def dedupe(items):
             continue
         toks = _sig_tokens(it["title"])
         img = (it.get("image") or "").strip().lower()
-        dup = False
+        lead = None
         for m in meta:
-            if SequenceMatcher(None, norm, m["norm"]).ratio() > 0.80:
-                dup = True
+            same = SequenceMatcher(None, norm, m["norm"]).ratio() > 0.80
+            if not same:
+                shared = toks & m["toks"]
+                inter = len(shared)
+                if inter:
+                    union = len(toks | m["toks"]) or 1
+                    jaccard = inter / union
+                    contain = inter / min(len(toks), len(m["toks"]))
+                    strong = sum(1 for w in shared if len(w) >= 5)
+                    same = (jaccard >= 0.5
+                            or (contain >= 0.55 and inter >= 4)
+                            or strong >= 3
+                            or (img and img == m["img"] and inter >= 2))
+            if same:
+                lead = m["lead"]
                 break
-            shared = toks & m["toks"]
-            inter = len(shared)
-            if inter:
-                union = len(toks | m["toks"]) or 1
-                jaccard = inter / union
-                contain = inter / min(len(toks), len(m["toks"]))
-                # Distinctive shared words: proper nouns, titles, places (5+
-                # letters). Three or more in common is a strong same-story signal
-                # even when outlets word the rest of the headline very differently
-                # (e.g. one says "seven", another "seventh"), or pad it with extra
-                # names. This is what catches cross-outlet repeats of one event.
-                strong = sum(1 for w in shared if len(w) >= 5)
-                if (jaccard >= 0.5
-                        or (contain >= 0.55 and inter >= 4)
-                        or strong >= 3
-                        or (img and img == m["img"] and inter >= 2)):
-                    dup = True
-                    break
-        if dup:
+        if lead is not None:
+            # Same story: attach this outlet to the lead's package, do not add a card.
+            src = it.get("source", "")
+            if src and src != lead.get("source") and src not in lead["also"] and len(lead["also"]) < 4:
+                lead["also"].append(src)
+            lead["cluster"] = lead.get("cluster", 1) + 1
+            if link:
+                seen_links.add(link)
             continue
-        seen_links.add(link)
-        meta.append({"norm": norm, "toks": toks, "img": img})
+        if link:
+            seen_links.add(link)
+        it["cluster"] = 1
+        it["also"] = []
+        meta.append({"norm": norm, "toks": toks, "img": img, "lead": it})
         kept.append(it)
     return kept
 
@@ -332,6 +340,85 @@ _STOP = {
 
 def _sig_tokens(t):
     return {w for w in _norm_title(t).split() if len(w) >= 4 and w not in _STOP}
+
+
+# ---------------------------------------------------------------------------
+# RANKING. Every story gets one importance score from three honest signals:
+# how recent it is, how authoritative its source is, and how many outlets
+# carried it (corroboration, which falls out of the clustering above). An
+# editor's pick overrides everything. This is the hybrid that the best wires
+# in the world use: an algorithm proposes, a human disposes.
+# ---------------------------------------------------------------------------
+# Source authority is a gentle, fully editable weighting, a tie-breaker and not
+# a gatekeeper. It is matched as a lowercase substring of the source name, and
+# anything unlisted gets the baseline. This list is itself an editorial
+# statement, Rey's hand on the scale, so tune it freely.
+SOURCE_AUTHORITY = {
+    "guardian": 1.0, "new york times": 1.0, "nyt": 1.0, "new yorker": 1.0,
+    "washington post": 1.0, "bbc": 1.0, "financial times": 1.0, "reuters": 1.0,
+    "artforum": 1.0, "art newspaper": 1.0, "artnews": 0.95, "artnet": 0.95,
+    "hyperallergic": 0.9, "frieze": 0.9, "e-flux": 0.9, "aperture": 0.9,
+    "criterion": 0.9, "sight": 0.85, "variety": 0.85, "hollywood reporter": 0.85,
+    "deadline": 0.85, "indiewire": 0.8, "pitchfork": 0.85, "the quietus": 0.8,
+    "dezeen": 0.8, "archdaily": 0.8, "cineuropa": 0.8, "letras libres": 0.8,
+    "el estornudo": 0.8, "artishock": 0.8, "oncuba": 0.8, "puerto rico art": 0.75,
+    "vogue": 0.75, "dazed": 0.75,
+}
+_AUTH_BASE = 0.6
+
+
+def _authority(source):
+    s = (source or "").lower()
+    best = _AUTH_BASE
+    for needle, w in SOURCE_AUTHORITY.items():
+        if needle in s and w > best:
+            best = w
+    return best
+
+
+def _editor_picks():
+    """The human hand on the algorithm. If a file named editors_pick.txt sits
+    beside this script, each non-empty line is a needle: a word, a name, a
+    phrase, or part of a URL. Any story matching a needle is pinned to the top
+    of its section and marked Editor's pick. Lines starting with # are ignored.
+    No file means no effect, so this is entirely optional."""
+    try:
+        here = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(here, "editors_pick.txt"), encoding="utf-8") as f:
+            return [ln.strip().lower() for ln in f
+                    if ln.strip() and not ln.lstrip().startswith("#")]
+    except Exception:                                   # noqa: BLE001
+        return []
+
+
+def _is_pick(it, picks):
+    if not picks:
+        return False
+    hay = " ".join([it.get("title") or "", it.get("source") or "",
+                    it.get("link") or ""]).lower()
+    return any(p in hay for p in picks)
+
+
+def rank_items(items, now, picks=None):
+    """Give every story a single score and mark editor's picks, in place.
+    score = recency + authority + corroboration, with a large pin for picks."""
+    picks = _editor_picks() if picks is None else picks
+    for it in items:
+        rec = 0.0
+        try:
+            pub = dt.datetime.fromisoformat(it["published"]) if it.get("published") else None
+            if pub is not None:
+                if pub.tzinfo is not None:
+                    pub = pub.replace(tzinfo=None)
+                hours = max(0.0, (now - pub).total_seconds() / 3600.0)
+                rec = math.exp(-hours / 72.0)           # ~1 fresh, decays over ~3 days
+        except Exception:                               # noqa: BLE001
+            rec = 0.0
+        auth = _authority(it.get("source"))
+        corro = math.log1p(max(0, it.get("cluster", 1) - 1))   # 0 alone, grows w/ outlets
+        it["pick"] = _is_pick(it, picks)
+        it["score"] = 2.0 * rec + 1.2 * auth + 1.5 * corro + (100.0 if it["pick"] else 0.0)
+    return items
 
 
 def ai_enrich(items, media, batch_size=10):
@@ -471,6 +558,13 @@ SECTION_ORDER = [
 # and the design skin rotate. XPRMNTL still opens the page and The Review still
 # closes it; only the sequence of sections inside The Wire is reshuffled.
 SHUFFLE_SECTIONS = True
+
+# Front-page Lead: lift the single highest-ranked story of the day to the top of
+# The Wire in hero size, the way a newspaper leads its front page. The story is
+# chosen by the same importance score (recency + authority + corroboration +
+# editor's pick), so the lead changes through the day and from day to day, and it
+# appears only once, never duplicated in its section below.
+LEAD_STORY = True
 
 # ---------------------------------------------------------------------------
 # THREADS, cross-cutting themes. The robot reads every story's title, summary,
@@ -774,11 +868,22 @@ def render_html(items, columns, categories, generated, used_ai, *,
         )
 
     regset = set(regional_sources or ())
-    reg_items = [it for it in items if it.get("source") in regset]
+    reg_items = sorted([it for it in items if it.get("source") in regset],
+                       key=lambda x: x.get("score", 0.0), reverse=True)
     main_items = [it for it in items if it.get("source") not in regset]
     # Experimental items live only in the XPRMNTL band, never as a Wire section.
     xpr_live = [it for it in main_items if it.get("medium") == "experimental"]
     main_items = [it for it in main_items if it.get("medium") != "experimental"]
+
+    # The day's Lead: the single highest-scored card story. Shown once, in hero
+    # size, at the very top of The Wire, and removed from its section so it never
+    # appears twice. Chosen by the same score that ranks everything else.
+    lead_item = None
+    if LEAD_STORY:
+        lead_pool = [it for it in main_items if it.get("kind") == "news"]
+        if lead_pool:
+            lead_item = max(lead_pool, key=lambda x: x.get("score", 0.0))
+    lead_link = (lead_item or {}).get("link")
 
     def teaser(it):
         im = ""
@@ -803,11 +908,46 @@ def render_html(items, columns, categories, generated, used_ai, *,
             f = _art_filters(it)
             if f:
                 vsub = f' data-vsub="{f}"'
+        pick = '<span class="pick">Editor&rsquo;s pick</span>' if it.get("pick") else ""
+        also = ""
+        extra = it.get("cluster", 1) - 1
+        if extra > 0 and it.get("also"):
+            shown = it["also"][:3]
+            label = " &middot; ".join(esc(s) for s in shown)
+            tail = extra - len(shown)
+            if tail > 0:
+                label += f" &middot; +{tail} more"
+            also = f'<p class="also">{chrome.get("also_label", "Also covered")}: {label}</p>'
         return (f'<article class="card{" has-img" if img else ""}"{vsub}>{img}'
+                f'{pick}'
                 f'<h3><a href="{esc(it["link"])}" target="_blank" '
                 f'rel="noopener">{esc(it["title"])}</a></h3>'
                 f'<p class="sum">{esc(it.get("summary",""))}</p>'
+                f'{also}'
                 f'<div class="meta"><span class="csrc">{esc(it["source"])}</span>{tags}</div></article>')
+
+    def lead_block(it):
+        img = ""
+        if it.get("image"):
+            img = (f'<a class="lead-img" href="{esc(it["link"])}" target="_blank" rel="noopener">'
+                   f'<img src="{esc(it["image"])}" alt="" loading="lazy" '
+                   f'onerror="this.closest(\'.lead\').classList.add(\'noimg\');this.remove()"></a>')
+        pick = '<span class="pick">Editor&rsquo;s pick</span>' if it.get("pick") else ""
+        also = ""
+        extra = it.get("cluster", 1) - 1
+        if extra > 0 and it.get("also"):
+            shown = it["also"][:3]
+            label = " &middot; ".join(esc(s) for s in shown)
+            tail = extra - len(shown)
+            if tail > 0:
+                label += f" &middot; +{tail} more"
+            also = f'<p class="also">{chrome.get("also_label", "Also covered")}: {label}</p>'
+        return (f'<section class="lead{" has-img" if img else ""}">{img}'
+                f'<div class="lead-body"><span class="lead-kicker">{chrome.get("lead_label", "Lead")}</span>{pick}'
+                f'<h2 class="lead-ttl"><a href="{esc(it["link"])}" target="_blank" '
+                f'rel="noopener">{esc(it["title"])}</a></h2>'
+                f'<p class="lead-sum">{esc(it.get("summary",""))}</p>{also}'
+                f'<div class="meta"><span class="csrc">{esc(it["source"])}</span></div></div></section>')
 
     cols_html = ""
     for kind, label in columns:
@@ -838,7 +978,10 @@ def render_html(items, columns, categories, generated, used_ai, *,
     label_of = dict(categories)
 
     def medium_section(medium):
-        group = [it for it in main_items if it["kind"] == "news" and it["medium"] == medium]
+        group = sorted([it for it in main_items
+                        if it["kind"] == "news" and it["medium"] == medium
+                        and it.get("link") != lead_link],
+                       key=lambda x: x.get("score", 0.0), reverse=True)
         if not group:
             return ""
         head = f'<h2>{label_of.get(medium, medium)}<span class="ct">{len(group)}</span></h2>'
@@ -861,7 +1004,9 @@ def render_html(items, columns, categories, generated, used_ai, *,
     def theme_section(key):
         for k, label, rx in _THEME_RX:
             if k == key:
-                picks = [it for it in items if rx.search(_theme_text(it))][:10]
+                picks = sorted([it for it in items if rx.search(_theme_text(it))
+                                and it.get("link") != lead_link],
+                               key=lambda x: x.get("score", 0.0), reverse=True)[:10]
                 if not picks:
                     return ""
                 return (f'<section class="section thread"><h2>{label}'
@@ -892,12 +1037,14 @@ def render_html(items, columns, categories, generated, used_ai, *,
         if sec_html:
             blocks.append((key, sec_html))
 
+    lead_html = lead_block(lead_item) if lead_item else ""
     wire_inner = ""
     for i, (key, block_html) in enumerate(blocks):
         if i > 0:
             wire_inner += frame_block(key)   # a frame between sections, matched to what follows
         wire_inner += block_html
-    wire = (f'<div class="zone-label">{chrome["wire_label"]}</div>' + wire_inner) if wire_inner else ""
+    wire_body = lead_html + wire_inner
+    wire = (f'<div class="zone-label">{chrome["wire_label"]}</div>' + wire_body) if wire_body else ""
 
     regional = ""   # rendered inline in the sequence above
     threads = ""    # Art & Science / Art & Social Justice are now inline sections
@@ -1068,10 +1215,33 @@ TEMPLATE = """<!DOCTYPE html>
     letter-spacing:-.005em;margin-top:6px}
   .card h3 a:hover{color:var(--accent-ink)}
   .card .sum{order:4;color:#2c2c2c;font-size:15.5px;margin-top:7px;line-height:1.42}
+  .card .also{order:5;margin:7px 0 0;font-family:"Archivo",sans-serif;font-size:10px;
+    letter-spacing:.05em;text-transform:uppercase;color:#7a766c}
+  .card .pick{order:-1;align-self:flex-start;margin:0 0 8px;font-family:"Archivo",sans-serif;
+    font-weight:700;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--paper);background:var(--accent-ink);padding:3px 8px;border-radius:2px}
   .csrc{font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;text-transform:uppercase;
     letter-spacing:.05em;color:var(--accent-ink)}
   .tag{font-family:"Archivo",sans-serif;font-size:9.5px;background:var(--alt);border:1px solid var(--line);
     padding:2px 7px;border-radius:20px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+
+  /* Front-page Lead: the day's top-ranked story, in hero size */
+  .lead{margin:4px 0 26px;padding:0 0 24px;border-bottom:2px solid var(--ink)}
+  .lead-img{display:block;overflow:hidden;background:var(--alt);margin:0 -20px 14px}
+  .lead-img img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block}
+  .lead.noimg .lead-img{display:none}
+  .lead-kicker{display:inline-block;font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--paper);background:var(--accent-ink);
+    padding:3px 9px;border-radius:2px;margin-right:8px}
+  .lead .pick{font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--accent-ink)}
+  .lead-ttl{font-family:"Spectral",serif;font-weight:600;font-size:30px;line-height:1.12;
+    letter-spacing:-.015em;margin:12px 0 0}
+  .lead-ttl a:hover{color:var(--accent-ink)}
+  .lead-sum{color:#2c2c2c;font-size:17px;line-height:1.46;margin-top:9px}
+  .lead .also{margin:9px 0 0;font-family:"Archivo",sans-serif;font-size:10px;letter-spacing:.05em;
+    text-transform:uppercase;color:#7a766c}
+  .lead .meta{margin-top:11px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 
   /* visual-art filter chips */
   .vfilter{display:flex;flex-wrap:wrap;gap:7px;margin:-2px 0 16px}
@@ -1158,12 +1328,18 @@ TEMPLATE = """<!DOCTYPE html>
   html[data-skin="teletype"] .xpr-snd,
   html[data-skin="teletype"] .xpr-livettl{color:var(--ink)}
   html[data-skin="teletype"] .card .sum{color:#b8b5ac}
+  html[data-skin="teletype"] .card .also{color:#8a877e}
+  html[data-skin="teletype"] .lead{border-bottom-color:var(--accent)}
+  html[data-skin="teletype"] .lead-sum{color:#b8b5ac}
+  html[data-skin="teletype"] .lead .also{color:#8a877e}
   html[data-skin="teletype"] .aw-modal .lede{color:#c9c6bd}
   html[data-skin="teletype"] .aw-form input{background:#111114;color:var(--ink)}
   html[data-skin="teletype"] .card img,
+  html[data-skin="teletype"] .lead-img img,
   html[data-skin="teletype"] .oneart img,
   html[data-skin="teletype"] .t-img{border:1px solid var(--line);filter:grayscale(.35) contrast(1.04)}
   html[data-skin="teletype"] .card:hover img,
+  html[data-skin="teletype"] .lead-img:hover img,
   html[data-skin="teletype"] .oneart:hover img,
   html[data-skin="teletype"] .t-img:hover{filter:none}
 </style></head>
@@ -1303,7 +1479,7 @@ function awDoSearch(){
     var anyShown=Array.prototype.some.call(its,function(el){return !el.classList.contains("hidden-by-search");});
     sec.style.display=anyShown?"":"none";
   });
-  document.querySelectorAll(".zone-label,.oneart,.banner,.xprmntl").forEach(function(el){el.style.display=q?"none":"";});
+  document.querySelectorAll(".zone-label,.oneart,.banner,.xprmntl,.lead").forEach(function(el){el.style.display=q?"none":"";});
   var note=document.getElementById("awSearchNote");
   note.textContent=q?(shown+" "+(shown===1?"piece":"pieces")+" match \u201c"+q+"\u201d"):"";
 }
@@ -1475,6 +1651,15 @@ def main():
             print(f"Image gate: dropped {dropped} sub-standard image(s); "
                   f"those cards run clean.")
 
+        # Rank every story by recency, source authority, and corroboration (how
+        # many outlets carried it, which the clustering counted), and apply any
+        # editor's picks. This orders each section by importance, not just date.
+        rank_items(items, now)
+        nclust = sum(1 for it in items if it.get("cluster", 1) > 1)
+        npick = sum(1 for it in items if it.get("pick"))
+        print(f"Ranked {len(items)} stories; {nclust} multi-outlet package(s)"
+              + (f"; {npick} editor pick(s)." if npick else "."))
+
     # "One Beautiful Thing", daily public-domain artwork hero.
     art = None
     frames = {}
@@ -1543,6 +1728,7 @@ def main():
     if extra and not args.demo and os.environ.get("ANTHROPIC_API_KEY"):
         from anthropic import Anthropic
         client = Anthropic()
+    rankmap = {it.get("link"): it for it in items}      # carry ranking across translations
     for lang in extra:
         try:
             if args.demo:
@@ -1556,6 +1742,13 @@ def main():
                     lang, client, MODEL)
             else:
                 print(f"  ({lang}: needs ANTHROPIC_API_KEY; skipped)"); continue
+            for t in titems:                            # ranking/packaging is language-neutral
+                base = rankmap.get(t.get("link"))
+                if base:
+                    t["score"] = base.get("score", 0.0)
+                    t["cluster"] = base.get("cluster", 1)
+                    t["also"] = base.get("also", [])
+                    t["pick"] = base.get("pick", False)
             write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
                               chrome=tchrome, langs=langs, artwork=art, frames=frames,
                               regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), lang)
