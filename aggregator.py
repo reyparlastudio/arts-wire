@@ -1178,7 +1178,7 @@ if("serviceWorker" in navigator){
 }
 
 var NEWSLETTER={ endpoint:"https://buttondown.com/api/emails/embed-subscribe/theartswire", emailField:"email" };
-function awOpenNews(){document.getElementById("awOverlay").classList.add("show");setTimeout(function(){var e=document.getElementById("awNewsEmail");if(e){e.focus();}},80);}
+function awOpenNews(){window.location.href="subscribe.html";}
 function awCloseNews(){document.getElementById("awOverlay").classList.remove("show");}
 function awDontShow(){try{localStorage.setItem("aw_news_dismissed","1");}catch(e){}awCloseNews();}
 function awSubmitNews(ev){

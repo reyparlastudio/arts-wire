@@ -51,6 +51,12 @@ LINKS = [("reyparla.com", "https://reyparla.com"),
 BD_BASE = "https://api.buttondown.com"
 DEFAULT_MODEL = os.environ.get("NEWSLETTER_MODEL", "claude-sonnet-4-6")
 
+# The Back Room is members-only. "premium" means it is delivered ONLY to paying
+# subscribers and stays paywalled (locked) in any public archive. Free readers
+# never receive it and cannot read it on the web. Set to "public" only if you
+# ever deliberately want a free, openly readable issue.
+EMAIL_TYPE = os.environ.get("NEWSLETTER_EMAIL_TYPE", "premium")
+
 # ----------------------------------------------------------------------------
 # The voice. This is what the model is told about who is writing and how.
 # ----------------------------------------------------------------------------
@@ -276,8 +282,11 @@ def _bd_post(path, payload):
 
 
 def create_draft(subject, body):
-    # status=draft is explicit so the letter can NEVER queue to the whole list.
-    data = _bd_post("/v1/emails", {"subject": subject, "body": body, "status": "draft"})
+    # status=draft so it can NEVER queue to the whole list on its own, and
+    # email_type premium so the letter reaches ONLY paying members and stays
+    # paywalled in any archive. Free subscribers never receive or read it.
+    data = _bd_post("/v1/emails", {"subject": subject, "body": body,
+                                   "status": "draft", "email_type": EMAIL_TYPE})
     return data.get("id"), data.get("absolute_url") or data.get("web_url")
 
 
