@@ -958,6 +958,37 @@ TEMPLATE = """<!DOCTYPE html>
   .aw-fine{font-size:12px;color:var(--soft);font-style:italic;margin-top:12px}
   .aw-msg{font-family:"Archivo",sans-serif;font-weight:700;font-size:14px;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.05em;margin-top:12px;min-height:1px}
   .aw-dismiss{display:block;margin:12px auto 0;background:none;border:none;color:var(--soft);font-size:12px;text-decoration:underline;cursor:pointer}
+
+  /* ===================== TELETYPE skin ===================== */
+  /* Monospace on dark, a teleprinter that glows in the day's    */
+  /* rotating Parlá color. Same HTML; the script swaps it daily  */
+  /* or by the visitor's choice. The Wire skin is the default.   */
+  html[data-skin="teletype"]{--paper:#0c0c0e;--alt:#141417;--ink:#e7e4db;--soft:#8c8c8c;--line:#2a2a30}
+  html[data-skin="teletype"] body{background:#070708}
+  html[data-skin="teletype"] *{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;border-radius:0 !important}
+  html[data-skin="teletype"] body::after{content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);mix-blend-mode:soft-light}
+  html[data-skin="teletype"] .wrap{box-shadow:0 0 0 1px #ffffff14}
+  html[data-skin="teletype"] header.masthead{background:rgba(10,10,12,.92);border-bottom-color:var(--line)}
+  html[data-skin="teletype"] .brand::after{content:"_";color:var(--accent);margin-left:.12em;animation:awblink 1.1s steps(1) infinite}
+  @keyframes awblink{50%{opacity:0}}
+  html[data-skin="teletype"] .zone-label::before{content:"// ";color:var(--accent)}
+  html[data-skin="teletype"] .section h2::before{content:"> ";color:var(--accent)}
+  html[data-skin="teletype"] .xprmntl{background:#050506;border-top:1px solid var(--accent);border-bottom:1px solid var(--accent)}
+  html[data-skin="teletype"] .xpr-word,
+  html[data-skin="teletype"] .xpr-ttl,
+  html[data-skin="teletype"] .xpr-quote,
+  html[data-skin="teletype"] .xpr-snd,
+  html[data-skin="teletype"] .xpr-livettl{color:var(--ink)}
+  html[data-skin="teletype"] .card .sum{color:#b8b5ac}
+  html[data-skin="teletype"] .aw-modal .lede{color:#c9c6bd}
+  html[data-skin="teletype"] .aw-form input{background:#111114;color:var(--ink)}
+  html[data-skin="teletype"] .card img,
+  html[data-skin="teletype"] .oneart img,
+  html[data-skin="teletype"] .t-img{border:1px solid var(--line);filter:grayscale(.35) contrast(1.04)}
+  html[data-skin="teletype"] .card:hover img,
+  html[data-skin="teletype"] .oneart:hover img,
+  html[data-skin="teletype"] .t-img:hover{filter:none}
 </style></head>
 <body>
 <div class="wrap">
@@ -976,6 +1007,7 @@ TEMPLATE = """<!DOCTYPE html>
       <span class="nd-div"></span>
       <a href="subscribe.html">Subscribe</a>
       <a href="#" onclick="awOpenNews();return false;">Newsletter</a>
+      <a href="#" id="skinToggle">Switch design</a>
       <span class="nd-div"></span>
       <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
       <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
@@ -1023,24 +1055,38 @@ TEMPLATE = """<!DOCTYPE html>
 </div>
 <iframe name="aw_sink" style="display:none" title="signup target" tabindex="-1"></iframe>
 <script>
-/* ---- Daily Parlá color rotation (mirrors parlastudios.com's rotating menu) ---- */
+/* ---- Daily Parlá color + design-skin rotation ---- */
 (function(){
+  var root=document.documentElement;
   var PAL=[{n:"Slate Blue",c:"#7593BA"},{n:"Seafoam",c:"#9FD5BD"},{n:"Marigold",c:"#E7AB48"},{n:"Olive",c:"#817E30"},{n:"Coral",c:"#F37E66"}];
+  var SKINS=["wire","teletype"];
   function rgb(h){h=h.replace("#","");return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   function hx(r,g,b){function f(x){x=Math.max(0,Math.min(255,Math.round(x)));return ("0"+x.toString(16)).slice(-2);}return "#"+f(r)+f(g)+f(b);}
-  function apply(i){
+  function store(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  function load(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  var skin;
+  function applyColor(i){
     var p=PAL[((i%PAL.length)+PAL.length)%PAL.length],c=rgb(p.c);
-    var ink=hx(c[0]*0.55,c[1]*0.55,c[2]*0.55);
     var lum=(0.299*c[0]+0.587*c[1]+0.114*c[2])/255;
     var on=lum<0.5?"#ffffff":"#111111";
-    var s=document.documentElement.style;
+    // On the dark Teletype skin links and labels glow in the bright accent;
+    // on the light Wire skin they use a darkened sibling for contrast on white.
+    var ink=(skin==="teletype")?p.c:hx(c[0]*0.55,c[1]*0.55,c[2]*0.55);
+    var s=root.style;
     s.setProperty("--accent",p.c);s.setProperty("--accent-ink",ink);s.setProperty("--on-accent",on);
-    var m=document.querySelector('meta[name=theme-color]');if(m){m.setAttribute("content",p.c);}
+    var m=document.querySelector('meta[name=theme-color]');
+    if(m){m.setAttribute("content",(skin==="teletype")?"#0b0b0d":p.c);}
   }
-  var today=Math.floor(Date.now()/86400000)%PAL.length,view=today;
-  apply(view);
+  var day=Math.floor(Date.now()/86400000);
+  var view=day%PAL.length;
+  var daySkin=SKINS[day%SKINS.length];
+  function applySkin(s){skin=s;root.setAttribute("data-skin",s);applyColor(view);}
+  // priority: a hard lock (used by previews) > the visitor's saved choice > the day's skin
+  applySkin(root.getAttribute("data-skin-lock") || load("aw-skin") || daySkin);
   var b=document.getElementById("brand");
-  if(b){b.addEventListener("click",function(){view=(view+1)%PAL.length;apply(view);});}
+  if(b){b.addEventListener("click",function(){view=(view+1)%PAL.length;applyColor(view);});}
+  var st=document.getElementById("skinToggle");
+  if(st){st.addEventListener("click",function(e){e.preventDefault();var s=(skin==="teletype")?"wire":"teletype";store("aw-skin",s);applySkin(s);});}
 })();
 
 /* ---- Index drop-down (the hamburger) ---- */
