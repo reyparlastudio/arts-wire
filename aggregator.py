@@ -293,7 +293,7 @@ FRAME_SECTIONS = {
     "literature":  ["book", "manuscript", "letter", "library", "reading"],
     "ideas":       ["philosopher", "allegory", "scholar", "study", "manuscript"],
     "podcast":     ["conversation", "salon", "gathering", "two figures"],
-    "regional":    ["Mexican", "Spanish colonial", "Latin American", "colonial"],
+    "regional":    ["Cuban", "Caribbean", "Havana", "Spanish", "Spanish colonial", "Latin American", "Mexican"],
     "artsci":      ["botanical", "anatomical", "astronomical chart", "scientific illustration", "natural history"],
     "artjustice":  ["allegory of justice", "liberty", "crowd", "procession", "laborer"],
     "review":      ["reading", "open book", "scholar", "letter", "study"],

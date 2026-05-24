@@ -1,9 +1,16 @@
+# ============================================================================
+#  THE ARTS WIRE — runs the robot automatically every morning, for free.
+# ============================================================================
+#  GitHub runs this on its own computers on a schedule. You never touch it.
+#  It builds the digest and publishes it to a free public web page
+#  (GitHub Pages).  Setup is in the README — about 10 minutes, once.
+# ============================================================================
 name: Build The Arts Wire
 
 on:
   schedule:
-    - cron: "0 11 * * *"
-  workflow_dispatch: {}
+    - cron: "0 11 * * *"     # every day at 11:00 UTC (~7am ET). Change if you like.
+  workflow_dispatch: {}       # also lets you run it by hand with one click.
 
 permissions:
   contents: read
@@ -21,11 +28,19 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Build the digest
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python aggregator.py --langs es,fr,pt,de,it,ar,hi,zh,ja,ko,ru
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # optional; add in repo Settings > Secrets
+          # Optional open-access image sources. Add any of these as repo secrets
+          # to switch the matching collection on. Missing ones are simply skipped.
+          SI_API_KEY: ${{ secrets.SI_API_KEY }}                 # Smithsonian (api.data.gov)
+          RIJKS_API_KEY: ${{ secrets.RIJKS_API_KEY }}           # Rijksmuseum
+          EUROPEANA_API_KEY: ${{ secrets.EUROPEANA_API_KEY }}   # Europeana (incl. Spain)
+          HARVARD_API_KEY: ${{ secrets.HARVARD_API_KEY }}       # Harvard Art Museums
+          NYPL_TOKEN: ${{ secrets.NYPL_TOKEN }}                 # New York Public Library
+        run: python aggregator.py --langs es
       - uses: actions/upload-pages-artifact@v3
         with:
           path: output
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
