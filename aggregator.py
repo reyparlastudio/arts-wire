@@ -1189,8 +1189,8 @@ TEMPLATE = """<!DOCTYPE html>
   .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
   .sub{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;
     letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
-  .ticker{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);text-align:start;
-    padding:7px 0;border-bottom:1px solid var(--line);background:var(--alt);margin:0 -20px;
+  .ticker{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);text-align:center;
+    padding:7px 16px;border-bottom:1px solid var(--line);background:var(--alt);margin:0 -20px;
     overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .ticker b{font-weight:500}
   .kicker-line{font-family:"Saira Condensed",sans-serif;font-weight:600;text-transform:uppercase;
