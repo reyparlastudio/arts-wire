@@ -1174,8 +1174,10 @@ TEMPLATE = """<!DOCTYPE html>
   /* masthead = sticky bar + ticker */
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
     margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
-  .mast-bar{display:grid;grid-template-columns:34px 1fr auto;align-items:center;height:52px}
+  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;height:52px}
   .mast-bar .menu{font-size:20px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;text-align:left}
+  .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;justify-self:end}
+  .mast-bar .skinsun:hover{opacity:.6}
   .navdrawer{display:none;border-top:1px solid var(--line);background:var(--paper);padding:8px 0 12px}
   .navdrawer.open{display:block}
   .navdrawer .nd-label{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;
@@ -1417,6 +1419,7 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="mast-bar">
       <button class="menu" id="navToggle" aria-label="Open index" aria-expanded="false">&#9776;</button>
       <span class="brand" id="brand" title="Tap to preview the next color">The Arts Wire<sup class="tm">&trade;</sup></span>
+      <button class="skinsun" id="skinToggle" type="button" aria-label="Switch design">&#9728;</button>
       <a class="sub" href="subscribe.html">Subscribe</a>
     </div>
     <nav class="navdrawer" id="navdrawer" aria-label="Index">
@@ -1428,7 +1431,6 @@ TEMPLATE = """<!DOCTYPE html>
       <span class="nd-div"></span>
       <a href="subscribe.html">Subscribe</a>
       <a href="#" onclick="awOpenNews();return false;">Newsletter</a>
-      <a href="#" id="skinToggle">Switch design</a>
       <span class="nd-div"></span>
       <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
       <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
@@ -1508,7 +1510,11 @@ TEMPLATE = """<!DOCTYPE html>
   var day=Math.floor(Date.now()/86400000);
   var view=day%PAL.length;
   var daySkin=SKINS[day%SKINS.length];
-  function applySkin(s){skin=s;root.setAttribute("data-skin",s);applyColor(view);}
+  function applySkin(s){skin=s;root.setAttribute("data-skin",s);applyColor(view);
+    var t=document.getElementById("skinToggle");
+    if(t){t.innerHTML=(s==="teletype")?"\u263E":"\u2600";
+      t.setAttribute("aria-label",(s==="teletype")?"Switch to the light Wire design":"Switch to the dark Teletype design");
+      t.title=t.getAttribute("aria-label");}}
   // priority: a hard lock (used by previews) > the visitor's saved choice > the day's skin
   applySkin(root.getAttribute("data-skin-lock") || load("aw-skin") || daySkin);
   var b=document.getElementById("brand");
