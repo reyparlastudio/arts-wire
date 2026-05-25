@@ -80,8 +80,9 @@ def translate_edition(items, chrome, columns, categories, lang, client, model):
         "columns": {k: v for k, v in columns},
         "categories": {k: v for k, v in categories},
     }
-    m = _translate_json(client, model, language, meta, 2000) or {}
-    tchrome = m.get("chrome", chrome)
+    m = _translate_json(client, model, language, meta, 4096) or {}
+    mc = m.get("chrome") if isinstance(m.get("chrome"), dict) else {}
+    tchrome = {k: mc.get(k, v) for k, v in chrome.items()}   # per-key fallback to English
     tcolumns = [(k, m.get("columns", {}).get(k, v)) for k, v in columns]
     tcategories = [(k, m.get("categories", {}).get(k, v)) for k, v in categories]
 
@@ -117,9 +118,12 @@ def _translate_json(client, model, language, obj, max_tokens):
     returns {} on any error so the caller can fall back gracefully."""
     prompt = (
         f"Translate the VALUES in this JSON into {language} for an arts-and-letters "
-        "newsletter. Translate naturally and idiomatically, not literally. Keep every "
-        "JSON key, every integer 'i' field, all source names, and any URLs exactly as "
-        "they are. Do not add, drop, merge, or reorder items. Return ONLY the JSON.\n\n"
+        "newsletter. Translate ALL visible text, including taglines, section labels, "
+        "category words, and descriptions, naturally and idiomatically. Keep UNCHANGED "
+        "only these: any URLs; the names 'The Arts Wire', 'XPRMNTL', and 'Rey Parlá'; "
+        "and publication or source names. Keep every JSON key and every integer 'i' "
+        "field exactly, do not add, drop, merge, or reorder items, and keep HTML "
+        "entities such as &middot; and &amp; intact. Return ONLY the JSON.\n\n"
         + json.dumps(obj, ensure_ascii=False)
     )
     try:

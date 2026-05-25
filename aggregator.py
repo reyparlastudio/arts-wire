@@ -53,6 +53,92 @@ CHROME_EN = {
 }
 
 
+# The About page: Rey's manifesto, the two rooms, who it is for, and the
+# colophon. Written verbatim on every build as about.html.
+ABOUT_HTML = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About &mdash; XPRMNTL&trade; The Arts Wire</title>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#14110d;--paper:#f4f0e6;--line:#d8cfb8;--muted:#6c6450;--soft:#8a7f63;
+    --marigold:#e0a534;--olive:#73772f;--coral:#cf512c;--accent-ink:#47451a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"Spectral",Georgia,serif;font-size:18px;line-height:1.62;
+    background-image:radial-gradient(circle at 1px 1px,rgba(20,17,13,.04) 1px,transparent 0);background-size:24px 24px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:680px;margin:0 auto;padding:0 22px 80px}
+  header.top{text-align:center;padding:34px 0 16px;border-bottom:2px solid var(--ink);margin-bottom:30px}
+  header.top a.home{text-decoration:none;color:inherit;display:inline-block}
+  .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:26px;letter-spacing:.045em;line-height:1;display:block}
+  .wm-x .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
+  .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;margin-top:3px}
+  .kicker{font-family:"Saira Condensed",sans-serif;font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:var(--coral)}
+  .manifesto{margin:6px 0 8px}
+  .manifesto p{font-size:21px;line-height:1.5;margin:0 0 16px;color:#211d15}
+  .manifesto p:first-of-type{font-size:23px}
+  .manifesto .turn{color:var(--accent-ink)}
+  .msign{margin-top:24px}
+  .msign .nm{font-family:"Spectral",serif;font-style:italic;font-size:21px;color:#211d15}
+  .msign .loc{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:4px}
+  .rule{height:0;border:none;border-top:1px solid var(--line);margin:34px 0}
+  section{margin:30px 0}
+  h2{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  section p{margin:0 0 16px}
+  .lead-in{font-family:"Saira Condensed",sans-serif;font-weight:700;letter-spacing:.02em;color:var(--ink)}
+  .room{padding-inline-start:14px;border-inline-start:2px solid var(--olive);margin:0 0 18px}
+  .room.back{border-inline-start-color:var(--coral)}
+  .room .name{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:19px;letter-spacing:.01em;display:block;margin-bottom:4px}
+  footer.foot{margin-top:42px;padding-top:18px;border-top:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:12.5px;color:var(--muted)}
+  footer.foot a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid var(--line);margin-right:18px}
+  footer.foot a:hover{border-bottom-color:var(--accent-ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="home" href="index.html"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></a>
+  </header>
+  <p class="kicker">About</p>
+  <div class="manifesto">
+    <p>I am an artist. I have spent my life looking at art, making it, and collaborating with others to make it all happen, and watching how artists actually live and work.</p>
+    <p>XPRMNTL The Arts Wire is what that life became: an educational art project, not a media company.</p>
+    <p>Each day it is a wire. The world&rsquo;s art, gathered and written in your own language, free, for anyone who wants to see.</p>
+    <p>Each week, in private, it is a studio newsletter where I&rsquo;ll share my story, experiences, tips and other ideas like what it has been to be an artist, what it may mean to be one now, how this world really works, and how a life inside it is built and survived.</p>
+    <p class="turn">The wire shows you what is happening. The newsletter subscription tells you what it means and how to live it if you want it. I don&rsquo;t have all the answers, but I believe you&rsquo;ll be inspired and learn how to stay motivated.</p>
+    <p>I made it to hand forward what I know, to the next person trying to make a life in art.</p>
+    <div class="msign"><div class="nm">~Rey Parl&aacute;</div><div class="loc">Brooklyn, NY</div></div>
+  </div>
+  <hr class="rule">
+  <section>
+    <h2>The Two Rooms</h2>
+    <p>The project has two rooms, and the difference between them is the point.</p>
+    <div class="room"><span class="name">The Arts Wire</span>It is the field. Every day it reads the world&rsquo;s art press, finds what matters across film, theater, art, letters, and ideas, and rewrites the day into something clear and close, in your language. It is free, and it is meant to be. It is how you find the work, and how the work finds you.</div>
+    <div class="room back"><span class="name">The Back Room</span>It is the studio. Once a week, in a private letter, I share the things the news does not carry: my own story and experience, what the art industry rewards and what it quietly costs, how careers are made and how they last, and what it has felt like, and might still mean, to give a life to this. This is the part you pay for, because it is not reportage. It is lived.</div>
+  </section>
+  <section>
+    <h2>Who It Is For</h2>
+    <p>I write first to the artist: the young one deciding whether a life in art is even possible, and the working one who wants the field without the noise and a voice that has been where they are going. But the door opens wider than that. If you love art and want to understand it from the inside rather than the gift-shop outside, this was made for you too.</p>
+  </section>
+  <section>
+    <h2>The Colophon: How It Is Made, and Why</h2>
+    <p>An art project should show its hand, so here is how this one works.</p>
+    <p>Each morning the wire reads a wide field of sources from around the world, recognizes when many outlets are telling the same story and folds them into one, and arranges the day into its sections: <span class="lead-in">the Wire</span> for the day&rsquo;s movement, <span class="lead-in">the Review</span> for slower thinking, <span class="lead-in">the Frame</span> for a single public-domain artwork read closely, <span class="lead-in">XPRMNTL</span> for the avant-garde across time, and the regional pillars that keep Latin America, the Caribbean, and the wider world in view. The Lead is chosen for meaning, not for clicks, which is why an exhibition will sit above a celebrity headline.</p>
+    <p>Every edition is then rewritten, not swapped word for word, into each reader&rsquo;s language, so the same art arrives in your own tongue with its sense intact.</p>
+    <p>I use AI the way I use any material in the studio: as a tool and a collaborator, never a vending machine. It helps gather and translate at a scale one person could not reach alone. But the judgment, the design, the editorial eye, and the conviction are human, and they are mine. That is why every edition is signed, Designed by human intelligence, Rey Parl&aacute;.</p>
+    <p>Why build it this way? Because understanding art should not be gated behind language, geography, or who you happen to know. The wire opens the door. The newsletter walks you in.</p>
+  </section>
+  <footer class="foot">
+    <a href="index.html">&larr; The Arts Wire</a>
+    <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
+    <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
+  </footer>
+</div>
+</body>
+</html>"""
+
+
 # ----------------------------------------------------------------------------
 # IMAGE QUALITY STANDARD
 # A weak image cheapens the page, so every lead image must clear a measurable
@@ -1430,6 +1516,7 @@ TEMPLATE = """<!DOCTYPE html>
       <a href="#wire">The Wire</a>
       <a href="#review">The Review</a>
       <span class="nd-div"></span>
+      <a href="about.html">About</a>
       <a href="subscribe.html">Subscribe</a>
       <a href="#" onclick="awOpenNews();return false;">Newsletter</a>
       <span class="nd-div"></span>
@@ -1462,7 +1549,7 @@ TEMPLATE = """<!DOCTYPE html>
   <span class="anchor" id="wire"></span>@@WIRE@@
   @@THREADS@@
   <span class="anchor" id="review"></span>@@REVIEW@@
-  <footer><p>@@FOOT1@@</p></footer>
+  <footer><p><a href="about.html">About The Arts Wire</a> &middot; @@FOOT1@@</p></footer>
   <div class="cta">
     <button class="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&uarr;</button>
     <div class="t"><b>World Arts in Your Language.</b></div>
@@ -1819,30 +1906,28 @@ def main():
     # every edition). Falls back to the curated canon when AI is unavailable.
     xpr_ai = [] if args.demo else generate_ai_transmissions(now)
 
-    # English
-    write(render_html(items, COLUMNS, CATEGORIES, now, used_ai, lang="en",
-                       chrome=CHROME_EN, langs=langs, artwork=art, frames=frames,
-                       regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), "en")
-
-    # Other languages
+    # Translate the other languages FIRST, so the language switcher and the
+    # hreflang tags list only editions that were actually built. A language that
+    # fails or is skipped never leaves a dead link in the picker.
     client = None
     if extra and not args.demo and os.environ.get("ANTHROPIC_API_KEY"):
         from anthropic import Anthropic
         client = Anthropic()
     rankmap = {it.get("link"): it for it in items}      # carry ranking across translations
+    editions, built, failed = [], [], []
     for lang in extra:
         try:
             if args.demo:
                 tr = demo_translation(lang, items, COLUMNS, CATEGORIES)
                 if tr is None:
-                    print(f"  ({lang}: no offline sample; skipped in demo)"); continue
+                    print(f"  ({lang}: no offline sample; skipped in demo)"); failed.append(lang); continue
                 titems, tchrome, tcols, tcats = tr
             elif client:
                 titems, tchrome, tcols, tcats = T.translate_edition(
                     items, {k: v for k, v in CHROME_EN.items()}, COLUMNS, CATEGORIES,
                     lang, client, MODEL)
             else:
-                print(f"  ({lang}: needs ANTHROPIC_API_KEY; skipped)"); continue
+                print(f"  ({lang}: needs ANTHROPIC_API_KEY; skipped)"); failed.append(lang); continue
             for t in titems:                            # ranking/packaging is language-neutral
                 base = rankmap.get(t.get("link"))
                 if base:
@@ -1850,13 +1935,33 @@ def main():
                     t["cluster"] = base.get("cluster", 1)
                     t["also"] = base.get("also", [])
                     t["pick"] = base.get("pick", False)
-            write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
-                              chrome=tchrome, langs=langs, artwork=art, frames=frames,
-                              regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), lang)
+            editions.append((lang, titems, tcols, tcats, tchrome))
+            built.append(lang)
             print(f"  translated -> {lang}")
         except Exception as exc:                        # noqa: BLE001
+            failed.append(lang)
             print(f"  ! {lang} failed: {exc}", file=sys.stderr)
 
+    langs = ["en"] + built                              # the switcher lists only what exists
+
+    # English, now that we know which languages succeeded.
+    write(render_html(items, COLUMNS, CATEGORIES, now, used_ai, lang="en",
+                       chrome=CHROME_EN, langs=langs, artwork=art, frames=frames,
+                       regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), "en")
+    # Each translated edition.
+    for lang, titems, tcols, tcats, tchrome in editions:
+        write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
+                          chrome=tchrome, langs=langs, artwork=art, frames=frames,
+                          regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), lang)
+
+    if extra:
+        line = "Languages built: en" + "".join(f", {l}" for l in built)
+        if failed:
+            line += f"   |   unavailable: {', '.join(failed)}"
+        print(line)
+    with open(os.path.join(args.out, "about.html"), "w", encoding="utf-8") as f:
+        f.write(ABOUT_HTML)
+    print("  wrote about.html")
     print(f"\nDone. Open: {os.path.join(args.out, 'index.html')}")
 
 
