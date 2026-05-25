@@ -48,6 +48,7 @@ CHROME_EN = {
     "foot2": "built with care, run on autopilot.",
     "empty": "Nothing today.",
     "banner": "",
+    "signed": "Designed by human intelligence, Rey Parl&aacute;",
 }
 
 
@@ -479,6 +480,18 @@ def _parse_arr(text):
 def _short(text, n=170):
     text = text or ""
     return text if len(text) <= n else text[:n].rsplit(" ", 1)[0] + "\u2026"
+
+
+def hreflang_html(langs, current):
+    # Search engines need a self-referencing set of alternate links on every
+    # edition, plus an x-default. Codes follow BCP-47 (zh -> zh-Hans, etc.).
+    base = "https://reyparlastudio.github.io/arts-wire/"
+    out = []
+    for code in langs:
+        href = base + ("index.html" if code == "en" else f"index.{code}.html")
+        out.append(f'<link rel="alternate" hreflang="{T.bcp47(code)}" href="{href}">')
+    out.append(f'<link rel="alternate" hreflang="x-default" href="{base}index.html">')
+    return "\n".join(out)
 
 
 def switcher_html(langs, current):
@@ -1050,9 +1063,11 @@ def render_html(items, columns, categories, generated, used_ai, *,
     threads = ""    # Art & Science / Art & Social Justice are now inline sections
 
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
-    mode = "Curated by Rey Parl&aacute;"
+    mode = chrome.get("signed", "Designed by human intelligence, Rey Parl&aacute;")
     repl = {
-        "LANG": lang, "DIR": direction, "SWITCH": switcher_html(langs, lang),
+        "LANG": T.bcp47(lang), "DIR": direction, "SWITCH": switcher_html(langs, lang),
+        "HREFLANG": hreflang_html(langs, lang),
+        "LANGSJSON": json.dumps(list(langs)), "SHORTLANG": lang,
         "KICKER": chrome["kicker"], "PIECES": chrome["pieces"], "SUBSCRIBE": chrome["subscribe"],
         "DATE": generated.strftime("%A %B %-d, %Y"), "MODE": mode, "TOTAL": len(items),
         "BANNER": banner, "ONEART": oneart, "REGIONAL": regional, "REVIEW": review,
@@ -1071,6 +1086,7 @@ TEMPLATE = """<!DOCTYPE html>
 <html lang="@@LANG@@" dir="@@DIR@@"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Arts Wire</title>
+@@HREFLANG@@
 <meta name="theme-color" content="#0b0b0b">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -1104,6 +1120,14 @@ TEMPLATE = """<!DOCTYPE html>
   .switch .lang:hover{color:var(--ink)}
   .switch .on{color:var(--accent-ink);font-weight:500}
   .switch .globe{color:var(--soft);font-size:12px}
+
+  /* language suggestion: a quiet one-line offer, never a forced redirect */
+  .aw-lang-suggest{display:flex;align-items:center;gap:10px;justify-content:center;
+    flex-wrap:wrap;margin:8px -20px 0;padding:8px 16px;background:var(--alt);
+    border-bottom:1px solid var(--line);font-family:"DM Mono",monospace;font-size:12px;color:var(--soft)}
+  .aw-lang-suggest a{color:var(--accent-ink);font-weight:600;border-bottom:1px solid var(--accent)}
+  .aw-lang-suggest button{background:none;border:none;color:var(--soft);font-size:16px;
+    line-height:1;cursor:pointer;padding:0 2px}
 
   /* masthead = sticky bar + ticker */
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
@@ -1368,6 +1392,11 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="ticker">@@DATE@@ &nbsp;&middot;&nbsp; <b>World Arts in Your Language</b></div>
   </header>
   @@SWITCH@@
+  <div class="aw-lang-suggest" id="awLangSuggest" hidden>
+    <span id="awLangSuggestText"></span>
+    <a id="awLangSuggestGo" href="#"></a>
+    <button type="button" onclick="awDismissLang()" aria-label="Dismiss">&times;</button>
+  </div>
   <div class="editionline">@@KICKER@@<span class="curator">@@MODE@@</span></div>
   <div class="utility">
     <button class="news-btn" onclick="awOpenNews()">Newsletter</button>
@@ -1462,6 +1491,25 @@ var NEWSLETTER={ endpoint:"https://buttondown.com/api/emails/embed-subscribe/the
 function awOpenNews(){window.location.href="subscribe.html";}
 function awCloseNews(){document.getElementById("awOverlay").classList.remove("show");}
 function awDontShow(){try{localStorage.setItem("aw_news_dismissed","1");}catch(e){}awCloseNews();}
+/* Language suggestion: offer the reader's browser language, once, never force it.
+   Editions present on the site are listed in AW_LANGS (set per build). */
+var AW_LANGS=@@LANGSJSON@@, AW_CURRENT="@@SHORTLANG@@";
+var AW_LANG_LABEL={en:"Read in English",es:"Leer en espa\u00f1ol",fr:"Lire en fran\u00e7ais",pt:"Ler em portugu\u00eas",de:"Auf Deutsch lesen",it:"Leggi in italiano",zh:"\u9605\u8bfb\u4e2d\u6587\u7248",ja:"\u65e5\u672c\u8a9e\u3067\u8aad\u3080",ar:"\u0627\u0642\u0631\u0623 \u0628\u0627\u0644\u0639\u0631\u0628\u064a\u0629",ru:"\u0427\u0438\u0442\u0430\u0442\u044c \u043f\u043e-\u0440\u0443\u0441\u0441\u043a\u0438",ko:"\ud55c\uad6d\uc5b4\ub85c \uc77d\uae30"};
+function awDismissLang(){try{localStorage.setItem("aw_lang_dismissed","1");}catch(e){}var b=document.getElementById("awLangSuggest");if(b){b.hidden=true;}}
+(function(){
+  try{ if(localStorage.getItem("aw_lang_dismissed")==="1"){return;} }catch(e){}
+  var want=(navigator.language||"en").slice(0,2).toLowerCase();
+  if(want===AW_CURRENT){return;}
+  if(AW_LANGS.indexOf(want)===-1){return;}
+  var href=(want==="en")?"index.html":"index."+want+".html";
+  var box=document.getElementById("awLangSuggest");
+  var go=document.getElementById("awLangSuggestGo");
+  if(!box||!go){return;}
+  go.textContent=AW_LANG_LABEL[want]||("Read in "+want);
+  go.setAttribute("href",href);
+  document.getElementById("awLangSuggestText").textContent="\u25c9";
+  box.hidden=false;
+})();
 function awSubmitNews(ev){
   var msg=document.getElementById("awNewsMsg");
   if(!NEWSLETTER.endpoint){ev.preventDefault();msg.textContent="Thank you. Signups open in just a moment.";return false;}

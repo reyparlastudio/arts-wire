@@ -37,6 +37,18 @@ NAMES = {
 }
 
 
+# BCP-47 / hreflang codes. Most match the short code; a few need script or
+# region refinement so Google serves the right edition (esp. Chinese).
+BCP47 = {
+    "zh": "zh-Hans", "pt": "pt", "el": "el", "he": "he", "uk": "uk",
+}
+
+
+def bcp47(code):
+    """The search-engine-correct language tag for a short code."""
+    return BCP47.get(code, code)
+
+
 def autonym(code):
     return AUTONYMS.get(code, code.upper())
 
