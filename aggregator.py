@@ -1170,8 +1170,6 @@ TEMPLATE = """<!DOCTYPE html>
   .aw-lang-suggest a{color:var(--accent-ink);font-weight:600;border-bottom:1px solid var(--accent)}
   .aw-lang-suggest button{background:none;border:none;color:var(--soft);font-size:16px;
     line-height:1;cursor:pointer;padding:0 2px}
-  .brandline{font-family:"Spectral",Georgia,serif;font-style:italic;font-size:13.5px;
-    line-height:1.45;color:var(--soft);text-align:center;max-width:46ch;margin:6px auto 2px;padding:0 6px}
 
   /* masthead = sticky bar + ticker */
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
@@ -1191,14 +1189,16 @@ TEMPLATE = """<!DOCTYPE html>
   .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
   .sub{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;
     letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
-  .ticker{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);text-align:center;
+  .ticker{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);text-align:start;
     padding:7px 0;border-bottom:1px solid var(--line);background:var(--alt);margin:0 -20px;
     overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .ticker b{font-weight:500}
-  .editionline{text-align:center;font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);
-    padding:11px 0 0;line-height:1.5}
-  .editionline b{color:var(--ink);font-weight:500}
-  .editionline .curator{display:block;margin-top:5px;color:var(--ink);letter-spacing:.02em}
+  .kicker-line{font-family:"Saira Condensed",sans-serif;font-weight:600;text-transform:uppercase;
+    letter-spacing:.16em;font-size:11px;color:var(--soft);text-align:start;padding:12px 0 0}
+  .standfirst{font-family:"Spectral",Georgia,serif;font-size:16px;line-height:1.5;color:var(--ink);
+    text-align:start;max-width:46ch;margin:7px 0 0;padding-inline-start:12px;border-inline-start:2px solid var(--accent)}
+  .signed-line{font-family:"Saira Condensed",sans-serif;font-weight:600;text-transform:uppercase;
+    letter-spacing:.08em;font-size:11px;color:var(--soft);text-align:start;margin:12px 0 2px}
 
   /* utility: newsletter + search */
   .utility{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;padding:14px 0 2px}
@@ -1441,8 +1441,9 @@ TEMPLATE = """<!DOCTYPE html>
     <a id="awLangSuggestGo" href="#"></a>
     <button type="button" onclick="awDismissLang()" aria-label="Dismiss">&times;</button>
   </div>
-  <div class="editionline">@@KICKER@@<span class="curator">@@MODE@@</span></div>
-  <div class="brandline">@@TAGLINE@@</div>
+  <div class="kicker-line">@@KICKER@@</div>
+  <div class="standfirst">@@TAGLINE@@</div>
+  <div class="signed-line">@@MODE@@</div>
   <div class="utility">
     <button class="news-btn" onclick="awOpenNews()">Newsletter</button>
     <div class="searchbar">
