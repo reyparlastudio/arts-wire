@@ -2,13 +2,18 @@
 translate.py  —  turn one edition into many languages
 ======================================================
 Translates an assembled edition into any target language using Claude (the
-same key the summaries use). One API call per language per edition (we cache
-the whole edition, so we translate ONCE per language no matter how many
-subscribers want it). Proper nouns, source names, and links are left intact.
-Right-to-left languages (Arabic, Hebrew, Persian, Urdu) are flagged so the
-page flips direction automatically.
+same key the summaries use).
 
-If there's no API key, callers simply skip translation and ship English.
+Why this version is robust: instead of translating the whole edition in one
+API call (which overruns the token cap on a full day and comes back truncated,
+i.e. broken JSON), we translate the chrome once and then the stories in small
+BATCHES. Each call is small enough to never truncate, every call is wrapped so
+a single failure can't sink a whole language, and any story we cannot translate
+simply stays in English. The page is therefore always written.
+
+Proper nouns, source names, and links are left intact. Right-to-left languages
+(Arabic, Hebrew, Persian, Urdu) are flagged so the page flips automatically.
+If there's no API key, callers skip translation and ship English.
 """
 
 import json
@@ -36,12 +41,15 @@ NAMES = {
     "id": "Indonesian", "th": "Thai", "sw": "Swahili", "el": "Greek",
 }
 
-
 # BCP-47 / hreflang codes. Most match the short code; a few need script or
 # region refinement so Google serves the right edition (esp. Chinese).
 BCP47 = {
     "zh": "zh-Hans", "pt": "pt", "el": "el", "he": "he", "uk": "uk",
 }
+
+# How many stories to translate per API call. Small enough that the reply
+# never hits the token cap, large enough to keep the call count sane.
+BATCH = 12
 
 
 def bcp47(code):
@@ -59,37 +67,44 @@ def is_rtl(code):
 
 def translate_edition(items, chrome, columns, categories, lang, client, model):
     """Return (titems, tchrome, tcolumns, tcategories) translated into `lang`.
+
     `items` keep their kind/medium/link/source; only title/summary/tags change.
+    The work is split across several small calls so a long edition cannot
+    truncate. Anything that fails to translate is left in English.
     """
     language = NAMES.get(lang, lang)
-    bundle = {
+
+    # 1) Chrome + section labels: one small call.
+    meta = {
         "chrome": chrome,
         "columns": {k: v for k, v in columns},
         "categories": {k: v for k, v in categories},
-        "items": [{"i": i, "title": it["title"], "summary": it.get("summary", ""),
-                   "tags": it.get("tags", [])} for i, it in enumerate(items)],
     }
-    prompt = (
-        f"Translate the VALUES in this JSON into {language} for an arts-and-letters "
-        "newsletter. Rules: translate naturally and idiomatically (not literally); "
-        "keep JSON keys, the integer 'i' fields, source names, and any URLs exactly "
-        "as they are; do not add or drop items. Return ONLY the translated JSON.\n\n"
-        + json.dumps(bundle, ensure_ascii=False)
-    )
-    resp = client.messages.create(
-        model=model, max_tokens=8000,
-        messages=[{"role": "user", "content": prompt}])
-    data = _parse_obj(resp.content[0].text)
+    m = _translate_json(client, model, language, meta, 2000) or {}
+    tchrome = m.get("chrome", chrome)
+    tcolumns = [(k, m.get("columns", {}).get(k, v)) for k, v in columns]
+    tcategories = [(k, m.get("categories", {}).get(k, v)) for k, v in categories]
 
-    tchrome = data.get("chrome", chrome)
-    tcolumns = [(k, data.get("columns", {}).get(k, v)) for k, v in columns]
-    tcategories = [(k, data.get("categories", {}).get(k, v)) for k, v in categories]
+    # 2) Stories: small batches, each call independent and retried once.
+    done = {}  # global index -> {"title","summary","tags"}
+    for start in range(0, len(items), BATCH):
+        chunk = items[start:start + BATCH]
+        payload = {"items": [
+            {"i": start + j, "title": it["title"],
+             "summary": it.get("summary", ""), "tags": it.get("tags", [])}
+            for j, it in enumerate(chunk)]}
+        d = _translate_json(client, model, language, payload, 4096)
+        if not d.get("items"):                       # one retry on a bad batch
+            d = _translate_json(client, model, language, payload, 4096)
+        for row in d.get("items", []):
+            if isinstance(row, dict) and isinstance(row.get("i"), int):
+                done[row["i"]] = row
 
-    by_i = {d["i"]: d for d in data.get("items", []) if "i" in d}
+    # 3) Reassemble. Any story we could not translate stays English.
     titems = []
     for i, it in enumerate(items):
-        d = by_i.get(i, {})
-        copy = dict(it)                          # keep kind/medium/link/source
+        d = done.get(i, {})
+        copy = dict(it)                              # keep kind/medium/link/source
         copy["title"] = d.get("title", it["title"])
         copy["summary"] = d.get("summary", it.get("summary", ""))
         copy["tags"] = d.get("tags", it.get("tags", []))
@@ -97,7 +112,32 @@ def translate_edition(items, chrome, columns, categories, lang, client, model):
     return titems, tchrome, tcolumns, tcategories
 
 
+def _translate_json(client, model, language, obj, max_tokens):
+    """Translate the VALUES of one small JSON object. Always returns a dict;
+    returns {} on any error so the caller can fall back gracefully."""
+    prompt = (
+        f"Translate the VALUES in this JSON into {language} for an arts-and-letters "
+        "newsletter. Translate naturally and idiomatically, not literally. Keep every "
+        "JSON key, every integer 'i' field, all source names, and any URLs exactly as "
+        "they are. Do not add, drop, merge, or reorder items. Return ONLY the JSON.\n\n"
+        + json.dumps(obj, ensure_ascii=False)
+    )
+    try:
+        resp = client.messages.create(
+            model=model, max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}])
+        return _parse_obj(resp.content[0].text)
+    except Exception:
+        return {}
+
+
 def _parse_obj(text):
+    """Pull a JSON object out of a model reply. Never raises; {} on failure."""
     text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.MULTILINE).strip()
     s, e = text.find("{"), text.rfind("}")
-    return json.loads(text[s:e + 1]) if s != -1 else {}
+    if s == -1 or e <= s:
+        return {}
+    try:
+        return json.loads(text[s:e + 1])
+    except Exception:
+        return {}
