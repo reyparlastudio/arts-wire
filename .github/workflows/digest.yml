@@ -22,7 +22,7 @@ jobs:
       - name: Build the digest
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python aggregator.py
+        run: python aggregator.py --langs es,fr,pt,de,zh,ja,ar
       - uses: actions/upload-pages-artifact@v3
         with:
           path: output
