@@ -1174,7 +1174,7 @@ TEMPLATE = """<!DOCTYPE html>
   /* masthead = sticky bar + ticker */
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
     margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
-  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;height:52px}
+  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;padding:9px 0;min-height:52px}
   .mast-bar .menu{font-size:20px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;text-align:left}
   .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;justify-self:end}
   .mast-bar .skinsun:hover{opacity:.6}
@@ -1186,8 +1186,9 @@ TEMPLATE = """<!DOCTYPE html>
     color:var(--ink);padding:7px 2px;letter-spacing:.01em}
   .navdrawer a:hover{color:var(--accent-ink)}
   .navdrawer .nd-div{display:block;height:1px;background:var(--line);margin:7px 0}
-  .brand{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:20px;letter-spacing:.01em;
-    text-align:center;white-space:nowrap;cursor:pointer}
+  .brand{text-align:center;cursor:pointer;line-height:1;display:inline-block}
+  .brand .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:25px;letter-spacing:.045em;display:block;line-height:1}
+  .brand .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;line-height:1;margin-top:3px}
   .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
   .sub{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;
     letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
@@ -1223,7 +1224,7 @@ TEMPLATE = """<!DOCTYPE html>
   /* ---- XPRMNTL, the experimental core (dark signature band) ---- */
   .xprmntl{background:var(--ink);color:var(--paper);margin:16px -20px 0;padding:28px 20px 30px;scroll-margin-top:92px}
   .xpr-head{border-bottom:1px solid #ffffff22;padding-bottom:14px;margin-bottom:18px}
-  .xpr-word{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(40px,13vw,58px);
+  .xpr-word{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(30px,9vw,42px);
     letter-spacing:.07em;line-height:.9;display:block;color:var(--paper)}
   .xpr-tag{font-family:"Archivo",sans-serif;font-size:11px;letter-spacing:.04em;color:#b9b9b9;
     display:block;margin-top:10px;line-height:1.45;max-width:36ch}
@@ -1387,7 +1388,7 @@ TEMPLATE = """<!DOCTYPE html>
     background:repeating-linear-gradient(180deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);mix-blend-mode:soft-light}
   html[data-skin="teletype"] .wrap{box-shadow:0 0 0 1px #ffffff14}
   html[data-skin="teletype"] header.masthead{background:rgba(10,10,12,.92);border-bottom-color:var(--line)}
-  html[data-skin="teletype"] .brand::after{content:"_";color:var(--accent);margin-left:.12em;animation:awblink 1.1s steps(1) infinite}
+  html[data-skin="teletype"] .brand .wm-title::after{content:"_";color:var(--accent);margin-left:.12em;animation:awblink 1.1s steps(1) infinite}
   @keyframes awblink{50%{opacity:0}}
   html[data-skin="teletype"] .zone-label::before{content:"// ";color:var(--accent)}
   html[data-skin="teletype"] .section h2::before{content:"> ";color:var(--accent)}
@@ -1418,7 +1419,7 @@ TEMPLATE = """<!DOCTYPE html>
   <header class="masthead">
     <div class="mast-bar">
       <button class="menu" id="navToggle" aria-label="Open index" aria-expanded="false">&#9776;</button>
-      <span class="brand" id="brand" title="Tap to preview the next color">The Arts Wire<sup class="tm">&trade;</sup></span>
+      <span class="brand" id="brand" title="Tap to preview the next color"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></span>
       <button class="skinsun" id="skinToggle" type="button" aria-label="Switch design">&#9728;</button>
       <a class="sub" href="subscribe.html">Subscribe</a>
     </div>
