@@ -53,14 +53,39 @@ CHROME_EN = {
 }
 
 
-# The About page: Rey's manifesto, the two rooms, who it is for, and the
-# colophon. Written verbatim on every build as about.html.
-ABOUT_HTML = r"""<!DOCTYPE html>
-<html lang="en">
+# The About page. The prose lives in ABOUT_STRINGS so every language can be
+# translated; the brand names, Rey's name, and the layout live in ABOUT_TEMPLATE.
+ABOUT_STRINGS = {
+    "about": "About",
+    "m1": "I am an artist. I have spent my life looking at art, making it, and collaborating with others to make it all happen, and watching how artists actually live and work.",
+    "m2": "In 2008 I co-founded Parl\u00e1 Studios with my brother, the artist Jos\u00e9 Parl\u00e1, and I have worked and collaborated beside him and many other artists ever since. I have traveled the world for art, but my eye was formed on one long line, from early days in Miami to twenty years in Brooklyn. I am a New Yorker, and this project is that vantage, an artist\u2019s, turned outward.",
+    "m3": "XPRMNTL The Arts Wire is what that life became: an educational art project, not a media company.",
+    "m4": "Each day it is a wire. The world\u2019s art, gathered and written in your own language, free, for anyone who wants to see.",
+    "m5": "Each week, in private, it is a studio newsletter where I\u2019ll share my story, experiences, tips and other ideas like what it has been to be an artist, what it may mean to be one now, how this world really works, and how a life inside it is built and survived.",
+    "m6": "The wire shows you what is happening. The newsletter subscription tells you what it means and how to live it if you want it. I don\u2019t have all the answers, but I believe you\u2019ll be inspired and learn how to stay motivated.",
+    "m7": "I made it to hand forward what I know, to the next person trying to make a life in art.",
+    "loc": "Brooklyn, NY",
+    "rooms_h": "The Two Rooms",
+    "rooms_intro": "The project has two rooms, and the difference between them is the point.",
+    "wire_body": "It is the field. Every day it reads the world\u2019s art press, finds what matters across film, theater, art, letters, and ideas, and rewrites the day into something clear and close, in your language. It is free, and it is meant to be. It is how you find the work, and how the work finds you.",
+    "backroom_body": "It is the studio. Once a week, in a private letter, I share the things the news does not carry: my own story and experience, what the art industry rewards and what it quietly costs, how careers are made and how they last, and what it has felt like, and might still mean, to give a life to this. This is the part you pay for, because it is not reportage. It is lived.",
+    "who_h": "Who It Is For",
+    "who_body": "I write first to the artist: the young one deciding whether a life in art is even possible, and the working one who wants the field without the noise and a voice that has been where they are going. But the door opens wider than that. If you love art and want to understand it from the inside rather than the gift-shop outside, this was made for you too.",
+    "colophon_h": "The Colophon: How It Is Made, and Why",
+    "c1": "An art project should show its hand, so here is how this one works.",
+    "c2": "Each morning the wire reads a wide field of sources from around the world, recognizes when many outlets are telling the same story and folds them into one, and arranges the day into its sections: the Wire for the day\u2019s movement, the Review for slower thinking, the Frame for a single public-domain artwork read closely, XPRMNTL for the avant-garde across time, and the regional pillars that keep Latin America, the Caribbean, and the wider world in view. The Lead is chosen for meaning, not for clicks, which is why an exhibition will sit above a celebrity headline.",
+    "c3": "Every edition is then rewritten, not swapped word for word, into each reader\u2019s language, so the same art arrives in your own tongue with its sense intact.",
+    "c4": "I use AI the way I use any material in the studio: as a tool and a collaborator, never a vending machine. It helps gather and translate at a scale one person could not reach alone. But the judgment, the design, the editorial eye, and the conviction are human, and they are mine. That is why every edition is signed, Designed by human intelligence, Rey Parl\u00e1.",
+    "c5": "Why build it this way? Because understanding art should not be gated behind language, geography, or who you happen to know. The wire opens the door. The newsletter walks you in.",
+    "back": "The Arts Wire",
+}
+
+ABOUT_TEMPLATE = r"""<!DOCTYPE html>
+<html lang="@@LANG@@" dir="@@DIR@@">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>About &mdash; XPRMNTL&trade; The Arts Wire</title>
+<title>@@ABOUT@@ &mdash; XPRMNTL&trade; The Arts Wire</title>
 <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{--ink:#14110d;--paper:#f4f0e6;--line:#d8cfb8;--muted:#6c6450;--soft:#8a7f63;
@@ -86,7 +111,6 @@ ABOUT_HTML = r"""<!DOCTYPE html>
   section{margin:30px 0}
   h2{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
   section p{margin:0 0 16px}
-  .lead-in{font-family:"Saira Condensed",sans-serif;font-weight:700;letter-spacing:.02em;color:var(--ink)}
   .room{padding-inline-start:14px;border-inline-start:2px solid var(--olive);margin:0 0 18px}
   .room.back{border-inline-start-color:var(--coral)}
   .room .name{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:19px;letter-spacing:.01em;display:block;margin-bottom:4px}
@@ -98,45 +122,60 @@ ABOUT_HTML = r"""<!DOCTYPE html>
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="home" href="index.html"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></a>
+    <a class="home" href="@@HOMEHREF@@"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></a>
   </header>
-  <p class="kicker">About</p>
+  <p class="kicker">@@ABOUT@@</p>
   <div class="manifesto">
-    <p>I am an artist. I have spent my life looking at art, making it, and collaborating with others to make it all happen, and watching how artists actually live and work.</p>
-    <p>XPRMNTL The Arts Wire is what that life became: an educational art project, not a media company.</p>
-    <p>Each day it is a wire. The world&rsquo;s art, gathered and written in your own language, free, for anyone who wants to see.</p>
-    <p>Each week, in private, it is a studio newsletter where I&rsquo;ll share my story, experiences, tips and other ideas like what it has been to be an artist, what it may mean to be one now, how this world really works, and how a life inside it is built and survived.</p>
-    <p class="turn">The wire shows you what is happening. The newsletter subscription tells you what it means and how to live it if you want it. I don&rsquo;t have all the answers, but I believe you&rsquo;ll be inspired and learn how to stay motivated.</p>
-    <p>I made it to hand forward what I know, to the next person trying to make a life in art.</p>
-    <div class="msign"><div class="nm">~Rey Parl&aacute;</div><div class="loc">Brooklyn, NY</div></div>
+    <p>@@M1@@</p>
+    <p>@@M2@@</p>
+    <p>@@M3@@</p>
+    <p>@@M4@@</p>
+    <p>@@M5@@</p>
+    <p class="turn">@@M6@@</p>
+    <p>@@M7@@</p>
+    <div class="msign"><div class="nm">~Rey Parl&aacute;</div><div class="loc">@@LOC@@</div></div>
   </div>
   <hr class="rule">
   <section>
-    <h2>The Two Rooms</h2>
-    <p>The project has two rooms, and the difference between them is the point.</p>
-    <div class="room"><span class="name">The Arts Wire</span>It is the field. Every day it reads the world&rsquo;s art press, finds what matters across film, theater, art, letters, and ideas, and rewrites the day into something clear and close, in your language. It is free, and it is meant to be. It is how you find the work, and how the work finds you.</div>
-    <div class="room back"><span class="name">The Back Room</span>It is the studio. Once a week, in a private letter, I share the things the news does not carry: my own story and experience, what the art industry rewards and what it quietly costs, how careers are made and how they last, and what it has felt like, and might still mean, to give a life to this. This is the part you pay for, because it is not reportage. It is lived.</div>
+    <h2>@@ROOMS_H@@</h2>
+    <p>@@ROOMS_INTRO@@</p>
+    <div class="room"><span class="name">The Arts Wire</span>@@WIRE_BODY@@</div>
+    <div class="room back"><span class="name">The Back Room</span>@@BACKROOM_BODY@@</div>
   </section>
   <section>
-    <h2>Who It Is For</h2>
-    <p>I write first to the artist: the young one deciding whether a life in art is even possible, and the working one who wants the field without the noise and a voice that has been where they are going. But the door opens wider than that. If you love art and want to understand it from the inside rather than the gift-shop outside, this was made for you too.</p>
+    <h2>@@WHO_H@@</h2>
+    <p>@@WHO_BODY@@</p>
   </section>
   <section>
-    <h2>The Colophon: How It Is Made, and Why</h2>
-    <p>An art project should show its hand, so here is how this one works.</p>
-    <p>Each morning the wire reads a wide field of sources from around the world, recognizes when many outlets are telling the same story and folds them into one, and arranges the day into its sections: <span class="lead-in">the Wire</span> for the day&rsquo;s movement, <span class="lead-in">the Review</span> for slower thinking, <span class="lead-in">the Frame</span> for a single public-domain artwork read closely, <span class="lead-in">XPRMNTL</span> for the avant-garde across time, and the regional pillars that keep Latin America, the Caribbean, and the wider world in view. The Lead is chosen for meaning, not for clicks, which is why an exhibition will sit above a celebrity headline.</p>
-    <p>Every edition is then rewritten, not swapped word for word, into each reader&rsquo;s language, so the same art arrives in your own tongue with its sense intact.</p>
-    <p>I use AI the way I use any material in the studio: as a tool and a collaborator, never a vending machine. It helps gather and translate at a scale one person could not reach alone. But the judgment, the design, the editorial eye, and the conviction are human, and they are mine. That is why every edition is signed, Designed by human intelligence, Rey Parl&aacute;.</p>
-    <p>Why build it this way? Because understanding art should not be gated behind language, geography, or who you happen to know. The wire opens the door. The newsletter walks you in.</p>
+    <h2>@@COLOPHON_H@@</h2>
+    <p>@@C1@@</p>
+    <p>@@C2@@</p>
+    <p>@@C3@@</p>
+    <p>@@C4@@</p>
+    <p>@@C5@@</p>
   </section>
   <footer class="foot">
-    <a href="index.html">&larr; The Arts Wire</a>
+    <a href="@@HOMEHREF@@">&larr; @@BACK@@</a>
     <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
     <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
   </footer>
 </div>
 </body>
 </html>"""
+
+
+def render_about(strings, lang):
+    """Fill the About template with one language's strings."""
+    home = "index.html" if lang == "en" else f"index.{lang}.html"
+    repl = {"LANG": T.bcp47(lang), "DIR": "rtl" if T.is_rtl(lang) else "ltr",
+            "HOMEHREF": home}
+    for k, v in strings.items():
+        repl[k.upper()] = v
+    out = ABOUT_TEMPLATE
+    for k, v in repl.items():
+        out = out.replace(f"@@{k}@@", v)
+    return out
+
 
 
 # ----------------------------------------------------------------------------
@@ -1194,6 +1233,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
         "LANG": T.bcp47(lang), "DIR": direction, "SWITCH": switcher_html(langs, lang),
         "HREFLANG": hreflang_html(langs, lang),
         "LANGSJSON": json.dumps(list(langs)), "SHORTLANG": lang,
+        "ABOUTHREF": "about.html" if lang == "en" else f"about.{lang}.html",
         "KICKER": chrome["kicker"], "PIECES": chrome["pieces"], "SUBSCRIBE": chrome["subscribe"],
         "TAGLINE": chrome.get("tagline", ""),
         "DATE": generated.strftime("%A %B %-d, %Y"), "MODE": mode, "TOTAL": len(items),
@@ -1232,8 +1272,8 @@ TEMPLATE = """<!DOCTYPE html>
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-  body{background:#e4e2dd;color:var(--ink);font-family:"Spectral",Georgia,serif;
-    font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  body{background:var(--frame,#e4e2dd);color:var(--ink);font-family:"Spectral",Georgia,serif;
+    font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .6s ease}
   [dir=rtl] body{font-family:"Noto Naskh Arabic","Spectral",serif}
   a{color:inherit;text-decoration:none}
   /* the phone column, one design on every device, vertical scroll */
@@ -1516,7 +1556,7 @@ TEMPLATE = """<!DOCTYPE html>
       <a href="#wire">The Wire</a>
       <a href="#review">The Review</a>
       <span class="nd-div"></span>
-      <a href="about.html">About</a>
+      <a href="@@ABOUTHREF@@">About</a>
       <a href="subscribe.html">Subscribe</a>
       <a href="#" onclick="awOpenNews();return false;">Newsletter</a>
       <span class="nd-div"></span>
@@ -1549,7 +1589,7 @@ TEMPLATE = """<!DOCTYPE html>
   <span class="anchor" id="wire"></span>@@WIRE@@
   @@THREADS@@
   <span class="anchor" id="review"></span>@@REVIEW@@
-  <footer><p><a href="about.html">About The Arts Wire</a> &middot; @@FOOT1@@</p></footer>
+  <footer><p><a href="@@ABOUTHREF@@">About The Arts Wire</a> &middot; @@FOOT1@@</p></footer>
   <div class="cta">
     <button class="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&uarr;</button>
     <div class="t"><b>World Arts in Your Language.</b></div>
@@ -1592,6 +1632,8 @@ TEMPLATE = """<!DOCTYPE html>
     var ink=(skin==="teletype")?p.c:hx(c[0]*0.55,c[1]*0.55,c[2]*0.55);
     var s=root.style;
     s.setProperty("--accent",p.c);s.setProperty("--accent-ink",ink);s.setProperty("--on-accent",on);
+    var fb=[231,227,218],ft=0.22;                 // sides take a gentle wash of the day's color
+    s.setProperty("--frame",hx(c[0]*ft+fb[0]*(1-ft),c[1]*ft+fb[1]*(1-ft),c[2]*ft+fb[2]*(1-ft)));
     var m=document.querySelector('meta[name=theme-color]');
     if(m){m.setAttribute("content",(skin==="teletype")?"#0b0b0d":p.c);}
   }
@@ -1796,7 +1838,10 @@ def main():
         shutil.copy2(sub, os.path.join(args.out, "subscribe.html"))
 
     now = dt.datetime.now()
-    extra = [c.strip() for c in args.langs.split(",") if c.strip()]
+    if args.langs.strip().lower() in ("all", "*", "world"):
+        extra = T.all_langs()
+    else:
+        extra = [c.strip() for c in args.langs.split(",") if c.strip()]
     langs = ["en"] + extra
 
     if args.demo:
@@ -1959,9 +2004,16 @@ def main():
         if failed:
             line += f"   |   unavailable: {', '.join(failed)}"
         print(line)
-    with open(os.path.join(args.out, "about.html"), "w", encoding="utf-8") as f:
-        f.write(ABOUT_HTML)
-    print("  wrote about.html")
+    # About page: English plus a translated copy for every built language.
+    def write_about(html, lc):
+        name = "about.html" if lc == "en" else f"about.{lc}.html"
+        with open(os.path.join(args.out, name), "w", encoding="utf-8") as f:
+            f.write(html)
+    write_about(render_about(ABOUT_STRINGS, "en"), "en")
+    for lc in built:
+        astr = T.translate_map(ABOUT_STRINGS, lc, client, MODEL) if client else ABOUT_STRINGS
+        write_about(render_about(astr, lc), lc)
+    print(f"  wrote about.html (+{len(built)} translated)")
     print(f"\nDone. Open: {os.path.join(args.out, 'index.html')}")
 
 
