@@ -37,6 +37,7 @@ ALL_KINDS = REVIEW_KINDS + ("news",)
 
 CHROME_EN = {
     "kicker": "Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas",
+    "tagline": "The Arts Wire is a daily cultural briefing. The paid letter is a weekly editor&rsquo;s dispatch, sharper, slower, and more personal.",
     "pieces": "pieces",
     "review_label": "The Review: long reads, books &amp; ideas",
     "wire_label": "The Wire: today&rsquo;s news, by medium",
@@ -400,6 +401,39 @@ def _is_pick(it, picks):
     return any(p in hay for p in picks)
 
 
+_AFFINITY_UP = (
+    "museum", "exhibition", "retrospective", "biennial", "biennale", "gallery",
+    "painting", "painter", "sculptor", "sculpture", "poet", "poetry", "novelist",
+    "essay", "memoir", "archive", "curator", "curated", "opera", "ballet", "symphony",
+    "orchestra", "photograph", "architecture", "manuscript", "portrait", "installation",
+    "avant-garde", "literature", "criticism", "drawing", "printmaking", "fresco", "verse",
+)
+_AFFINITY_DOWN = (
+    "box office", "streaming", "episode", "season ", "trailer", "casting", "red carpet",
+    "celebrity", "franchise", "reboot", "renewed", "canceled", "cancelled", "ratings",
+    "death scene", "spoiler", "recap", "premiere date", "first look", "teaser", "sequel",
+    "spinoff", "influencer", "goes viral", "net worth", "dating", "feud", "box-office",
+)
+_TRADE_SOURCES = ("hollywood reporter", "deadline", "variety", "tmz", "page six")
+_ART_MEDIA = ("art", "museum", "photograph", "architecture", "design", "book",
+              "literature", "letters", "idea", "theater", "theatre", "dance",
+              "classical", "opera", "poetry")
+
+
+def _editorial_affinity(it):
+    """Positive for The Arts Wire's curatorial center, art, letters, criticism, the
+    stage, classical, photography, architecture; negative for entertainment-industry
+    churn and celebrity copy. Keeps the Lead and the top of the page on-brand."""
+    medium = (it.get("medium") or "").lower()
+    hay = " ".join([it.get("title") or "", " ".join(it.get("tags") or [])]).lower()
+    a = 0.0
+    if any(m in medium for m in _ART_MEDIA):
+        a += 0.6
+    a += 0.18 * sum(1 for k in _AFFINITY_UP if k in hay)
+    a -= 0.50 * sum(1 for k in _AFFINITY_DOWN if k in hay)
+    return max(-1.4, min(1.4, a))
+
+
 def rank_items(items, now, picks=None):
     """Give every story a single score and mark editor's picks, in place.
     score = recency + authority + corroboration, with a large pin for picks."""
@@ -417,8 +451,10 @@ def rank_items(items, now, picks=None):
             rec = 0.0
         auth = _authority(it.get("source"))
         corro = math.log1p(max(0, it.get("cluster", 1) - 1))   # 0 alone, grows w/ outlets
+        aff = _editorial_affinity(it)
+        it["affinity"] = aff
         it["pick"] = _is_pick(it, picks)
-        it["score"] = 2.0 * rec + 1.2 * auth + 1.5 * corro + (100.0 if it["pick"] else 0.0)
+        it["score"] = 2.0 * rec + 1.2 * auth + 1.5 * corro + 1.2 * aff + (100.0 if it["pick"] else 0.0)
     return items
 
 
@@ -895,7 +931,11 @@ def render_html(items, columns, categories, generated, used_ai, *,
     if LEAD_STORY:
         lead_pool = [it for it in main_items if it.get("kind") == "news"]
         if lead_pool:
-            lead_item = max(lead_pool, key=lambda x: x.get("score", 0.0))
+            def _lead_key(x):
+                src = (x.get("source") or "").lower()
+                trade = -0.7 if any(t in src for t in _TRADE_SOURCES) else 0.0
+                return x.get("score", 0.0) + 0.9 * x.get("affinity", 0.0) + trade
+            lead_item = max(lead_pool, key=_lead_key)
     lead_link = (lead_item or {}).get("link")
 
     def teaser(it):
@@ -1069,6 +1109,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
         "HREFLANG": hreflang_html(langs, lang),
         "LANGSJSON": json.dumps(list(langs)), "SHORTLANG": lang,
         "KICKER": chrome["kicker"], "PIECES": chrome["pieces"], "SUBSCRIBE": chrome["subscribe"],
+        "TAGLINE": chrome.get("tagline", ""),
         "DATE": generated.strftime("%A %B %-d, %Y"), "MODE": mode, "TOTAL": len(items),
         "BANNER": banner, "ONEART": oneart, "REGIONAL": regional, "REVIEW": review,
         "WIRE": wire, "THREADS": threads,
@@ -1129,6 +1170,8 @@ TEMPLATE = """<!DOCTYPE html>
   .aw-lang-suggest a{color:var(--accent-ink);font-weight:600;border-bottom:1px solid var(--accent)}
   .aw-lang-suggest button{background:none;border:none;color:var(--soft);font-size:16px;
     line-height:1;cursor:pointer;padding:0 2px}
+  .brandline{font-family:"Spectral",Georgia,serif;font-style:italic;font-size:13.5px;
+    line-height:1.45;color:var(--soft);text-align:center;max-width:46ch;margin:6px auto 2px;padding:0 6px}
 
   /* masthead = sticky bar + ticker */
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
@@ -1399,6 +1442,7 @@ TEMPLATE = """<!DOCTYPE html>
     <button type="button" onclick="awDismissLang()" aria-label="Dismiss">&times;</button>
   </div>
   <div class="editionline">@@KICKER@@<span class="curator">@@MODE@@</span></div>
+  <div class="brandline">@@TAGLINE@@</div>
   <div class="utility">
     <button class="news-btn" onclick="awOpenNews()">Newsletter</button>
     <div class="searchbar">
