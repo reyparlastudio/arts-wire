@@ -1122,6 +1122,7 @@ TEMPLATE = """<!DOCTYPE html>
   .switch .globe{color:var(--soft);font-size:12px}
 
   /* language suggestion: a quiet one-line offer, never a forced redirect */
+  .aw-lang-suggest[hidden]{display:none}
   .aw-lang-suggest{display:flex;align-items:center;gap:10px;justify-content:center;
     flex-wrap:wrap;margin:8px -20px 0;padding:8px 16px;background:var(--alt);
     border-bottom:1px solid var(--line);font-family:"DM Mono",monospace;font-size:12px;color:var(--soft)}
