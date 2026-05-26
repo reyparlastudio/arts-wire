@@ -41,7 +41,7 @@ CHROME_EN = {
     "pieces": "pieces",
     "review_label": "The Review: long reads, books &amp; ideas",
     "wire_label": "The Wire: today&rsquo;s news, by medium",
-    "subscribe": "Subscribe &middot; $12/year",
+    "subscribe": "Subscribe &middot; $30/year",
     "art_label": "The Frame",
     "regional_label": "Latin America &amp; the Caribbean",
     "threads_label": "Threads: reading across the arts",
