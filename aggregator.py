@@ -75,7 +75,7 @@ ABOUT_STRINGS = {
     "c1": "An art project should show its hand, so here is how this one works.",
     "c2": "Each morning the wire reads a wide field of sources from around the world, recognizes when many outlets are telling the same story and folds them into one, and arranges the day into its sections: the Wire for the day\u2019s movement, the Review for slower thinking, the Frame for a single public-domain artwork read closely, XPRMNTL for the avant-garde across time, and the regional pillars that keep Latin America, the Caribbean, and the wider world in view. The Lead is chosen for meaning, not for clicks, which is why an exhibition will sit above a celebrity headline.",
     "c3": "Every edition is then rewritten, not swapped word for word, into each reader\u2019s language, so the same art arrives in your own tongue with its sense intact.",
-    "c4": "I use AI the way I use any material in the studio: as a tool and a collaborator, never a vending machine. It helps gather and translate at a scale one person could not reach alone. But the judgment, the design, the editorial eye, and the conviction are human, and they are mine. That is why every edition is signed, Designed by human intelligence, Rey Parl\u00e1.",
+    "c4": "I use ethical AI the way I use any material in the studio: as a tool and a collaborator, never a vending machine. It helps gather and translate at a scale one person could not reach alone. But the judgment, the design, the editorial eye, and the conviction are human, and they are mine. That is why every edition is signed, Designed by human intelligence, Rey Parl\u00e1.",
     "c5": "Why build it this way? Because understanding art should not be gated behind language, geography, or who you happen to know. The wire opens the door. The newsletter walks you in.",
     "back": "The Arts Wire",
 }
@@ -85,81 +85,146 @@ ABOUT_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#817e30">
 <title>@@ABOUT@@ &mdash; XPRMNTL&trade; The Arts Wire</title>
-<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700;800;900&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@400;500&family=Archivo:wght@600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--ink:#14110d;--paper:#f4f0e6;--line:#d8cfb8;--muted:#6c6450;--soft:#8a7f63;
-    --marigold:#e0a534;--olive:#73772f;--coral:#cf512c;--accent-ink:#47451a}
+  :root{--paper:#ffffff;--alt:#f7f7f6;--ink:#0b0b0b;--soft:#6f6f6f;--line:#e9e9e9;
+    --accent:#817e30;--accent-ink:#47451a;--on-accent:#ffffff;--coral:#cf512c;--frame:#e4e2dd;--phone:500px}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--paper);color:var(--ink);font-family:"Spectral",Georgia,serif;font-size:18px;line-height:1.62;
-    background-image:radial-gradient(circle at 1px 1px,rgba(20,17,13,.04) 1px,transparent 0);background-size:24px 24px;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:680px;margin:0 auto;padding:0 22px 80px}
-  header.top{text-align:center;padding:34px 0 16px;border-bottom:2px solid var(--ink);margin-bottom:30px}
-  header.top a.home{text-decoration:none;color:inherit;display:inline-block}
-  .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:26px;letter-spacing:.045em;line-height:1;display:block}
-  .wm-x .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
-  .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;margin-top:3px}
-  .kicker{font-family:"Saira Condensed",sans-serif;font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:var(--coral)}
-  .manifesto{margin:6px 0 8px}
-  .manifesto p{font-size:21px;line-height:1.5;margin:0 0 16px;color:#211d15}
-  .manifesto p:first-of-type{font-size:23px}
-  .manifesto .turn{color:var(--accent-ink)}
-  .msign{margin-top:24px}
-  .msign .nm{font-family:"Spectral",serif;font-style:italic;font-size:21px;color:#211d15}
-  .msign .loc{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:4px}
-  .rule{height:0;border:none;border-top:1px solid var(--line);margin:34px 0}
-  section{margin:30px 0}
-  h2{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-  section p{margin:0 0 16px}
-  .room{padding-inline-start:14px;border-inline-start:2px solid var(--olive);margin:0 0 18px}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--frame);color:var(--ink);font-family:"Spectral",Georgia,serif;font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .5s ease}
+  [dir=rtl] body{font-family:"Noto Naskh Arabic","Spectral",serif}
+  a{color:inherit;text-decoration:none}
+  .wrap{position:relative;width:100%;max-width:var(--phone);margin:0 auto;background:var(--paper);min-height:100vh;box-shadow:0 0 0 1px #00000010,0 30px 80px #00000026;padding:0 20px}
+  header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
+  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;padding:9px 0;min-height:52px}
+  .mast-bar .home{font-size:20px;line-height:1;color:var(--ink);text-align:start}
+  .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0}
+  .mast-bar .skinsun:hover{opacity:.6}
+  .brand{text-align:center;line-height:1;display:inline-block;cursor:pointer}
+  .brand .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:25px;letter-spacing:.045em;display:block;line-height:1}
+  .brand .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;line-height:1;margin-top:3px}
+  .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
+  .sub{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
+  .kicker{font-family:"Saira Condensed",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--soft);padding:24px 0 0}
+  .lead-para{font-family:"Spectral",Georgia,serif;font-size:20px;line-height:1.46;color:var(--ink);margin:14px 0 0;border-inline-start:2px solid var(--accent);padding-inline-start:15px}
+  .mpara{font-size:17px;line-height:1.6;color:var(--ink);margin:16px 0 0}
+  .turn{font-size:17px;line-height:1.6;color:var(--accent-ink);margin:16px 0 0}
+  .msign{margin-top:22px}
+  .msign .nm{font-family:"Spectral",serif;font-style:italic;font-size:20px;color:var(--ink)}
+  .msign .loc{font-family:"DM Mono",monospace;font-size:12px;color:var(--soft);letter-spacing:.05em;text-transform:uppercase;margin-top:4px}
+  .ruleline{height:0;border:none;border-top:1px solid var(--ink);margin:32px 0 0}
+  section{margin:30px 0 0}
+  section h2{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:12px}
+  section p{font-size:16.5px;line-height:1.6;color:var(--ink);margin:0 0 14px}
+  .room{padding-inline-start:15px;border-inline-start:2px solid var(--accent);margin:0 0 18px}
   .room.back{border-inline-start-color:var(--coral)}
-  .room .name{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:19px;letter-spacing:.01em;display:block;margin-bottom:4px}
-  footer.foot{margin-top:42px;padding-top:18px;border-top:2px solid var(--ink);font-family:"DM Mono",monospace;font-size:12.5px;color:var(--muted)}
-  footer.foot a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid var(--line);margin-right:18px}
-  footer.foot a:hover{border-bottom-color:var(--accent-ink)}
+  .room .name{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:19px;letter-spacing:.01em;display:block;margin-bottom:5px}
+  footer.foot{margin-top:38px;padding:22px 0 44px;border-top:1px solid var(--line);text-align:center}
+  footer.foot .tag{font-family:"Spectral",serif;font-style:italic;font-size:15px;color:var(--ink)}
+  footer.foot .links{font-family:"DM Mono",monospace;font-size:12px;color:var(--soft);margin-top:11px;line-height:2}
+  footer.foot .links a{color:var(--accent-ink);border-bottom:1px solid var(--line);margin:0 8px}
+  html[data-skin="teletype"]{--paper:#0c0c0e;--alt:#141417;--ink:#e7e4db;--soft:#8c8c8c;--line:#2a2a30}
+  html[data-skin="teletype"] body{background:#070708}
+  html[data-skin="teletype"] *{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;border-radius:0 !important}
+  html[data-skin="teletype"] .wrap{box-shadow:0 0 0 1px #ffffff14}
+  html[data-skin="teletype"] header.masthead{background:rgba(10,10,12,.92)}
+  html[data-skin="teletype"] .brand .wm-title::after{content:"_";color:var(--accent);margin-left:.12em;animation:awblink 1.1s steps(1) infinite}
+  @keyframes awblink{50%{opacity:0}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <a class="home" href="@@HOMEHREF@@"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></a>
-  </header>
-  <p class="kicker">@@ABOUT@@</p>
-  <div class="manifesto">
-    <p>@@M1@@</p>
-    <p>@@M2@@</p>
-    <p>@@M3@@</p>
-    <p>@@M4@@</p>
-    <p>@@M5@@</p>
+  <div class="wrap">
+    <header class="masthead">
+      <div class="mast-bar">
+        <a class="home" href="@@HOMEHREF@@" aria-label="Back to the edition">&larr;</a>
+        <span class="brand" id="brand"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></span>
+        <button class="skinsun" id="skinToggle" aria-label="Switch design">&#9788;</button>
+        <a class="sub" href="subscribe.html">Subscribe</a>
+      </div>
+    </header>
+
+    <p class="kicker">@@ABOUT@@</p>
+    <p class="lead-para">@@M1@@</p>
+    <p class="mpara">@@M2@@</p>
+    <p class="mpara">@@M3@@</p>
+    <p class="mpara">@@M4@@</p>
+    <p class="mpara">@@M5@@</p>
     <p class="turn">@@M6@@</p>
-    <p>@@M7@@</p>
+    <p class="mpara">@@M7@@</p>
     <div class="msign"><div class="nm">~Rey Parl&aacute;</div><div class="loc">@@LOC@@</div></div>
+
+    <hr class="ruleline">
+
+    <section>
+      <h2>@@ROOMS_H@@</h2>
+      <p>@@ROOMS_INTRO@@</p>
+      <div class="room"><span class="name">The Arts Wire</span>@@WIRE_BODY@@</div>
+      <div class="room back"><span class="name">The Back Room</span>@@BACKROOM_BODY@@</div>
+    </section>
+
+    <section>
+      <h2>@@WHO_H@@</h2>
+      <p>@@WHO_BODY@@</p>
+    </section>
+
+    <section>
+      <h2>@@COLOPHON_H@@</h2>
+      <p>@@C1@@</p>
+      <p>@@C2@@</p>
+      <p>@@C3@@</p>
+      <p>@@C4@@</p>
+      <p>@@C5@@</p>
+    </section>
+
+    <footer class="foot">
+      <div class="tag">World Arts in Your Language</div>
+      <div class="links">
+        <a href="@@HOMEHREF@@">&larr; @@BACK@@</a>
+        <a href="subscribe.html">Subscribe</a>
+        <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com</a>
+      </div>
+    </footer>
   </div>
-  <hr class="rule">
-  <section>
-    <h2>@@ROOMS_H@@</h2>
-    <p>@@ROOMS_INTRO@@</p>
-    <div class="room"><span class="name">The Arts Wire</span>@@WIRE_BODY@@</div>
-    <div class="room back"><span class="name">The Back Room</span>@@BACKROOM_BODY@@</div>
-  </section>
-  <section>
-    <h2>@@WHO_H@@</h2>
-    <p>@@WHO_BODY@@</p>
-  </section>
-  <section>
-    <h2>@@COLOPHON_H@@</h2>
-    <p>@@C1@@</p>
-    <p>@@C2@@</p>
-    <p>@@C3@@</p>
-    <p>@@C4@@</p>
-    <p>@@C5@@</p>
-  </section>
-  <footer class="foot">
-    <a href="@@HOMEHREF@@">&larr; @@BACK@@</a>
-    <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
-    <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
-  </footer>
-</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var PAL=[{n:"Slate Blue",c:"#7593BA"},{n:"Seafoam",c:"#9FD5BD"},{n:"Marigold",c:"#E7AB48"},{n:"Olive",c:"#817E30"},{n:"Coral",c:"#F37E66"}];
+  var SKINS=["wire","teletype"];
+  function rgb(h){h=h.replace("#","");return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+  function hx(r,g,b){function f(x){x=Math.max(0,Math.min(255,Math.round(x)));return ("0"+x.toString(16)).slice(-2);}return "#"+f(r)+f(g)+f(b);}
+  function store(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  function load(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  var skin;
+  function applyColor(i){
+    var p=PAL[((i%PAL.length)+PAL.length)%PAL.length],c=rgb(p.c);
+    var lum=(0.299*c[0]+0.587*c[1]+0.114*c[2])/255;
+    var on=lum<0.5?"#ffffff":"#111111";
+    var ink=(skin==="teletype")?p.c:hx(c[0]*0.55,c[1]*0.55,c[2]*0.55);
+    var s=root.style;
+    s.setProperty("--accent",p.c);s.setProperty("--accent-ink",ink);s.setProperty("--on-accent",on);
+    var fb=[231,227,218],ft=0.22;
+    s.setProperty("--frame",hx(c[0]*ft+fb[0]*(1-ft),c[1]*ft+fb[1]*(1-ft),c[2]*ft+fb[2]*(1-ft)));
+    var m=document.querySelector('meta[name=theme-color]');
+    if(m){m.setAttribute("content",(skin==="teletype")?"#0b0b0d":p.c);}
+  }
+  var day=Math.floor(Date.now()/86400000);
+  var view=day%PAL.length;
+  var daySkin=SKINS[day%SKINS.length];
+  function applySkin(s){skin=s;root.setAttribute("data-skin",s);applyColor(view);
+    var t=document.getElementById("skinToggle");
+    if(t){t.innerHTML=(s==="teletype")?"\u263E":"\u2600";
+      t.setAttribute("aria-label",(s==="teletype")?"Switch to the light Wire design":"Switch to the dark Teletype design");
+      t.title=t.getAttribute("aria-label");}}
+  applySkin(load("aw-skin") || daySkin);
+  var b=document.getElementById("brand");
+  if(b){b.addEventListener("click",function(){view=(view+1)%PAL.length;applyColor(view);});}
+  var st=document.getElementById("skinToggle");
+  if(st){st.addEventListener("click",function(e){e.preventDefault();var s=(skin==="teletype")?"wire":"teletype";store("aw-skin",s);applySkin(s);});}
+})();
+</script>
 </body>
 </html>"""
 
@@ -173,7 +238,7 @@ def render_about(strings, lang):
         repl[k.upper()] = v
     out = ABOUT_TEMPLATE
     for k, v in repl.items():
-        out = out.replace(f"@@{k}@@", v)
+        out = out.replace(f"@@{k}@@", str(v))
     return out
 
 
@@ -1956,8 +2021,11 @@ def main():
     # fails or is skipped never leaves a dead link in the picker.
     client = None
     if extra and not args.demo and os.environ.get("ANTHROPIC_API_KEY"):
-        from anthropic import Anthropic
-        client = Anthropic()
+        try:
+            from anthropic import Anthropic
+            client = Anthropic()
+        except Exception as exc:                        # noqa: BLE001
+            print(f"  ! Anthropic unavailable; building English only: {exc}", file=sys.stderr)
     rankmap = {it.get("link"): it for it in items}      # carry ranking across translations
     editions, built, failed = [], [], []
     for lang in extra:
@@ -1993,11 +2061,14 @@ def main():
     write(render_html(items, COLUMNS, CATEGORIES, now, used_ai, lang="en",
                        chrome=CHROME_EN, langs=langs, artwork=art, frames=frames,
                        regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), "en")
-    # Each translated edition.
+    # Each translated edition, guarded so one bad page can never fail the build.
     for lang, titems, tcols, tcats, tchrome in editions:
-        write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
-                          chrome=tchrome, langs=langs, artwork=art, frames=frames,
-                          regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), lang)
+        try:
+            write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
+                              chrome=tchrome, langs=langs, artwork=art, frames=frames,
+                              regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), lang)
+        except Exception as exc:                        # noqa: BLE001
+            print(f"  ! {lang} page skipped: {exc}", file=sys.stderr)
 
     if extra:
         line = "Languages built: en" + "".join(f", {l}" for l in built)
@@ -2009,11 +2080,16 @@ def main():
         name = "about.html" if lc == "en" else f"about.{lc}.html"
         with open(os.path.join(args.out, name), "w", encoding="utf-8") as f:
             f.write(html)
-    write_about(render_about(ABOUT_STRINGS, "en"), "en")
+    write_about(render_about(ABOUT_STRINGS, "en"), "en")   # English About always ships
+    done_about = 0
     for lc in built:
-        astr = T.translate_map(ABOUT_STRINGS, lc, client, MODEL) if client else ABOUT_STRINGS
-        write_about(render_about(astr, lc), lc)
-    print(f"  wrote about.html (+{len(built)} translated)")
+        try:
+            astr = T.translate_map(ABOUT_STRINGS, lc, client, MODEL) if client else ABOUT_STRINGS
+            write_about(render_about(astr, lc), lc)
+            done_about += 1
+        except Exception as exc:                        # noqa: BLE001
+            print(f"  ! about {lc} skipped: {exc}", file=sys.stderr)
+    print(f"  wrote about.html (+{done_about} translated)")
     print(f"\nDone. Open: {os.path.join(args.out, 'index.html')}")
 
 

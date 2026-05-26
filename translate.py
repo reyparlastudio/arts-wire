@@ -18,6 +18,7 @@ If there's no API key, callers skip translation and ship English.
 
 import json
 import re
+import time
 
 RTL_LANGS = {"ar", "he", "fa", "ur", "yi"}
 
@@ -29,6 +30,9 @@ AUTONYMS = {
     "he": "עברית", "fa": "فارسی", "ur": "اردو", "hi": "हिन्दी",
     "ja": "日本語", "ko": "한국어", "zh": "中文", "vi": "Tiếng Việt",
     "id": "Bahasa Indonesia", "th": "ไทย", "sw": "Kiswahili", "el": "Ελληνικά",
+    "bn": "বাংলা", "ta": "தமிழ்", "ro": "Română", "cs": "Čeština", "hu": "Magyar",
+    "sv": "Svenska", "da": "Dansk", "fi": "Suomi", "no": "Norsk", "tl": "Filipino",
+    "ms": "Bahasa Melayu",
 }
 
 # English-language name, for the translation prompt.
@@ -39,6 +43,9 @@ NAMES = {
     "fa": "Persian", "ur": "Urdu", "hi": "Hindi", "ja": "Japanese",
     "ko": "Korean", "zh": "Chinese (Simplified)", "vi": "Vietnamese",
     "id": "Indonesian", "th": "Thai", "sw": "Swahili", "el": "Greek",
+    "bn": "Bengali", "ta": "Tamil", "ro": "Romanian", "cs": "Czech", "hu": "Hungarian",
+    "sv": "Swedish", "da": "Danish", "fi": "Finnish", "no": "Norwegian", "tl": "Filipino",
+    "ms": "Malay",
 }
 
 # BCP-47 / hreflang codes. Most match the short code; a few need script or
@@ -63,6 +70,21 @@ def autonym(code):
 
 def is_rtl(code):
     return code in RTL_LANGS
+
+
+def all_langs():
+    """Every language we can render: the full supported world set, minus English."""
+    return list(NAMES.keys())
+
+
+def translate_map(mapping, lang, client, model):
+    """Translate the values of a flat {key: text} map into `lang`.
+    One call, with per-key fallback to English so nothing is ever lost."""
+    language = NAMES.get(lang, lang)
+    d = _translate_json(client, model, language, mapping, 4096)
+    if not isinstance(d, dict):
+        d = {}
+    return {k: d.get(k, v) for k, v in mapping.items()}
 
 
 def translate_edition(items, chrome, columns, categories, lang, client, model):
@@ -95,11 +117,10 @@ def translate_edition(items, chrome, columns, categories, lang, client, model):
              "summary": it.get("summary", ""), "tags": it.get("tags", [])}
             for j, it in enumerate(chunk)]}
         d = _translate_json(client, model, language, payload, 4096)
-        if not d.get("items"):                       # one retry on a bad batch
-            d = _translate_json(client, model, language, payload, 4096)
         for row in d.get("items", []):
             if isinstance(row, dict) and isinstance(row.get("i"), int):
                 done[row["i"]] = row
+        time.sleep(0.4)                              # pace the API between batches
 
     # 3) Reassemble. Any story we could not translate stays English.
     titems = []
@@ -113,7 +134,7 @@ def translate_edition(items, chrome, columns, categories, lang, client, model):
     return titems, tchrome, tcolumns, tcategories
 
 
-def _translate_json(client, model, language, obj, max_tokens):
+def _translate_json(client, model, language, obj, max_tokens, attempts=3):
     """Translate the VALUES of one small JSON object. Always returns a dict;
     returns {} on any error so the caller can fall back gracefully."""
     prompt = (
@@ -126,13 +147,18 @@ def _translate_json(client, model, language, obj, max_tokens):
         "entities such as &middot; and &amp; intact. Return ONLY the JSON.\n\n"
         + json.dumps(obj, ensure_ascii=False)
     )
-    try:
-        resp = client.messages.create(
-            model=model, max_tokens=max_tokens,
-            messages=[{"role": "user", "content": prompt}])
-        return _parse_obj(resp.content[0].text)
-    except Exception:
-        return {}
+    delay = 2.0
+    for n in range(attempts):
+        try:
+            resp = client.messages.create(
+                model=model, max_tokens=max_tokens,
+                messages=[{"role": "user", "content": prompt}])
+            return _parse_obj(resp.content[0].text)
+        except Exception:
+            if n < attempts - 1:
+                time.sleep(delay)              # gentle backoff for rate limits
+                delay *= 2
+    return {}
 
 
 def _parse_obj(text):

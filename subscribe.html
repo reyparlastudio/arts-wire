@@ -1,168 +1,214 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Subscribe &middot; The Arts Wire</title>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#817e30">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Saira+Condensed:wght@500;600;700;800;900&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<title>Subscribe &mdash; XPRMNTL&trade; The Arts Wire</title>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700;800;900&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@400;500&family=Archivo:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* Same design language as the site: white column on a warm surround, the
-     daily Parla accent (set by the script below), Saira + Spectral + Archivo. */
-  :root{--paper:#ffffff;--alt:#f7f7f6;--ink:#0b0b0b;--soft:#6f6f6f;--line:#e9e9e9;
-    --accent:#817e30;--accent-ink:#47451a;--on-accent:#ffffff}
+  :root{
+    --paper:#ffffff;--alt:#f7f7f6;--ink:#0b0b0b;--soft:#6f6f6f;--line:#e9e9e9;
+    --accent:#817e30;--accent-ink:#47451a;--on-accent:#ffffff;
+    --frame:#e4e2dd;--phone:500px;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#e4e2dd;color:var(--ink);font-family:"Spectral",Georgia,serif;
-    font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--frame);color:var(--ink);font-family:"Spectral",Georgia,serif;
+    font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .5s ease}
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:660px;margin:0 auto;background:var(--paper);min-height:100vh;
-    box-shadow:0 0 0 1px #00000010,0 30px 80px #00000022;padding:0 26px 60px}
 
-  .top{display:flex;justify-content:space-between;align-items:center;height:54px;border-bottom:1px solid var(--line)}
-  .brand{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:20px;letter-spacing:.01em}
+  .wrap{position:relative;width:100%;max-width:var(--phone);margin:0 auto;background:var(--paper);
+    min-height:100vh;box-shadow:0 0 0 1px #00000010,0 30px 80px #00000026;padding:0 20px}
+
+  header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
+    margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
+  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;
+    padding:9px 0;min-height:52px}
+  .mast-bar .menu{font-size:20px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;text-align:left}
+  .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0}
+  .mast-bar .skinsun:hover{opacity:.6}
+  .brand{text-align:center;line-height:1;display:inline-block;cursor:pointer}
+  .brand .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:25px;letter-spacing:.045em;display:block;line-height:1}
+  .brand .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;line-height:1;margin-top:3px}
   .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
-  .back{font-family:"Archivo",sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.12em;
-    text-transform:uppercase;color:var(--accent-ink)}
+  .edlink{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;
+    letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
 
-  header.hero{text-align:center;padding:40px 0 6px}
-  .kicker{font-family:"Archivo",sans-serif;font-weight:800;font-size:11px;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--accent)}
-  h1{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(40px,10vw,64px);
-    line-height:.95;letter-spacing:-.012em;margin:12px 0 0}
-  .lede{max-width:520px;margin:18px auto 0;font-size:18px;color:#2c2c2c}
-  .lede em{color:var(--accent-ink);font-style:italic}
-  .versus{max-width:520px;margin:18px auto 0;font-family:"Spectral",serif;font-style:italic;
-    color:var(--soft);font-size:15.5px;line-height:1.5}
+  .hero{padding:24px 0 6px}
+  .kicker{font-family:"Saira Condensed",sans-serif;font-weight:600;text-transform:uppercase;
+    letter-spacing:.16em;font-size:11px;color:var(--soft)}
+  .headline{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:clamp(34px,9.4vw,46px);
+    line-height:1.02;letter-spacing:-.01em;margin:13px 0 0;color:var(--ink)}
+  .lede{font-family:"Spectral",Georgia,serif;font-size:17px;line-height:1.55;color:#2c2c2c;margin:17px 0 0;
+    border-inline-start:2px solid var(--accent);padding-inline-start:15px}
+  .versus{font-family:"Spectral",Georgia,serif;font-style:italic;font-size:16px;line-height:1.55;color:var(--soft);
+    margin:16px 0 0;border-inline-start:2px solid var(--accent);padding-inline-start:15px}
   .versus b{color:var(--ink);font-style:normal;font-weight:500}
 
-  .rule{height:0;border-top:1px solid var(--ink);margin:30px 0 0}
+  .ruleline{height:0;border:none;border-top:1px solid var(--ink);margin:26px 0 0}
 
-  .plan{border:1px solid var(--line);background:var(--alt);padding:28px 26px;margin-top:30px}
+  .plan{border:1px solid var(--line);background:var(--alt);padding:26px 22px;margin-top:26px}
   .pk{font-family:"Archivo",sans-serif;font-weight:800;font-size:11px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--accent)}
-  .price{font-family:"Saira Condensed",sans-serif;font-weight:900;font-size:62px;line-height:1;margin:4px 0 2px}
+    text-transform:uppercase;color:var(--accent-ink)}
+  .price{font-family:"Saira Condensed",sans-serif;font-weight:900;font-size:60px;line-height:1;margin:6px 0 0}
   .price small{font-family:"Spectral",serif;font-style:italic;font-weight:400;font-size:18px;color:var(--soft)}
-  .pnote{font-style:italic;color:var(--soft);font-size:15px;margin-bottom:18px}
+  .pnote{font-size:15px;color:var(--soft);margin-top:9px;line-height:1.5}
 
-  .field{margin:2px 0 18px}
+  .field{margin-top:20px}
   .field label{display:block;font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.06em;
-    text-transform:uppercase;color:var(--soft);margin-bottom:7px}
+    text-transform:uppercase;color:var(--soft);margin-bottom:6px}
   .field select{width:100%;font-family:"Spectral",serif;font-size:17px;padding:11px 12px;
     background:var(--paper);border:1px solid var(--line);color:var(--ink)}
+  .fhint{font-family:"Spectral",serif;font-style:italic;font-size:14px;color:var(--soft);margin-top:8px}
 
-  .plan ul{list-style:none;display:flex;flex-direction:column;gap:9px;font-size:16px;margin:0 0 22px}
-  .plan li::before{content:"\2013  ";color:var(--accent);font-weight:700}
+  .feat{list-style:none;margin:20px 0 0;padding:0}
+  .feat li{position:relative;padding-inline-start:20px;margin:0 0 11px;font-size:15.5px;line-height:1.45}
+  .feat li::before{content:"";position:absolute;inset-inline-start:0;top:.5em;width:7px;height:7px;
+    background:var(--accent);border-radius:1px}
 
   .btn{display:block;width:100%;text-align:center;font-family:"Archivo",sans-serif;font-weight:800;
-    text-transform:uppercase;letter-spacing:.1em;font-size:14px;padding:16px;border:none;
-    background:var(--accent);color:var(--on-accent);cursor:pointer}
-  .btn:hover{filter:brightness(.94)}
+    font-size:14px;letter-spacing:.04em;text-transform:uppercase;padding:15px;margin-top:22px;
+    background:var(--accent);color:var(--on-accent);border:none;cursor:pointer;border-radius:2px}
+  .btn:hover{opacity:.92}
+  .subnote{font-family:"DM Mono",monospace;font-size:12.5px;color:var(--accent-ink);text-align:center;margin-top:12px}
 
-  .pay{text-align:center;color:var(--soft);font-size:13.5px;margin-top:18px}
-  .pay b{color:var(--ink);font-style:normal}
-  .methods{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:11px}
-  .chip{font-family:"Archivo",sans-serif;font-size:11px;border:1px solid var(--line);border-radius:20px;
-    padding:4px 11px;color:var(--soft)}
+  .pay{font-family:"Spectral",serif;font-style:italic;font-size:14px;color:var(--soft);margin-top:14px;text-align:center}
+  .methods{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:12px}
+  .chip{font-family:"Archivo",sans-serif;font-weight:600;font-size:11px;border:1px solid var(--line);
+    border-radius:20px;padding:5px 11px;color:var(--soft)}
 
-  footer{text-align:center;margin-top:40px;padding-top:22px;border-top:1px solid var(--line);
-    color:var(--soft);font-size:13.5px}
-  footer .m{font-style:italic;font-family:"Spectral",serif}
-  footer a{color:var(--accent-ink);font-weight:600}
-</style></head>
+  footer.foot{margin-top:34px;padding:22px 0 44px;border-top:1px solid var(--line);text-align:center}
+  footer.foot .tag{font-family:"Spectral",serif;font-style:italic;font-size:15px;color:var(--ink)}
+  footer.foot .links{font-family:"DM Mono",monospace;font-size:12px;color:var(--soft);margin-top:11px}
+  footer.foot .links a{color:var(--accent-ink);border-bottom:1px solid var(--line);margin:0 9px}
+
+  /* ---- Teletype dark skin (accent + frame come from the daily-color script) ---- */
+  html[data-skin="teletype"]{--paper:#0c0c0e;--alt:#141417;--ink:#e7e4db;--soft:#8c8c8c;--line:#2a2a30}
+  html[data-skin="teletype"] body{background:#070708}
+  html[data-skin="teletype"] *{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;border-radius:0 !important}
+  html[data-skin="teletype"] .wrap{box-shadow:0 0 0 1px #ffffff14}
+  html[data-skin="teletype"] header.masthead{background:rgba(10,10,12,.92)}
+  html[data-skin="teletype"] .brand .wm-title::after{content:"_";color:var(--accent);margin-left:.12em;animation:awblink 1.1s steps(1) infinite}
+  html[data-skin="teletype"] .lede{color:#cbc8bf}
+  html[data-skin="teletype"] .headline{font-size:clamp(22px,6vw,30px);letter-spacing:0;line-height:1.18}
+  html[data-skin="teletype"] .feat li::before{border-radius:0}
+  @keyframes awblink{50%{opacity:0}}
+</style>
+</head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <span class="brand">The Arts Wire<sup class="tm">&trade;</sup></span>
-    <a class="back" href="index.html">&larr;&nbsp; Today&rsquo;s edition</a>
-  </div>
+  <div class="wrap">
+    <header class="masthead">
+      <div class="mast-bar">
+        <button class="menu" aria-label="Menu">&#9776;</button>
+        <span class="brand" id="brand"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></span>
+        <button class="skinsun" id="skinToggle" aria-label="Switch design">&#9788;</button>
+        <a class="edlink" href="index.html">Edition</a>
+      </div>
+    </header>
 
-  <header class="hero">
-    <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide</div>
-    <h1>Read the world&rsquo;s arts,<br>in your language.</h1>
-    <p class="lede">A weekly review of film, theater, art, books, and ideas from across the globe,
-      written for you and <em>delivered in the language you choose</em>, wherever you are.</p>
-    <p class="versus">The great papers report the world in English. <b>The Arts Wire reports it in yours.</b>
-      The first arts review written for every reader on earth, in their own language.</p>
-  </header>
+    <section class="hero">
+      <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide</div>
+      <h1 class="headline">Read the world&rsquo;s arts,<br>in your language.</h1>
+      <p class="lede">A weekly review of film, theater, art, books, and ideas from across the globe, written for you and delivered in the language you choose, wherever you are.</p>
+      <p class="versus">The great papers report the world in English. <b>The Arts Wire reports it in yours.</b> The first arts review written for every reader on earth, in their own language.</p>
+    </section>
 
-  <div class="rule"></div>
+    <div class="ruleline"></div>
 
-  <div class="plan">
-    <div class="pk">The weekly letter</div>
-    <div class="price">$30 <small>/ year</small></div>
-    <p class="pnote">One email a week, fifty-two a year. About two and a half dollars a month, paid once. The same price for everyone, everywhere.</p>
+    <div class="plan">
+      <div class="pk">The weekly letter</div>
+      <div class="price">$30 <small>/ year</small></div>
+      <p class="pnote">One email a week, fifty-two a year. About two and a half dollars a month, paid once. The same price for everyone, everywhere.</p>
 
-    <div class="field">
-      <label for="lang">Deliver my edition in</label>
-      <select id="lang">
-        <option value="en">English</option>
-        <option value="es">Español (Spanish)</option>
-        <option value="fr">Français (French)</option>
-        <option value="pt">Português (Portuguese)</option>
-        <option value="de">Deutsch (German)</option>
-        <option value="it">Italiano (Italian)</option>
-        <option value="ar">العربية (Arabic)</option>
-        <option value="hi">हिन्दी (Hindi)</option>
-        <option value="zh">中文 (Chinese)</option>
-        <option value="ja">日本語 (Japanese)</option>
-        <option value="ko">한국어 (Korean)</option>
-        <option value="ru">Русский (Russian)</option>
-        <option value="other">Another language, just ask</option>
-      </select>
-    </div>
+      <div class="field">
+        <label for="lang">Deliver my edition in</label>
+        <select id="lang">
+          <option>English</option>
+          <option>Espa&ntilde;ol</option>
+          <option>Fran&ccedil;ais</option>
+          <option>Deutsch</option>
+          <option>Portugu&ecirc;s</option>
+          <option>Italiano</option>
+          <option>&#20013;&#25991;</option>
+          <option>&#26085;&#26412;&#35486;</option>
+          <option>&#54620;&#44397;&#50612;</option>
+          <option>&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
+          <option>&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</option>
+          <option>&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option>
+          <option>T&uuml;rk&ccedil;e</option>
+        </select>
+        <p class="fhint">A new letter every week, in the language you choose.</p>
+      </div>
 
-    <ul>
-      <li>A new letter every week, in the language you choose</li>
-      <li>Original essays, stories, and curation by Rey Parl&aacute;</li>
-      <li>Exclusive: written for members, never posted on the site</li>
-      <li>Read from anywhere in the world</li>
-      <li>One payment a year, cancel anytime</li>
-    </ul>
+      <ul class="feat">
+        <li>Original essays, stories, and curation by Rey Parl&aacute;</li>
+        <li>Exclusive: written for members, never posted on the site</li>
+        <li>Read from anywhere in the world</li>
+        <li>One payment a year, cancel anytime</li>
+      </ul>
 
-    <button class="btn" id="sub">Subscribe for $30 a year</button>
-
-    <div class="pay">
-      <p>Pay securely from <b>almost anywhere in the world</b>. Taxes handled for you.</p>
+      <button class="btn" id="subBtn">Subscribe for $30 a year</button>
+      <p class="subnote" id="subnote" hidden>Member signups open here soon. Thank you for your patience.</p>
+      <p class="pay">Pay securely from almost anywhere in the world. Taxes handled for you.</p>
       <div class="methods">
         <span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span>
         <span class="chip">PayPal</span><span class="chip">Apple Pay</span><span class="chip">Google Pay</span>
         <span class="chip">+ local methods</span>
       </div>
     </div>
+
+    <footer class="foot">
+      <div class="tag">World Arts in Your Language</div>
+      <div class="links">
+        <a href="index.html">&larr; Today&rsquo;s edition</a>
+        <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com</a>
+      </div>
+    </footer>
   </div>
 
-  <footer>
-    <p class="m">World arts in your language.</p>
-    <p style="margin-top:10px"><a href="index.html">&larr; Back to today&rsquo;s edition</a></p>
-  </footer>
-</div>
-
 <script>
-/* Daily Parla color, matching the site so this page wears the color of the day. */
+/* ---- Daily Parlá color + design-skin rotation, shared with the edition ---- */
 (function(){
-  var PAL=["#7593BA","#9FD5BD","#E7AB48","#817E30","#F37E66"];
+  var root=document.documentElement;
+  var PAL=[{n:"Slate Blue",c:"#7593BA"},{n:"Seafoam",c:"#9FD5BD"},{n:"Marigold",c:"#E7AB48"},{n:"Olive",c:"#817E30"},{n:"Coral",c:"#F37E66"}];
+  var SKINS=["wire","teletype"];
   function rgb(h){h=h.replace("#","");return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   function hx(r,g,b){function f(x){x=Math.max(0,Math.min(255,Math.round(x)));return ("0"+x.toString(16)).slice(-2);}return "#"+f(r)+f(g)+f(b);}
-  var c=PAL[Math.floor(Date.now()/86400000)%PAL.length],r=rgb(c);
-  var lum=(0.299*r[0]+0.587*r[1]+0.114*r[2])/255,s=document.documentElement.style;
-  s.setProperty("--accent",c);
-  s.setProperty("--accent-ink",hx(r[0]*0.55,r[1]*0.55,r[2]*0.55));
-  s.setProperty("--on-accent",lum<0.5?"#ffffff":"#111111");
-  var m=document.querySelector('meta[name=theme-color]');if(m){m.setAttribute("content",c);}
+  function store(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  function load(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  var skin;
+  function applyColor(i){
+    var p=PAL[((i%PAL.length)+PAL.length)%PAL.length],c=rgb(p.c);
+    var lum=(0.299*c[0]+0.587*c[1]+0.114*c[2])/255;
+    var on=lum<0.5?"#ffffff":"#111111";
+    var ink=(skin==="teletype")?p.c:hx(c[0]*0.55,c[1]*0.55,c[2]*0.55);
+    var s=root.style;
+    s.setProperty("--accent",p.c);s.setProperty("--accent-ink",ink);s.setProperty("--on-accent",on);
+    var fb=[231,227,218],ft=0.22;
+    s.setProperty("--frame",hx(c[0]*ft+fb[0]*(1-ft),c[1]*ft+fb[1]*(1-ft),c[2]*ft+fb[2]*(1-ft)));
+    var m=document.querySelector('meta[name=theme-color]');
+    if(m){m.setAttribute("content",(skin==="teletype")?"#0b0b0d":p.c);}
+  }
+  var day=Math.floor(Date.now()/86400000);
+  var view=day%PAL.length;
+  var daySkin=SKINS[day%SKINS.length];
+  function applySkin(s){skin=s;root.setAttribute("data-skin",s);applyColor(view);
+    var t=document.getElementById("skinToggle");
+    if(t){t.innerHTML=(s==="teletype")?"\u263E":"\u2600";
+      t.setAttribute("aria-label",(s==="teletype")?"Switch to the light Wire design":"Switch to the dark Teletype design");
+      t.title=t.getAttribute("aria-label");}}
+  applySkin(load("aw-skin") || daySkin);
+  var b=document.getElementById("brand");
+  if(b){b.addEventListener("click",function(){view=(view+1)%PAL.length;applyColor(view);});}
+  var st=document.getElementById("skinToggle");
+  if(st){st.addEventListener("click",function(e){e.preventDefault();var s=(skin==="teletype")?"wire":"teletype";store("aw-skin",s);applySkin(s);});}
 })();
-
-/* Subscribe -> Buttondown checkout, carrying the chosen language as a tag so the
-   reader is filed into that language's edition. Payment happens on Buttondown. */
+/* ---- Visual mockup button: payments are wired later ---- */
 (function(){
-  var b=document.getElementById("sub");if(!b){return;}
-  b.addEventListener("click",function(){
-    var lang=document.getElementById("lang").value;
-    var url="https://buttondown.com/theartswire";
-    if(lang && lang!=="other"){url+="?tag="+encodeURIComponent(lang);}
-    window.location.href=url;
-  });
+  var btn=document.getElementById("subBtn"),note=document.getElementById("subnote");
+  if(btn&&note){btn.addEventListener("click",function(){note.hidden=false;});}
 })();
 </script>
-</body></html>
+</body>
+</html>
