@@ -32,12 +32,13 @@ import translate as T
 
 MODEL = "claude-haiku-4-5-20251001"
 OUTPUT_DIR = "output"
+CACHE_PATH = os.environ.get("AW_CACHE", "translations.json")   # persisted between builds
 REVIEW_KINDS = ("note", "book", "essay")
 ALL_KINDS = REVIEW_KINDS + ("news",)
 
 CHROME_EN = {
-    "kicker": "Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas",
-    "tagline": "The Arts Wire is a daily cultural briefing. The paid letter is a weekly editor&rsquo;s dispatch, sharper, slower, and more personal.",
+    "kicker": "Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide",
+    "tagline": "The Arts Wire is a daily review of world arts, in your language. The paid letter is a weekly studio dispatch, sharper, slower, and more personal.",
     "pieces": "pieces",
     "review_label": "The Review: long reads, books &amp; ideas",
     "wire_label": "The Wire: today&rsquo;s news, by medium",
@@ -721,18 +722,27 @@ def hreflang_html(langs, current):
 
 
 def switcher_html(langs, current):
-    # Show only the OTHER languages, a quiet "read in" strip. The current
-    # language (e.g. English on the English edition) never labels itself, so the
-    # word "English" no longer sits at the top of the English page.
-    others = [c for c in langs if c != current]
-    if not others:
+    """The language picker for the masthead: a globe and a small caret, no label,
+    sitting to the left of the sun. A transparent native <select> is laid over it,
+    so a tap opens the device's own language list and choosing one navigates to
+    that edition. Only languages that actually built are listed; the current one
+    is preselected. Returns "" when there is nothing to switch to."""
+    if len(langs) <= 1:
         return ""
-    parts = []
-    for code in others:
+    opts = []
+    for code in langs:
         target = "index.html" if code == "en" else f"index.{code}.html"
-        parts.append(f'<a class="lang" href="{target}">{T.autonym(code)}</a>')
-    return ('<nav class="switch"><span class="globe" aria-hidden="true">\u25c9</span>'
-            + "".join(parts) + "</nav>")
+        sel = " selected" if code == current else ""
+        opts.append(f'<option value="{target}"{sel}>{T.autonym(code)}</option>')
+    return (
+        '<span class="lang" title="Language">'
+        '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" '
+        'stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/>'
+        '<path d="M3 12h18"/><path d="M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg>'
+        '<span class="caret" aria-hidden="true">\u25be</span>'
+        '<select aria-label="Choose language" onchange="if(this.value){location.href=this.value;}">'
+        + "".join(opts) + '</select></span>'
+    )
 
 
 # --- Interstitial frames -----------------------------------------------------
@@ -1009,36 +1019,48 @@ def generate_ai_transmissions(generated, n=2):
         return []
 
 
-def xprmntl_block(generated, live_items=None, ai_transmissions=None):
-    """Render the XPRMNTL signature section: a daily verified quote, fresh AI
-    transmissions ahead of the curated canon, a live experimental strip, and
-    listening links. The daily quote rotates by date."""
-    esc = html.escape
-    q = XPRMNTL_QUOTES[generated.toordinal() % len(XPRMNTL_QUOTES)]
-    quote = (f'<blockquote class="xpr-quote">&ldquo;{esc(q[0])}&rdquo;'
-             f'<span class="who">{esc(q[1])} &middot; {esc(q[2])}</span></blockquote>')
+def xprmntl_payload(generated, ai_transmissions=None):
+    """Today's XPRMNTL content as a structured, translatable payload (English).
 
-    # Daily rotation: the two AI transmissions already change subject each day;
-    # here we also rotate WHICH curated capsules appear and reshuffle the whole
-    # stream, seeded by the date. So the section changes every day, holds steady
-    # within a day, and reshuffles at midnight, like the colour, skin and
-    # section order. Even if the AI step is skipped, the canon still rotates.
+    The quote, the AI capsules, and the curated window all advance by date, so
+    the section turns over every morning. The window now steps forward by its
+    full width, so two consecutive days show a fresh, non-overlapping set
+    instead of sharing three of four capsules."""
+    q = XPRMNTL_QUOTES[generated.toordinal() % len(XPRMNTL_QUOTES)]
     canon = list(XPRMNTL_TRANSMISSIONS)
     window = min(4, len(canon))
-    start = generated.toordinal() % len(canon)
+    start = (generated.toordinal() * window) % len(canon)   # advance a full window/day
     canon_today = [canon[(start + i) % len(canon)] for i in range(window)]
     rows = list(ai_transmissions or []) + canon_today
     random.Random(generated.toordinal()).shuffle(rows)
-    stream = ""
-    for row in rows:
-        era, title, body = row[0], row[1], row[2]
-        link = row[3] if len(row) > 3 else ""
-        more = (f' <a class="xpr-link" href="{esc(link)}" target="_blank" rel="noopener">read &rarr;</a>'
-                if link else "")
-        stream += (f'<div class="xpr-item"><span class="xpr-era">{era}</span>'
-                   f'<div class="xpr-ttl">{title}</div>'
-                   f'<p class="xpr-body">{body}{more}</p></div>')
+    return {
+        "word": "XPRMNTL",
+        "tag": "Avant-garde across time: the long-ago, the now, the not-yet.",
+        "quote": q[0], "quote_who": f"{html.escape(q[1])} &middot; {html.escape(q[2])}",
+        "readlabel": "read",
+        "livehead": "On the wire now: experimental &amp; sound art",
+        "sndhead": "Listen: experimental &amp; sound art",
+        "rows": [{"era": r[0], "title": r[1], "body": r[2],
+                  "link": (r[3] if len(r) > 3 else "")} for r in rows],
+        "sound": list(XPRMNTL_SOUND),
+    }
 
+
+def render_xprmntl(P, live_items=None):
+    """Render an XPRMNTL payload (English or already translated) to HTML.
+    Escaping matches the original block: only the quote text, links and sound
+    names are escaped; titles and bodies carry trusted inline markup."""
+    esc = html.escape
+    quote = (f'<blockquote class="xpr-quote">&ldquo;{esc(P.get("quote", ""))}&rdquo;'
+             f'<span class="who">{P.get("quote_who", "")}</span></blockquote>')
+    stream = ""
+    for r in P.get("rows", []):
+        link = r.get("link", "")
+        more = (f' <a class="xpr-link" href="{esc(link)}" target="_blank" rel="noopener">'
+                f'{esc(P.get("readlabel", "read"))} &rarr;</a>' if link else "")
+        stream += (f'<div class="xpr-item"><span class="xpr-era">{r.get("era", "")}</span>'
+                   f'<div class="xpr-ttl">{r.get("title", "")}</div>'
+                   f'<p class="xpr-body">{r.get("body", "")}{more}</p></div>')
     live = ""
     if live_items:
         rowhtml = ""
@@ -1047,26 +1069,45 @@ def xprmntl_block(generated, live_items=None, ai_transmissions=None):
                         f'target="_blank" rel="noopener">'
                         f'<span class="xpr-livesrc">{esc(it.get("source", ""))}</span>'
                         f'<span class="xpr-livettl">{esc(it.get("title", ""))}</span></a>')
-        live = (f'<div class="xpr-live"><span class="xpr-livehead">On the wire now: '
-                f'experimental &amp; sound art</span>{rowhtml}</div>')
-
+        live = (f'<div class="xpr-live"><span class="xpr-livehead">'
+                f'{P.get("livehead", "")}</span>{rowhtml}</div>')
     sound = "".join(
         f'<a class="xpr-snd" href="{esc(u)}" target="_blank" rel="noopener">{name} &nearr;</a>'
-        for name, u in XPRMNTL_SOUND)
+        for name, u in P.get("sound", []))
     return (
         '<section class="xprmntl" id="xprmntl">'
-        '<div class="xpr-head"><span class="xpr-word">XPRMNTL</span>'
-        '<span class="xpr-tag">Avant-garde across time: the long-ago, the now, the not-yet.'
-        '</span></div>'
+        f'<div class="xpr-head"><span class="xpr-word">{P.get("word", "XPRMNTL")}</span>'
+        f'<span class="xpr-tag">{P.get("tag", "")}</span></div>'
         f'{quote}<div class="xpr-stream">{stream}</div>{live}'
-        '<div class="xpr-sound"><span class="xpr-sndhead">Listen: experimental &amp; sound art</span>'
+        f'<div class="xpr-sound"><span class="xpr-sndhead">{P.get("sndhead", "")}</span>'
         f'{sound}</div></section>'
     )
 
 
+def translate_xprmntl(P, lang, client, model, cache=None):
+    """Translate an XPRMNTL payload into `lang`: prose only. Names, years, links
+    and source names stay as written. Cached, so the curated canon translates
+    once per language and is then reused for free."""
+    labels = {"tag": P["tag"], "quote": P["quote"], "sndhead": P["sndhead"],
+              "livehead": P["livehead"], "readlabel": P["readlabel"]}
+    tl = T.translate_map(labels, lang, client, model, cache=cache)
+    trows = T.translate_rows(
+        [{"era": r["era"], "title": r["title"], "body": r["body"]} for r in P["rows"]],
+        lang, client, model, cache=cache)
+    out = dict(P)
+    out.update(tl)
+    out["rows"] = [{"era": trows[i].get("era", P["rows"][i]["era"]),
+                    "title": trows[i].get("title", P["rows"][i]["title"]),
+                    "body": trows[i].get("body", P["rows"][i]["body"]),
+                    "link": P["rows"][i].get("link", "")}
+                   for i in range(len(P["rows"]))]
+    return out
+
+
 def render_html(items, columns, categories, generated, used_ai, *,
                 lang="en", chrome=None, langs=("en",), artwork=None,
-                regional_sources=(), frames=None, ai_transmissions=None):
+                regional_sources=(), frames=None, ai_transmissions=None,
+                xprmntl_payload_tr=None):
     chrome = chrome or CHROME_EN
     esc = html.escape
     direction = "rtl" if T.is_rtl(lang) else "ltr"
@@ -1295,7 +1336,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
     banner = f'<div class="banner">{chrome["banner"]}</div>' if chrome.get("banner") else ""
     mode = chrome.get("signed", "Designed by human intelligence, Rey Parl&aacute;")
     repl = {
-        "LANG": T.bcp47(lang), "DIR": direction, "SWITCH": switcher_html(langs, lang),
+        "LANG": T.bcp47(lang), "DIR": direction, "LANGPICK": switcher_html(langs, lang),
         "HREFLANG": hreflang_html(langs, lang),
         "LANGSJSON": json.dumps(list(langs)), "SHORTLANG": lang,
         "ABOUTHREF": "about.html" if lang == "en" else f"about.{lang}.html",
@@ -1304,7 +1345,7 @@ def render_html(items, columns, categories, generated, used_ai, *,
         "DATE": generated.strftime("%A %B %-d, %Y"), "MODE": mode, "TOTAL": len(items),
         "BANNER": banner, "ONEART": oneart, "REGIONAL": regional, "REVIEW": review,
         "WIRE": wire, "THREADS": threads,
-        "XPRMNTL": xprmntl_block(generated, xpr_live, ai_transmissions),
+        "XPRMNTL": render_xprmntl(xprmntl_payload_tr or xprmntl_payload(generated, ai_transmissions), xpr_live),
         "FOOT1": chrome["foot1"].replace("{year}", str(generated.year)),
         "FOOT2": chrome["foot2"], "YEAR": generated.year,
     }
@@ -1365,10 +1406,15 @@ TEMPLATE = """<!DOCTYPE html>
   /* masthead = sticky bar + ticker */
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
     margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
-  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;padding:9px 0;min-height:52px}
+  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto auto;gap:11px;align-items:center;padding:9px 0;min-height:52px}
   .mast-bar .menu{font-size:20px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;text-align:left}
   .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;justify-self:end}
   .mast-bar .skinsun:hover{opacity:.6}
+  .mast-bar .lang{position:relative;display:inline-flex;align-items:center;gap:3px;color:var(--ink);cursor:pointer}
+  .mast-bar .lang svg{display:block}
+  .mast-bar .lang .caret{font-size:9px;color:var(--soft);line-height:1}
+  .mast-bar .lang:hover{color:var(--accent-ink)}
+  .mast-bar .lang select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px;border:none}
   .navdrawer{display:none;border-top:1px solid var(--line);background:var(--paper);padding:8px 0 12px}
   .navdrawer.open{display:block}
   .navdrawer .nd-label{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;
@@ -1611,6 +1657,7 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="mast-bar">
       <button class="menu" id="navToggle" aria-label="Open index" aria-expanded="false">&#9776;</button>
       <span class="brand" id="brand" title="Tap to preview the next color"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></span>
+      @@LANGPICK@@
       <button class="skinsun" id="skinToggle" type="button" aria-label="Switch design">&#9728;</button>
       <a class="sub" href="subscribe.html">Subscribe</a>
     </div>
@@ -1630,7 +1677,6 @@ TEMPLATE = """<!DOCTYPE html>
     </nav>
     <div class="ticker">@@DATE@@ &nbsp;&middot;&nbsp; <b>World Arts in Your Language</b></div>
   </header>
-  @@SWITCH@@
   <div class="aw-lang-suggest" id="awLangSuggest" hidden>
     <span id="awLangSuggestText"></span>
     <a id="awLangSuggestGo" href="#"></a>
@@ -2015,6 +2061,7 @@ def main():
     # Fresh XPRMNTL transmissions, composed once per build (English, shared by
     # every edition). Falls back to the curated canon when AI is unavailable.
     xpr_ai = [] if args.demo else generate_ai_transmissions(now)
+    xpay = xprmntl_payload(now, xpr_ai)                 # today's XPRMNTL, English
 
     # Translate the other languages FIRST, so the language switcher and the
     # hreflang tags list only editions that were actually built. A language that
@@ -2026,6 +2073,7 @@ def main():
             client = Anthropic()
         except Exception as exc:                        # noqa: BLE001
             print(f"  ! Anthropic unavailable; building English only: {exc}", file=sys.stderr)
+    tcache = T.load_cache(CACHE_PATH) if client else None   # reuse prior translations
     rankmap = {it.get("link"): it for it in items}      # carry ranking across translations
     editions, built, failed = [], [], []
     for lang in extra:
@@ -2035,10 +2083,12 @@ def main():
                 if tr is None:
                     print(f"  ({lang}: no offline sample; skipped in demo)"); failed.append(lang); continue
                 titems, tchrome, tcols, tcats = tr
+                xpay_lang = xpay                        # demo: XPRMNTL stays English
             elif client:
                 titems, tchrome, tcols, tcats = T.translate_edition(
                     items, {k: v for k, v in CHROME_EN.items()}, COLUMNS, CATEGORIES,
-                    lang, client, MODEL)
+                    lang, client, MODEL, cache=tcache)
+                xpay_lang = translate_xprmntl(xpay, lang, client, MODEL, cache=tcache)
             else:
                 print(f"  ({lang}: needs ANTHROPIC_API_KEY; skipped)"); failed.append(lang); continue
             for t in titems:                            # ranking/packaging is language-neutral
@@ -2048,7 +2098,7 @@ def main():
                     t["cluster"] = base.get("cluster", 1)
                     t["also"] = base.get("also", [])
                     t["pick"] = base.get("pick", False)
-            editions.append((lang, titems, tcols, tcats, tchrome))
+            editions.append((lang, titems, tcols, tcats, tchrome, xpay_lang))
             built.append(lang)
             print(f"  translated -> {lang}")
         except Exception as exc:                        # noqa: BLE001
@@ -2060,13 +2110,15 @@ def main():
     # English, now that we know which languages succeeded.
     write(render_html(items, COLUMNS, CATEGORIES, now, used_ai, lang="en",
                        chrome=CHROME_EN, langs=langs, artwork=art, frames=frames,
-                       regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), "en")
+                       regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai,
+                       xprmntl_payload_tr=xpay), "en")
     # Each translated edition, guarded so one bad page can never fail the build.
-    for lang, titems, tcols, tcats, tchrome in editions:
+    for lang, titems, tcols, tcats, tchrome, xpay_lang in editions:
         try:
             write(render_html(titems, tcols, tcats, now, used_ai, lang=lang,
                               chrome=tchrome, langs=langs, artwork=art, frames=frames,
-                              regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai), lang)
+                              regional_sources=REGIONAL_SOURCES, ai_transmissions=xpr_ai,
+                              xprmntl_payload_tr=xpay_lang), lang)
         except Exception as exc:                        # noqa: BLE001
             print(f"  ! {lang} page skipped: {exc}", file=sys.stderr)
 
@@ -2084,12 +2136,16 @@ def main():
     done_about = 0
     for lc in built:
         try:
-            astr = T.translate_map(ABOUT_STRINGS, lc, client, MODEL) if client else ABOUT_STRINGS
+            astr = T.translate_map(ABOUT_STRINGS, lc, client, MODEL, cache=tcache) if client else ABOUT_STRINGS
             write_about(render_about(astr, lc), lc)
             done_about += 1
         except Exception as exc:                        # noqa: BLE001
             print(f"  ! about {lc} skipped: {exc}", file=sys.stderr)
     print(f"  wrote about.html (+{done_about} translated)")
+    if tcache is not None:
+        n = T.save_cache(CACHE_PATH, tcache)
+        if n >= 0:
+            print(f"  translation cache: {n} entries kept in {CACHE_PATH}")
     print(f"\nDone. Open: {os.path.join(args.out, 'index.html')}")
 
 
