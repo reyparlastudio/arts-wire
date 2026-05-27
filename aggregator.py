@@ -100,9 +100,15 @@ ABOUT_TEMPLATE = r"""<!DOCTYPE html>
   .wrap{position:relative;width:100%;max-width:var(--phone);margin:0 auto;background:var(--paper);min-height:100vh;box-shadow:0 0 0 1px #00000010,0 30px 80px #00000026;padding:0 20px}
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
   .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;padding:9px 0;min-height:52px}
-  .mast-bar .home{font-size:20px;line-height:1;color:var(--ink);text-align:start}
+  .mast-bar .menu{font-size:20px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;text-align:start}
   .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0}
   .mast-bar .skinsun:hover{opacity:.6}
+  .navdrawer{display:none;position:absolute;left:0;right:0;top:100%;z-index:45;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 14px 28px #0000001f;padding:8px 14px 14px}
+  .navdrawer.open{display:block}
+  .navdrawer .nd-label{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);padding:8px 2px 4px}
+  .navdrawer a{display:block;font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:18px;color:var(--ink);padding:7px 2px;letter-spacing:.01em}
+  .navdrawer a:hover{color:var(--accent-ink)}
+  .navdrawer .nd-div{display:block;height:1px;background:var(--line);margin:7px 0}
   .brand{text-align:center;line-height:1;display:inline-block;cursor:pointer}
   .brand .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:25px;letter-spacing:.045em;display:block;line-height:1}
   .brand .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;line-height:1;margin-top:3px}
@@ -139,11 +145,24 @@ ABOUT_TEMPLATE = r"""<!DOCTYPE html>
   <div class="wrap">
     <header class="masthead">
       <div class="mast-bar">
-        <a class="home" href="@@HOMEHREF@@" aria-label="Back to the edition">&larr;</a>
+        <button class="menu" id="navToggle" aria-label="Open index" aria-expanded="false">&#9776;</button>
         <span class="brand" id="brand"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></span>
         <button class="skinsun" id="skinToggle" aria-label="Switch design">&#9788;</button>
         <a class="sub" href="subscribe.html">Subscribe</a>
       </div>
+      <nav class="navdrawer" id="navdrawer" aria-label="Index">
+        <span class="nd-label">Index</span>
+        <a href="@@HOMEHREF@@#xprmntl">XPRMNTL</a>
+        <a href="@@HOMEHREF@@#frame">The Frame</a>
+        <a href="@@HOMEHREF@@#wire">The Wire</a>
+        <a href="@@HOMEHREF@@#review">The Review</a>
+        <span class="nd-div"></span>
+        <a href="@@HOMEHREF@@">Back to the edition</a>
+        <a href="subscribe.html">Subscribe</a>
+        <span class="nd-div"></span>
+        <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
+        <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
+      </nav>
     </header>
 
     <p class="kicker">@@ABOUT@@</p>
@@ -224,6 +243,12 @@ ABOUT_TEMPLATE = r"""<!DOCTYPE html>
   if(b){b.addEventListener("click",function(){view=(view+1)%PAL.length;applyColor(view);});}
   var st=document.getElementById("skinToggle");
   if(st){st.addEventListener("click",function(e){e.preventDefault();var s=(skin==="teletype")?"wire":"teletype";store("aw-skin",s);applySkin(s);});}
+})();
+(function(){
+  var t=document.getElementById("navToggle"),d=document.getElementById("navdrawer");
+  if(!t||!d){return;}
+  t.addEventListener("click",function(){var o=d.classList.toggle("open");t.setAttribute("aria-expanded",o?"true":"false");});
+  d.addEventListener("click",function(e){if(e.target.tagName==="A"){d.classList.remove("open");t.setAttribute("aria-expanded","false");}});
 })();
 </script>
 </body>
@@ -1415,7 +1440,7 @@ TEMPLATE = """<!DOCTYPE html>
   .mast-bar .lang .caret{font-size:9px;color:var(--soft);line-height:1}
   .mast-bar .lang:hover{color:var(--accent-ink)}
   .mast-bar .lang select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px;border:none}
-  .navdrawer{display:none;border-top:1px solid var(--line);background:var(--paper);padding:8px 0 12px}
+  .navdrawer{display:none;position:absolute;left:0;right:0;top:100%;z-index:45;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 14px 28px #0000001f;padding:8px 14px 14px}
   .navdrawer.open{display:block}
   .navdrawer .nd-label{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;
     text-transform:uppercase;letter-spacing:.1em;color:var(--soft);padding:8px 2px 4px}

@@ -23,11 +23,22 @@
 
   header.masthead{position:sticky;top:0;z-index:40;background:#ffffffec;backdrop-filter:blur(10px);
     margin:0 -20px;padding:0 14px;border-bottom:1px solid var(--line)}
-  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;
+  .mast-bar{display:grid;grid-template-columns:34px 1fr auto auto auto;gap:11px;align-items:center;
     padding:9px 0;min-height:52px}
   .mast-bar .menu{font-size:20px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;text-align:left}
-  .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0}
+  .mast-bar .skinsun{font-size:16px;line-height:1;color:var(--ink);background:none;border:none;cursor:pointer;padding:0;justify-self:end}
   .mast-bar .skinsun:hover{opacity:.6}
+  .mast-bar .lang{position:relative;display:inline-flex;align-items:center;gap:3px;color:var(--ink);cursor:pointer}
+  .mast-bar .lang svg{display:block}
+  .mast-bar .lang .caret{font-size:9px;color:var(--soft);line-height:1}
+  .mast-bar .lang:hover{color:var(--accent-ink)}
+  .mast-bar .lang select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px;border:none}
+  .navdrawer{display:none;position:absolute;left:0;right:0;top:100%;z-index:45;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 14px 28px #0000001f;padding:8px 14px 14px}
+  .navdrawer.open{display:block}
+  .navdrawer .nd-label{display:block;font-family:"Archivo",sans-serif;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);padding:8px 2px 4px}
+  .navdrawer a{display:block;font-family:"Saira Condensed",sans-serif;font-weight:600;font-size:18px;color:var(--ink);padding:7px 2px;letter-spacing:.01em}
+  .navdrawer a:hover{color:var(--accent-ink)}
+  .navdrawer .nd-div{display:block;height:1px;background:var(--line);margin:7px 0}
   .brand{text-align:center;line-height:1;display:inline-block;cursor:pointer}
   .brand .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:25px;letter-spacing:.045em;display:block;line-height:1}
   .brand .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;line-height:1;margin-top:3px}
@@ -100,15 +111,47 @@
   <div class="wrap">
     <header class="masthead">
       <div class="mast-bar">
-        <button class="menu" aria-label="Menu">&#9776;</button>
+        <button class="menu" id="navToggle" aria-label="Open index" aria-expanded="false">&#9776;</button>
         <span class="brand" id="brand"><span class="wm-x">XPRMNTL<sup class="tm">&trade;</sup></span><span class="wm-title">The Arts Wire</span></span>
+        <span class="lang" title="Language">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg>
+          <span class="caret" aria-hidden="true">&#9662;</span>
+          <select aria-label="Choose language" onchange="if(this.value){location.href=this.value;}">
+            <option value="index.html" selected>English</option>
+            <option value="index.es.html">Espa&ntilde;ol</option>
+            <option value="index.fr.html">Fran&ccedil;ais</option>
+            <option value="index.de.html">Deutsch</option>
+            <option value="index.pt.html">Portugu&ecirc;s</option>
+            <option value="index.it.html">Italiano</option>
+            <option value="index.zh.html">&#20013;&#25991;</option>
+            <option value="index.ja.html">&#26085;&#26412;&#35486;</option>
+            <option value="index.ko.html">&#54620;&#44397;&#50612;</option>
+            <option value="index.ar.html">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
+            <option value="index.hi.html">&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</option>
+            <option value="index.ru.html">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option>
+            <option value="index.tr.html">T&uuml;rk&ccedil;e</option>
+          </select>
+        </span>
         <button class="skinsun" id="skinToggle" aria-label="Switch design">&#9788;</button>
         <a class="edlink" href="index.html">Edition</a>
       </div>
+      <nav class="navdrawer" id="navdrawer" aria-label="Index">
+        <span class="nd-label">Index</span>
+        <a href="index.html#xprmntl">XPRMNTL</a>
+        <a href="index.html#frame">The Frame</a>
+        <a href="index.html#wire">The Wire</a>
+        <a href="index.html#review">The Review</a>
+        <span class="nd-div"></span>
+        <a href="index.html">Today&rsquo;s edition</a>
+        <a href="about.html">About</a>
+        <span class="nd-div"></span>
+        <a href="https://reyparla.com" target="_blank" rel="noopener">reyparla.com &nearr;</a>
+        <a href="https://parlastudios.com" target="_blank" rel="noopener">parlastudios.com &nearr;</a>
+      </nav>
     </header>
 
     <section class="hero">
-      <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas &middot; Worldwide</div>
+      <div class="kicker">Film &middot; Theater &middot; Art &middot; Letters &middot; Ideas</div>
       <h1 class="headline">Read the world&rsquo;s arts,<br>in your language.</h1>
       <p class="lede">A weekly review of film, theater, art, books, and ideas from across the globe, written for you and delivered in the language you choose, wherever you are.</p>
       <p class="versus">The great papers report the world in English. <b>The Arts Wire reports it in yours.</b> The first arts review written for every reader on earth, in their own language.</p>
@@ -208,6 +251,13 @@
 (function(){
   var btn=document.getElementById("subBtn"),note=document.getElementById("subnote");
   if(btn&&note){btn.addEventListener("click",function(){note.hidden=false;});}
+})();
+/* ---- Index drop-down (the hamburger) ---- */
+(function(){
+  var t=document.getElementById("navToggle"),d=document.getElementById("navdrawer");
+  if(!t||!d){return;}
+  t.addEventListener("click",function(){var o=d.classList.toggle("open");t.setAttribute("aria-expanded",o?"true":"false");});
+  d.addEventListener("click",function(e){if(e.target.tagName==="A"){d.classList.remove("open");t.setAttribute("aria-expanded","false");}});
 })();
 </script>
 </body>
