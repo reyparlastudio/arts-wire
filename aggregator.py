@@ -113,6 +113,9 @@ ABOUT_TEMPLATE = r"""<!DOCTYPE html>
   .brand .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:25px;letter-spacing:.045em;display:block;line-height:1}
   .brand .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;line-height:1;margin-top:3px}
   .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
+  .brand .wm-x::before{content:"™";font-size:.42em;font-weight:600;vertical-align:super;visibility:hidden;margin-right:.05em}
+  .brand .wm-title::before{content:"_";visibility:hidden;margin-right:.09em}
+  .brand .wm-title::after{content:"_";color:var(--accent);margin-left:.09em;animation:awblink 1.1s steps(1) infinite}
   .sub{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
   .kicker{font-family:"Saira Condensed",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--soft);padding:24px 0 0}
   .lead-para{font-family:"Spectral",Georgia,serif;font-size:20px;line-height:1.46;color:var(--ink);margin:14px 0 0;border-inline-start:2px solid var(--accent);padding-inline-start:15px}
@@ -137,7 +140,6 @@ ABOUT_TEMPLATE = r"""<!DOCTYPE html>
   html[data-skin="teletype"] *{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace !important;border-radius:0 !important}
   html[data-skin="teletype"] .wrap{box-shadow:0 0 0 1px #ffffff14}
   html[data-skin="teletype"] header.masthead{background:rgba(10,10,12,.92)}
-  html[data-skin="teletype"] .brand .wm-title::after{content:"_";color:var(--accent);margin-left:.12em;animation:awblink 1.1s steps(1) infinite}
   @keyframes awblink{50%{opacity:0}}
 </style>
 </head>
@@ -1452,6 +1454,9 @@ TEMPLATE = """<!DOCTYPE html>
   .brand .wm-x{font-family:"Saira Condensed",sans-serif;font-weight:800;font-size:25px;letter-spacing:.045em;display:block;line-height:1}
   .brand .wm-title{font-family:"Saira Condensed",sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;color:var(--soft);display:block;line-height:1;margin-top:3px}
   .brand .tm{font-size:.42em;font-weight:600;vertical-align:super;color:var(--accent-ink);margin-left:.05em}
+  .brand .wm-x::before{content:"™";font-size:.42em;font-weight:600;vertical-align:super;visibility:hidden;margin-right:.05em}
+  .brand .wm-title::before{content:"_";visibility:hidden;margin-right:.09em}
+  .brand .wm-title::after{content:"_";color:var(--accent);margin-left:.09em;animation:awblink 1.1s steps(1) infinite}
   .sub{font-family:"Archivo",sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;
     letter-spacing:.05em;color:var(--on-accent);background:var(--accent);padding:8px 11px;border-radius:2px;justify-self:end}
   .ticker{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--soft);text-align:center;
@@ -1650,7 +1655,6 @@ TEMPLATE = """<!DOCTYPE html>
     background:repeating-linear-gradient(180deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);mix-blend-mode:soft-light}
   html[data-skin="teletype"] .wrap{box-shadow:0 0 0 1px #ffffff14}
   html[data-skin="teletype"] header.masthead{background:rgba(10,10,12,.92);border-bottom-color:var(--line)}
-  html[data-skin="teletype"] .brand .wm-title::after{content:"_";color:var(--accent);margin-left:.12em;animation:awblink 1.1s steps(1) infinite}
   @keyframes awblink{50%{opacity:0}}
   html[data-skin="teletype"] .zone-label::before{content:"// ";color:var(--accent)}
   html[data-skin="teletype"] .section h2::before{content:"> ";color:var(--accent)}
