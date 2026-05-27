@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://reyparlastudio.github.io/arts-wire/signal_atom.schema.json",
+  "title": "SignalAtom",
+  "description": "The structured research object produced by signal_atoms.py. The model fills the reading and consequence fields; the ethics fields (allowed_use, risk_level, ethical_use_status, citation_required) are set from the source registry, never by the model. An atom stores original analysis and a citation, never the full text of a source. No em dashes in any value.",
+  "type": "object",
+  "required": ["title", "source", "url", "date", "ethical_use_status", "risk_level", "citation_required"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {"type": "string", "description": "The signal's title or headline, as published."},
+    "source": {"type": "string", "description": "The outlet or source name, matching a registry record."},
+    "url": {"type": "string", "format": "uri", "description": "The public link to the original."},
+    "date": {"type": "string", "description": "Publication date if known."},
+    "language": {"type": "string", "description": "Language of the source."},
+    "region": {"type": "string", "description": "Region or scene, if relevant."},
+    "medium": {"type": "string", "description": "Art form or subject, from taxonomy.json."},
+    "speaker_type": {
+      "type": "string",
+      "enum": ["artist", "critic", "curator", "institution", "journalist", "scholar", "other"],
+      "description": "Who is speaking in the signal."
+    },
+    "artist_voice_score": {
+      "type": "number", "minimum": 0, "maximum": 1,
+      "description": "How directly this is an artist's own voice rather than a reporter's."
+    },
+    "topic_tags": {
+      "type": "array", "items": {"type": "string"}, "maxItems": 5,
+      "description": "Up to five short tags."
+    },
+    "emotional_signal": {"type": "string", "description": "The feeling the signal carries."},
+    "psychological_need": {"type": "string", "description": "The need underneath, from the psychological lens in taxonomy.json."},
+    "social_tension": {"type": "string", "description": "The social or institutional tension at play."},
+    "historical_lineage": {"type": "string", "description": "An art-historical echo."},
+    "now_signal": {"type": "string", "description": "What this says about the present."},
+    "before_signal": {"type": "string", "description": "The historical parallel."},
+    "future_signal": {"type": "string", "description": "Where it points."},
+    "studio_consequence": {"type": "string", "description": "What a working artist should understand or do."},
+    "money_consequence": {"type": "string", "description": "Who profits, who pays, who is exposed."},
+    "human_contact_consequence": {"type": "string", "description": "What it means for connection or collaboration."},
+    "ethical_use_status": {
+      "type": "string", "enum": ["approved", "needs-review", "forbidden"],
+      "description": "Set from the registry. Forbidden atoms are never published."
+    },
+    "allowed_use": {
+      "type": "string",
+      "enum": ["summarize-and-link", "short-quote-and-cite", "metadata-only", "image-public-domain"],
+      "description": "Set from the registry. How this source may be used."
+    },
+    "risk_level": {
+      "type": "string", "enum": ["green", "yellow", "red"],
+      "description": "Set from the registry. Red is never ingested."
+    },
+    "citation_required": {
+      "type": "boolean",
+      "description": "Always true. Every atom carries its source forward."
+    }
+  }
+}
