@@ -1,0 +1,35 @@
+{
+  "_about": "Taxonomy for The Artist Signal Engine. Used to tag Signal Atoms and to shape research dossiers. Edit freely. No em dashes in any value.",
+  "domains": {
+    "visual_arts": ["painting", "oil painting", "acrylic", "watercolor", "fresco", "tempera", "digital painting", "sculpture", "stone carving", "bronze casting", "clay modeling", "kinetic sculpture", "3d printed sculpture", "bio sculpture", "drawing", "charcoal", "ink wash", "etching", "lithography", "screenprinting", "digital illustration", "photography", "analog photography", "digital photography", "photojournalism", "fashion photography", "astrophotography", "computational photography", "digital art", "ai art", "generative art", "algorithmic art", "crypto art", "nfts", "vr art", "ar art", "holographic art"],
+    "performing_arts": ["theater", "classical theater", "musical theater", "improvisational theater", "physical theater", "puppetry", "vr theater", "dance", "classical ballet", "modern dance", "contemporary dance", "hip hop", "street dance", "folk dance", "traditional dance", "motion capture choreography", "opera", "rock opera", "vr opera", "performance art", "ritual", "embodied practice"],
+    "music_and_sound": ["classical composition", "electronic music production", "film scoring", "game scoring", "generative ai music", "ambient soundscaping", "algorithmic composition", "vocal performance", "instrumental performance", "live electronic mixing", "virtual avatar performance", "immersive spatial audio", "jazz", "latin jazz", "experimental sound", "noise", "radio", "sound archives"],
+    "literary_arts": ["poetry", "classical verse", "spoken word", "slam poetry", "generative ai poetry", "interactive hypertext poetry", "prose", "novels", "short stories", "historical fiction", "science fiction", "fantasy", "flash fiction", "interactive fiction", "ai co-written novels", "essays", "critical theory", "cultural journalism", "personal essays", "philosophy", "digital philosophy", "hypermedia essays"],
+    "media_and_audiovisual": ["cinema", "directing", "feature filmmaking", "documentary", "short film", "experimental film", "immersive 360 cinema", "ai generated cinema", "animation", "video art", "games", "interactive media", "virtual production", "streaming culture", "moving image archives"],
+    "design_and_built_world": ["architecture", "urbanism", "fashion", "typography", "object design", "interiors", "public space", "social design", "ecological design", "material culture"],
+    "art_and_science": ["bioart", "astronomy", "medical humanities", "computational art", "ecological art", "climate", "natural history", "robotics", "neuroscience", "synthetic media", "human perception"],
+    "art_and_society": ["activism", "migration", "exile", "censorship", "war", "race", "class", "gender", "labor", "disability", "grief", "ritual", "public memory", "archives", "identity", "diaspora", "spirituality", "belonging"],
+    "art_market_and_survival": ["galleries", "contracts", "pricing", "agents", "managers", "collectors", "fairs", "museums", "fabrication", "logistics", "shipping", "insurance", "taxes", "provenance", "studio systems", "attention", "burnout", "career longevity"]
+  },
+  "psychological_lens": {
+    "needs": ["recognition", "dignity", "livelihood", "community", "agency", "continuity", "freedom", "safety", "risk", "lineage", "witness", "language", "love", "time", "space", "protection", "contact"],
+    "fears": ["erasure", "poverty", "irrelevance", "exploitation", "theft", "silence", "censorship", "institutional betrayal", "market pressure", "loneliness", "illness", "burnout", "technological replacement", "being misunderstood"],
+    "seeks": ["a voice", "a room", "a lineage", "a community", "a public", "a material", "a method", "a patron", "a collaborator", "a future", "a way to remain human"],
+    "distortions": ["attention", "money", "access", "prestige", "identity", "trauma", "scarcity", "novelty", "success"],
+    "restorations": ["context", "connection", "language", "memory", "courage", "practical knowledge", "emotional intelligence", "human contact"]
+  },
+  "now_versus_before": [
+    {"now": "ai and authorship", "before": ["duchamp readymade", "fluxus instructions", "conceptual art", "early net art"]},
+    {"now": "climate grief", "before": ["land art", "eco-art", "indigenous ecological knowledge"]},
+    {"now": "artist labor and pay", "before": ["institutional critique", "feminist art", "artist unions and collectives"]},
+    {"now": "identity and extraction", "before": ["postcolonial practice", "black art movements", "feminist art", "queer art", "diaspora practice"]},
+    {"now": "censorship now", "before": ["earlier moral panics", "state repression", "museum controversies"]},
+    {"now": "archive anxiety", "before": ["memory work", "photography as testimony", "provenance", "estate planning"]},
+    {"now": "market fatigue", "before": ["earlier booms and crashes", "fairs", "patronage systems"]},
+    {"now": "return of craft", "before": ["modernism's repeated burial and rediscovery of the hand"]}
+  ],
+  "speaker_types": ["artist", "critic", "curator", "institution", "journalist", "scholar", "other"],
+  "risk_levels": ["green", "yellow", "red"],
+  "allowed_uses": ["summarize-and-link", "short-quote-and-cite", "metadata-only", "image-public-domain"],
+  "ethical_use_status": ["approved", "needs-review", "forbidden"]
+}
